@@ -1,16 +1,15 @@
 import NextAuth from 'next-auth'
-import type { AuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
-import GitHubProvider from 'next-auth/providers/github'
-import type { NextRequest } from 'next/server'
+import type { NextAuthConfig } from 'next-auth'
+import Google from 'next-auth/providers/google'
+import GitHub from 'next-auth/providers/github'
 
-const authOptions: AuthOptions = {
+const config: NextAuthConfig = {
   providers: [
-    GoogleProvider({
+    Google({
       clientId: process.env.GA4_CLIENT_ID!,
       clientSecret: process.env.GA4_CLIENT_SECRET!,
     }),
-    GitHubProvider({
+    GitHub({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
@@ -29,8 +28,8 @@ const authOptions: AuthOptions = {
       return baseUrl
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub!
+      if (session.user && token.sub) {
+        session.user.id = token.sub
       }
       return session
     },
@@ -42,19 +41,5 @@ const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handler = NextAuth(authOptions) as any
-
-export async function GET(
-  req: NextRequest,
-  ctx: { params?: Record<string, string | string[]> }
-): Promise<Response> {
-  return handler(req, ctx) as Promise<Response>
-}
-
-export async function POST(
-  req: NextRequest,
-  ctx: { params?: Record<string, string | string[]> }
-): Promise<Response> {
-  return handler(req, ctx) as Promise<Response>
-}
+const { handlers } = NextAuth(config)
+export const { GET, POST } = handlers
