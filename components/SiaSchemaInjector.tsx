@@ -34,6 +34,7 @@ interface BreadcrumbItem {
 interface SiaSchemaInjectorProps {
   schema: StructuredDataSchema
   breadcrumb?: { '@context': string; '@type': string; itemListElement: BreadcrumbItem[] }
+  dataset?: Record<string, unknown>
   priority?: 'high' | 'low'
   authorId?: string
   articleType?: 'news' | 'analysis' | 'unverified'
@@ -88,6 +89,7 @@ function generateClaimReviewSchema(
 export default function SiaSchemaInjector({ 
   schema, 
   breadcrumb,
+  dataset,
   priority = 'high',
   authorId,
   articleType = 'news',
@@ -185,6 +187,14 @@ export default function SiaSchemaInjector({
           type="application/ld+json"
           strategy={priority === 'high' ? 'beforeInteractive' : 'afterInteractive'}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb, null, 2) }}
+        />
+      )}
+      {dataset && (
+        <Script
+          id="sia-dataset-schema"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(dataset, null, 2) }}
         />
       )}
       {/* Primary JSON-LD Schema */}
