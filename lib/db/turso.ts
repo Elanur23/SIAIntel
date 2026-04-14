@@ -1,6 +1,6 @@
 /**
  * Turso Database Client (Production)
- * 
+ *
  * LibSQL adapter for Prisma Client.
  * Supports both local SQLite (development) and Turso (production).
  */
@@ -15,45 +15,58 @@ declare global {
 }
 
 /**
- * Create Prisma Client with Turso adapter
- * 
- * Environment-aware:
- * - Development: Uses local SQLite (file:./dev.db)
- * - Production: Uses Turso LibSQL with auth token
+ * Create Prisma Client with Turso adapter.
+ *
+ * Production (NODE_ENV=production OR TURSO_DATABASE_URL is set):
+ *   - Requires TURSO_DATABASE_URL. Throws immediately if missing.
+ *   - Uses PrismaLibSQL adapter over LibSQL/Turso.
+ *
+ * Development (local only):
+ *   - Falls back to plain PrismaClient (SQLite via schema datasource).
+ *   - Only allowed when NODE_ENV !== 'production' AND TURSO_DATABASE_URL is absent.
  */
 function createPrismaClient(): PrismaClient {
-  // Check if we're using Turso (production)
-  const isTurso = process.env.DATABASE_URL?.startsWith('libsql://')
-  
-  if (isTurso) {
-    // Production: Turso LibSQL
+  const tursoUrl = process.env.TURSO_DATABASE_URL
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  // Fail-closed: production must have a valid Turso URL.
+  if (isProduction && !tursoUrl) {
+    throw new Error(
+      '[DATABASE] FATAL: TURSO_DATABASE_URL is not set. ' +
+      'Production Prisma client cannot initialize without a Turso database URL. ' +
+      'Set TURSO_DATABASE_URL (and optionally TURSO_AUTH_TOKEN) in your Vercel environment variables.'
+    )
+  }
+
+  if (tursoUrl) {
+    // Turso / LibSQL path (production or local dev with Turso configured)
     console.log('[DATABASE] Connecting to Turso LibSQL...')
-    
+
     const libsql = createClient({
-      url: process.env.TURSO_DATABASE_URL!,
+      url: tursoUrl,
       authToken: process.env.TURSO_AUTH_TOKEN,
     })
-    
+
     const adapter = new PrismaLibSQL(libsql)
-    
+
     return new PrismaClient({
       adapter,
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    })
-  } else {
-    // Development: Local SQLite
-    console.log('[DATABASE] Connecting to local SQLite...')
-    
-    return new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      log: isProduction ? ['error'] : ['query', 'error', 'warn'],
     })
   }
+
+  // Local development only: plain PrismaClient (SQLite via schema datasource).
+  // This path is intentionally unreachable in production due to the guard above.
+  console.log('[DATABASE] Connecting to local SQLite (development only)...')
+  return new PrismaClient({
+    log: ['query', 'error', 'warn'],
+  })
 }
 
 /**
  * Prisma Client Singleton
- * 
- * Prevents multiple instances in development (hot reload)
+ *
+ * Prevents multiple instances in development (hot reload).
  */
 export const prisma = global.prisma || createPrismaClient()
 
@@ -89,12 +102,12 @@ export async function getDatabaseInfo(): Promise<{
   connected: boolean
   url?: string
 }> {
-  const isTurso = process.env.DATABASE_URL?.startsWith('libsql://')
+  const tursoUrl = process.env.TURSO_DATABASE_URL
   const connected = await checkDatabaseConnection()
-  
+
   return {
-    type: isTurso ? 'turso' : 'sqlite',
+    type: tursoUrl ? 'turso' : 'sqlite',
     connected,
-    url: isTurso ? process.env.TURSO_DATABASE_URL : 'file:./dev.db',
+    url: tursoUrl ?? 'file:./dev.db',
   }
 }
