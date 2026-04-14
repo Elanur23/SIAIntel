@@ -1,4 +1,5 @@
-import NextAuth, { NextAuthOptions } from 'next-auth'
+import NextAuth from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import GitHubProvider from 'next-auth/providers/github'
 
@@ -19,17 +20,14 @@ const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Allow sign in
       return true
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to home page after sign in
       if (url.startsWith('/')) return `${baseUrl}${url}`
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
     },
     async session({ session, token }) {
-      // Add user info to session
       if (session.user) {
         session.user.id = token.sub!
       }
@@ -38,10 +36,10 @@ const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-const { handlers } = NextAuth(authOptions)
-export const { GET, POST } = handlers
+const handler = NextAuth(authOptions)
+export { handler as GET, handler as POST }
