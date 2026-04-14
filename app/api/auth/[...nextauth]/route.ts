@@ -45,16 +45,16 @@ const authOptions: NextAuthOptions = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handler = NextAuth(authOptions) as any
 
-export async function GET(
+export function GET(
   req: NextRequest,
-  context: { params: Promise<{ nextauth: string[] }> }
-): Promise<Response> {
-  return handler(req, context)
+  ctx: { params?: Record<string, string | string[]> }
+): unknown {
+  return handler(req, ctx)
 }
 
-export async function POST(
+export function POST(
   req: NextRequest,
-  context: { params: Promise<{ nextauth: string[] }> }
-): Promise<Response> {
-  return handler(req, context)
+  ctx: { params?: Record<string, string | string[]> }
+): unknown {
+  return handler(req, ctx)
 }
