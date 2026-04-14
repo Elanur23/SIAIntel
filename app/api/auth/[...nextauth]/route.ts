@@ -2,6 +2,7 @@ import NextAuth from 'next-auth'
 import type { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import GitHubProvider from 'next-auth/providers/github'
+import type { NextRequest } from 'next/server'
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -19,7 +20,7 @@ const authOptions: NextAuthOptions = {
     error: '/en/admin/login',
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn() {
       return true
     },
     async redirect({ url, baseUrl }) {
@@ -41,5 +42,19 @@ const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handler = NextAuth(authOptions) as any
+
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ nextauth: string[] }> }
+): Promise<Response> {
+  return handler(req, context)
+}
+
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<{ nextauth: string[] }> }
+): Promise<Response> {
+  return handler(req, context)
+}
