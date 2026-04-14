@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -277,4 +278,48 @@ model BlockedIP {
   
   @@index([ip])
   @@index([expiresAt])
+}
+
+// ============================================
+// NORMALIZED ARTICLE SYSTEM (Added for multilingual article support)
+// ============================================
+
+model Article {
+  id           String               @id @default(cuid())
+  category     String               @default("MARKET")
+  publishedAt  DateTime             @default(now())
+  imageUrl     String?
+  authorId     String?
+  impact       Int?
+  confidence   Float?
+  signal       String?
+  volatility   String?
+  featured     Boolean              @default(false)
+  published    Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  translations ArticleTranslation[]
+
+  @@index([published])
+  @@index([publishedAt])
+  @@index([category])
+}
+
+model ArticleTranslation {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  lang      String
+  title     String
+  excerpt   String   @default("")
+  content   String   @default("")
+  slug      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([articleId, lang])
+  @@unique([slug, lang])
+  @@index([articleId])
+  @@index([lang])
+  @@index([slug])
 }
