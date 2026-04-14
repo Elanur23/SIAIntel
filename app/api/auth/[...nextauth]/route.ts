@@ -1,10 +1,10 @@
 import NextAuth from 'next-auth'
-import type { NextAuthOptions } from 'next-auth'
+import type { AuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import GitHubProvider from 'next-auth/providers/github'
 import type { NextRequest } from 'next/server'
 
-const authOptions: NextAuthOptions = {
+const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GA4_CLIENT_ID!,
