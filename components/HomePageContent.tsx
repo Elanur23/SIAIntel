@@ -37,6 +37,25 @@ export default async function HomePageContent({ rawLang }: HomePageContentProps)
   }))
 
   const featured = formattedArticles[0]
+  const hasArticles = formattedArticles.length > 0
+
+  // If no articles, show fallback and skip rendering child components
+  if (!hasArticles) {
+    return (
+      <>
+        <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
+          <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
+              <div className="w-16 h-16 border-4 border-white/10 border-t-blue-500 rounded-full animate-spin" />
+              <span className="text-sm text-white/60 uppercase tracking-wider">Synchronizing Intelligence Matrix...</span>
+              <span className="text-xs text-white/40">Connecting to database...</span>
+            </div>
+          </div>
+        </section>
+      </>
+    )
+  }
 
   return (
     <>
