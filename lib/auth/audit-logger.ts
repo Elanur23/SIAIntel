@@ -11,7 +11,7 @@
  * Storage: Database-backed via Prisma (SQLite → PostgreSQL ready)
  */
 
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from '../db/prisma'
 import {
   AuditEventType,
   AuditEventResult,
@@ -19,13 +19,13 @@ import {
   getEventSeverity,
   sanitizeAuditEntry,
   formatAuditEntry,
-} from '@/lib/security/audit-taxonomy'
+} from '../security/audit-taxonomy'
 import {
   shouldAlert,
   getAlertSeverity,
   sendSecurityAlert,
   type SecurityAlert,
-} from '@/lib/security/telegram-alerting'
+} from '../security/telegram-alerting'
 
 export interface AuditLogOptions {
   userId?: string
