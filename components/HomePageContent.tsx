@@ -1,6 +1,8 @@
-import { getCachedArticles } from '@/lib/warroom/database'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { getArticleFieldKey } from '@/lib/warroom/article-localization'
-import { getDictionary, Locale } from '@/lib/i18n/dictionaries'
+import { Locale } from '@/lib/i18n/dictionaries'
 import { buildArticleSlug } from '@/lib/warroom/article-seo'
 import Link from 'next/link'
 import { ArrowRight, Shield, AlertCircle } from 'lucide-react'
@@ -17,14 +19,37 @@ interface HomePageContentProps {
   rawLang: string
 }
 
-export default async function HomePageContent({ rawLang }: HomePageContentProps) {
+export default function HomePageContent({ rawLang }: HomePageContentProps) {
+  const [articles, setArticles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const response = await fetch('/api/articles?status=published')
+        if (!response.ok) {
+          throw new Error('Failed to fetch articles')
+        }
+        const data = await response.json()
+        setArticles(data || [])
+      } catch (err) {
+        console.error('Error fetching articles:', err)
+        setError(err instanceof Error ? err.message : 'Unknown error')
+        setArticles([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchArticles()
+  }, [])
+
   const lang = rawLang as Locale
-  const dict = getDictionary(lang)
-  const allArticles = await getCachedArticles('published')
   const titleKey = getArticleFieldKey('title', String(lang))
   const summaryKey = getArticleFieldKey('summary', String(lang))
 
-  const formattedArticles = (allArticles as any[]).map(a => ({
+  const formattedArticles = articles.map(a => ({
     id: String(a.id),
     slug: buildArticleSlug(String(a.id), String(a[titleKey] || a.titleEn || a.titleTr || a.id)),
     title: String(a[titleKey] || a.titleEn || a.titleTr || 'Intelligence Report'),
@@ -39,21 +64,35 @@ export default async function HomePageContent({ rawLang }: HomePageContentProps)
   const featured = formattedArticles[0]
   const hasArticles = formattedArticles.length > 0
 
-  // If no articles, show fallback and skip rendering child components
-  if (!hasArticles) {
+  // Loading state
+  if (loading) {
     return (
-      <>
-        <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
-          <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
-          <div className="max-w-7xl mx-auto px-6 relative z-10">
-            <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
-              <div className="w-16 h-16 border-4 border-white/10 border-t-blue-500 rounded-full animate-spin" />
-              <span className="text-sm text-white/60 uppercase tracking-wider">Synchronizing Intelligence Matrix...</span>
-              <span className="text-xs text-white/40">Connecting to database...</span>
-            </div>
+      <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
+        <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
+            <div className="w-16 h-16 border-4 border-white/10 border-t-blue-500 rounded-full animate-spin" />
+            <span className="text-sm text-white/60 uppercase tracking-wider">Synchronizing Intelligence Matrix...</span>
+            <span className="text-xs text-white/40">Loading articles...</span>
           </div>
-        </section>
-      </>
+        </div>
+      </section>
+    )
+  }
+
+  // Error or no articles state
+  if (error || !hasArticles) {
+    return (
+      <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
+        <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
+            <div className="w-16 h-16 border-4 border-white/10 border-t-blue-500 rounded-full animate-spin" />
+            <span className="text-sm text-white/60 uppercase tracking-wider">Synchronizing Intelligence Matrix...</span>
+            <span className="text-xs text-white/40">{error || 'Connecting to database...'}</span>
+          </div>
+        </div>
+      </section>
     )
   }
 
