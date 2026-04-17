@@ -4,14 +4,13 @@
  */
 
 import { cache } from 'react'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db/prisma'
 import { ARTICLE_LANGS, getArticleFieldKey, type ArticleLanguage } from '@/lib/warroom/article-localization'
 
 export type ArticleStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
-export const prisma = globalForPrisma.prisma || new PrismaClient()
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Re-export prisma for backward compatibility
+export { prisma }
 
 export interface SaveArticleData {
   id?: string
