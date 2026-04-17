@@ -1,13 +1,7 @@
 /**
  * AI Workspace Translation System
- * Translates content to 9 languages using Groq API
+ * Translates content to 9 languages using Groq API via direct fetch
  */
-
-import Groq from 'groq-sdk'
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || '',
-})
 
 export type SupportedLanguage = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
 
@@ -49,7 +43,7 @@ const LANGUAGE_INSTRUCTIONS: Record<SupportedLanguage, string> = {
 }
 
 /**
- * Translate content to target language using Groq
+ * Translate content to target language using Groq direct fetch
  */
 async function translateContent(
   content: WorkspaceContent,
@@ -97,24 +91,40 @@ Respond ONLY with valid JSON in this exact format:
   "socialSnippet": "translated social snippet"
 }`
 
+  const apiKey = process.env.GROQ_API_KEY || ''
+  if (!apiKey) throw new Error('GROQ_API_KEY is missing')
+
   try {
-    const completion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional financial translator. Always respond with valid JSON only.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      model: 'llama-3.3-70b-versatile',
-      temperature: 0.3,
-      max_tokens: 8000,
-      response_format: { type: 'json_object' },
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a professional financial translator. Always respond with valid JSON only.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.3,
+        max_tokens: 8000,
+        response_format: { type: 'json_object' },
+      })
     })
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(`Groq API error: ${response.status} ${JSON.stringify(errorData)}`)
+    }
+
+    const completion = await response.json()
     const responseText = completion.choices[0]?.message?.content || '{}'
     const translated = JSON.parse(responseText)
 
