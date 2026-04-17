@@ -10,7 +10,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma'
-import bcrypt from 'bcryptjs'
+import * as bcrypt from 'bcryptjs'
 import type { Role } from '@/lib/rbac/permissions'
 
 const BCRYPT_ROUNDS = 10

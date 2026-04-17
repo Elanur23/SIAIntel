@@ -12,7 +12,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/db/prisma'
 import { updateLastActivity } from './auth/idle-timeout'
-import bcrypt from 'bcryptjs'
+import * as bcrypt from 'bcryptjs'
 import type { NextAuthOptions } from 'next-auth'
 
 // Re-export for backward compatibility
