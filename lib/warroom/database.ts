@@ -193,25 +193,31 @@ export async function updateArticle(id: string, data: Partial<SaveArticleData>) 
 }
 
 export const getCachedArticles = cache(async (status?: string) => {
-  const now = new Date()
-  return await prisma.warRoomArticle.findMany({
-    where: status === 'published'
-      ? {
-          OR: [
-            { status: 'published', publishedAt: { lte: now } },
-            { status: 'scheduled', publishedAt: { lte: now } },
-          ],
-        }
-      : status
-        ? { status }
-        : {
+  try {
+    const now = new Date()
+    return await prisma.warRoomArticle.findMany({
+      where: status === 'published'
+        ? {
             OR: [
               { status: 'published', publishedAt: { lte: now } },
               { status: 'scheduled', publishedAt: { lte: now } },
             ],
-          },
-    orderBy: { publishedAt: 'desc' },
-  })
+          }
+        : status
+          ? { status }
+          : {
+              OR: [
+                { status: 'published', publishedAt: { lte: now } },
+                { status: 'scheduled', publishedAt: { lte: now } },
+              ],
+            },
+      orderBy: { publishedAt: 'desc' },
+    })
+  } catch (error) {
+    console.error('[DATABASE] getCachedArticles failed:', error)
+    // Return empty array instead of crashing the page
+    return []
+  }
 })
 
 export async function getArticles(status?: string) {
