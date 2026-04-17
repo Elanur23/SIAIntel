@@ -67,7 +67,7 @@ const nextConfig = {
 
   compress: true,
   experimental: {
-    serverComponentsExternalPackages: ['sharp'],
+    serverComponentsExternalPackages: ['sharp', '@libsql/client', 'libsql'],
   },
   output: 'standalone',
 

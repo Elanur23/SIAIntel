@@ -1,0 +1,62 @@
+{
+  "alerts": [
+    {
+      "name": "LLM_PROVIDER_DEGRADED",
+      "severity": "CRITICAL",
+      "condition": "llm_provider_error_rate > 5.0",
+      "aggregation_window": "5m",
+      "action": "AUTO_ROTATE_PROVIDER",
+      "escalation_target": "on-call-sre",
+      "playbook_ref": "SCENARIO_A"
+    },
+    {
+      "name": "GENERATION_LATENCY_SPIKE",
+      "severity": "HIGH",
+      "condition": "edition_generation_duration_ms_p90 > 45000",
+      "aggregation_window": "15m",
+      "action": "THROTTLE_INGESTION",
+      "escalation_target": "platform-eng",
+      "playbook_ref": "SCENARIO_A"
+    },
+    {
+      "name": "ORCHESTRATION_FAILURE_RATE_HIGH",
+      "severity": "CRITICAL",
+      "condition": "batch_processing_success_rate < 90.0",
+      "aggregation_window": "10m",
+      "action": "AUTO_PAUSE_INGESTION",
+      "escalation_target": "lead-orchestrator",
+      "playbook_ref": "SCENARIO_B"
+    },
+    {
+      "name": "ROLLBACK_STALL_DETECTED",
+      "severity": "HIGH",
+      "condition": "atomic_rollback_count_per_hour > 3",
+      "aggregation_window": "1h",
+      "action": "FREEZE_PIPELINE",
+      "escalation_target": "launch-commander",
+      "playbook_ref": "SOP_2"
+    },
+    {
+      "name": "BUDGET_BURN_ANOMALY",
+      "severity": "EMERGENCY",
+      "condition": "hourly_budget_burn_usd > 75.0",
+      "aggregation_window": "1h",
+      "action": "GLOBAL_EMERGENCY_STOP",
+      "escalation_target": "finance-admin",
+      "playbook_ref": "SCENARIO_C"
+    },
+    {
+      "name": "SHADOW_LEAK_DETECTED",
+      "severity": "EMERGENCY",
+      "condition": "shadow_leak_detection_count > 0",
+      "aggregation_window": "1m",
+      "action": "GLOBAL_EMERGENCY_STOP",
+      "escalation_target": "security-lead",
+      "playbook_ref": "SCENARIO_D"
+    }
+  ],
+  "global_overrides": {
+    "emergency_stop_auto_trigger": true,
+    "max_retries_before_alert": 3
+  }
+}

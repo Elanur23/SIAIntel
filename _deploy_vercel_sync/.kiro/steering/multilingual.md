@@ -1,0 +1,47 @@
+---
+inclusion: always
+---
+
+# Çok Dilli Yapı – Bozulmasın
+
+Bu projede **9 dil** ve **9 bölge** vardır. Yeni özellik veya metin eklerken aşağıdakilere uy.
+
+## Sabit listeler
+
+- **Diller (Language):** `tr`, `en`, `de`, `fr`, `es`, `ru`, `ar`, `jp`, `zh`
+- **Bölgeler (Region):** `TR`, `US`, `DE`, `FR`, `ES`, `RU`, `AE`, `JP`, `CN`
+
+Tip tanımları: `lib/store/language-store.ts` (Language), `lib/sia-news/types.ts` (Language, Region).
+
+## Kurallar
+
+1. **Arayüz metinleri**
+   - Kullanıcıya görünen her metin dilden bağımsız **sabit İngilizce/Türkçe yazılmamalı**.
+   - Çeviri: `contexts/LanguageContext.tsx` içindeki `translations` objesine key ekle (örn. `footer.xxx`, `hub.xxx`) ve bileşende `useLanguage()` + `t('key')` kullan.
+   - Yeni sayfa veya bileşen eklerken: metin varsa çeviri key’i ekleyip `t()` ile kullan.
+
+2. **Dinamik / API’den gelen içerik**
+   - Hook veya yardımcılar kullanıcıya **başlık, özet, açıklama** üretiyorsa mutlaka **dil parametresi** almalı ve metni o dile göre üretmeli.
+   - Örnek: `useLiveIntel(lang)` – `lang` olmadan İngilizce üretmek yasak. Benzer hook’lar için de `lang` (veya `locale`) kullan.
+
+3. **Record&lt;Language, …&gt; / Record&lt;Region, …&gt;**
+   - Yeni bir `Record<Language, T>` veya `Record<Region, T>` tanımladığında **9 dil / 9 bölge** için key’leri eksiksiz ver.
+   - Eksik key (örn. sadece en, tr, de) build hatası ve dil değişince bozulmaya yol açar. Hepsi: en, tr, de, fr, es, ru, ar, jp, zh (ve Region için TR, US, DE, FR, ES, RU, AE, JP, CN).
+
+4. **URL ve dil senkronu**
+   - Dil `[lang]` segment’inden gelir (`app/[lang]/...`). Yeni sayfada `params.lang`’ı kullan; gerekirse `setLanguage(params.lang)` ile context’i senkronize et (mevcut sayfalardaki gibi).
+
+## Kontrol listesi (yeni özellik)
+
+- [ ] Yeni UI metinleri `t('...')` ile mi?
+- [ ] Yeni dinamik metin üreten hook/helper `lang` parametresi alıyor mu?
+- [ ] Yeni `Record<Language, …>` / `Record<Region, …>` 9’ar key içeriyor mu?
+- [ ] Footer / hub haber kartları gibi dil değişince değişmesi gereken yerler dil parametresine bağlı mı?
+
+## Referans dosyalar
+
+- Çeviriler: `contexts/LanguageContext.tsx`
+- Dil listesi / tipler: `lib/store/language-store.ts`
+- Footer (çeviri kullanımı): `components/Footer.tsx`
+- Canlı haber metni (dil parametreli): `lib/hooks/useLiveIntel.ts`
+- Bölge/dil eşlemesi: `lib/sia-news/types.ts`, `middleware.ts`

@@ -1,0 +1,45 @@
+{
+  "news_id": "SIA_20260301_ULTRA_001",
+  "global_sentiment": "Neutral-Bearish",
+  "data_points": [
+    "BTC Exchange Reserve Lows",
+    "FED Reverse Repo Spikes"
+  ],
+  "regions": {
+    "tr": {
+      "title": "BTC 100K Sınırında: TRY Bazlı Zirve ve Yerel Likidite Analizi",
+      "content": "Bitcoin küresel 100k direncini zorlarken, iç piyasada USDT/TRY makasındaki daralma dikkat çekiyor. Kur korumalı sistemden çıkan sermayenin kripto rotası, yerel borsalarda hacim rekoru kırabilir.",
+      "insight": "Yerel yatırımcı için 100k psikolojik değil, teknik bir kâr alım bölgesi sinyali veriyor."
+    },
+    "en": {
+      "title": "The 100K Psychological Barrier: A Liquidity Absorption Study",
+      "content": "As BTC flirts with the six-figure mark, FED's latest repo operations suggest a short-term liquidity squeeze. Institutional 'Diamond Hands' are holding, but retail leverage is at extreme levels.",
+      "insight": "Look for the gap between spot buying and perpetual funding rates as a volatility indicator."
+    },
+    "ar": {
+      "title": "بيتكوين عند 100 ألف دولار: تحليل التدفقات النقدية في الخليج",
+      "content": "مع اقتراب البيتكوين من حاجز الـ 100 ألف دولار، تشير بيانات هيئة تنظيم الأصول الافتراضية (VARA) في دبي إلى زيادة في تدفقات الصناديق المؤسسية. الارتباط بين أسعار النفط والسيولة الرقمية يظهر بوادر انفصال إيجابي.",
+      "insight": "المستثمر الخليجي ينتقل من المضاربة إلى الحيازة الاستراتيجية قبل تقلبات الربع الثاني."
+    },
+    "de": {
+      "title": "Bitcoin bei 100.000 USD: BaFin-Perspektive und institutionelle Liquidität",
+      "content": "Während Bitcoin die psychologische Marke von 100.000 USD testet, zeigen deutsche institutionelle Investoren verstärktes Interesse. Die EZB-Zinspolitik und die Korrelation zu traditionellen Anlageklassen deuten auf eine Neubewertung digitaler Assets hin.",
+      "insight": "Deutsche Anleger bevorzugen regulierte Custody-Lösungen, was die Nachfrage nach Bitcoin-ETPs erhöht."
+    },
+    "fr": {
+      "title": "Bitcoin à 100 000 $ : Analyse de la liquidité institutionnelle européenne",
+      "content": "Alors que le Bitcoin approche les 100 000 dollars, les flux institutionnels européens montrent une accélération. La politique monétaire de la BCE et les nouvelles réglementations MiCA créent un environnement favorable pour les actifs numériques.",
+      "insight": "Les investisseurs français privilégient l'exposition via des véhicules réglementés AMF plutôt que la détention directe."
+    },
+    "es": {
+      "title": "Bitcoin en 100.000 USD: Flujos de capital latinoamericano y cobertura inflacionaria",
+      "content": "Con Bitcoin acercándose a los 100.000 dólares, los inversores latinoamericanos intensifican su uso como cobertura contra la inflación. Los flujos desde Argentina, Brasil y México muestran un patrón de acumulación estratégica.",
+      "insight": "El inversor latinoamericano ve Bitcoin como protección contra devaluación monetaria más que como especulación."
+    },
+    "ru": {
+      "title": "Биткоин по $100к: Влияние на трансграничные расчеты РФ",
+      "content": "Достижение отметки в $100,000 меняет математику трансграничных платежей. На фоне новых санкций, ликвидность в паре BTC/RUB становится ключевым индикатором для импортеров.",
+      "insight": "Высокая волатильность может временно усложнить расчеты, требуя фиксации курса в стейблкоинах."
+    }
+  }
+}

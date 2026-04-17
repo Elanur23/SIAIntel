@@ -1,0 +1,161 @@
+
+> siaintel-terminal@1.0.0 type-check
+> tsc --noEmit
+
+app/api/admin/2fa/verify/route.ts(18,21): error TS2724: '"@/lib/auth/session-manager"' has no exported member named 'regenerateSession'. Did you mean 'createSession'?
+app/api/admin/csrf-token/route.ts(9,35): error TS2307: Cannot find module '@/lib/security/csrf-middleware' or its corresponding type declarations.
+app/api/admin/login/route.ts(22,25): error TS2724: '"@/lib/auth/session-manager"' has no exported member named 'regenerateSession'. Did you mean 'createSession'?
+app/api/ai/deep-dive/route.ts(10,37): error TS2307: Cannot find module '@/lib/seo/auto-indexing-trigger' or its corresponding type declarations.
+app/api/ai/global-intelligence/route.ts(15,37): error TS2307: Cannot find module '@/lib/seo/auto-indexing-trigger' or its corresponding type declarations.
+app/api/ai/global-intelligence/route.ts(81,72): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+app/api/ai/global-intelligence/route.ts(117,67): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+app/api/ai/global-intelligence/route.ts(126,30): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+app/api/analytics/article-metrics/route.ts(16,40): error TS2307: Cannot find module '@/lib/signals/google-analytics-service' or its corresponding type declarations.
+app/api/auth/session-status/route.ts(8,10): error TS2305: Module '"@/lib/auth/auth-config"' has no exported member 'auth'.
+app/api/contact/route.ts(17,45): error TS2307: Cannot find module '@/lib/security/csrf-middleware' or its corresponding type declarations.
+app/api/contact/route.ts(18,32): error TS2307: Cannot find module '@/lib/security/rate-limiter' or its corresponding type declarations.
+app/api/distribution/execute/route.ts(2,39): error TS2307: Cannot find module '@/lib/distribution/distribution-engine' or its corresponding type declarations.
+app/api/distribution/high-frequency-test/route.ts(2,38): error TS2307: Cannot find module '@/lib/distribution/high-frequency-test' or its corresponding type declarations.
+app/api/distribution/metrics/route.ts(2,39): error TS2307: Cannot find module '@/lib/distribution/distribution-engine' or its corresponding type declarations.
+app/api/indexing/indexnow-key/route.ts(7,41): error TS2307: Cannot find module '@/lib/seo/global-search-engine-push' or its corresponding type declarations.
+app/api/indexing/push/route.ts(8,52): error TS2307: Cannot find module '@/lib/seo/google-indexing-api' or its corresponding type declarations.
+app/api/indexing/push/route.ts(9,63): error TS2307: Cannot find module '@/lib/seo/global-search-engine-push' or its corresponding type declarations.
+app/api/indexing/push/route.ts(51,46): error TS7006: Parameter 'r' implicitly has an 'any' type.
+app/api/indexing/push/route.ts(66,46): error TS7006: Parameter 'r' implicitly has an 'any' type.
+app/api/indexing/push/route.ts(189,53): error TS2307: Cannot find module '@/lib/seo/google-indexing-api' or its corresponding type declarations.
+app/api/neural-assembly/logs/critical/route.ts(10,35): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+app/api/neural-assembly/logs/critical/route.ts(28,35): error TS7006: Parameter 'log' implicitly has an 'any' type.
+app/api/neural-assembly/logs/route.ts(10,35): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+app/api/neural-assembly/logs/route.ts(129,20): error TS2345: Argument of type '"logs_accessed"' is not assignable to parameter of type 'AuditEventType'.
+app/api/search/index-webhook/route.ts(13,37): error TS2307: Cannot find module '@/lib/search/indexing-pipeline' or its corresponding type declarations.
+app/api/search/index-webhook/route.ts(14,41): error TS2307: Cannot find module '@/lib/search/content-update-handler' or its corresponding type declarations.
+app/api/search/index-webhook/route.ts(15,43): error TS2307: Cannot find module '@/lib/search/content-deletion-handler' or its corresponding type declarations.
+app/api/search/neural/route.ts(13,64): error TS2307: Cannot find module '@/lib/search/types' or its corresponding type declarations.
+app/api/search/neural/route.ts(14,37): error TS2307: Cannot find module '@/lib/search/request-validator' or its corresponding type declarations.
+app/api/search/neural/route.ts(15,32): error TS2307: Cannot find module '@/lib/search/rate-limiter' or its corresponding type declarations.
+app/api/search/neural/route.ts(16,31): error TS2307: Cannot find module '@/lib/search/api-key-auth' or its corresponding type declarations.
+app/api/search/neural/route.ts(17,39): error TS2307: Cannot find module '@/lib/search/neural-search-engine' or its corresponding type declarations.
+app/api/search/neural/route.ts(18,36): error TS2307: Cannot find module '@/lib/search/analytics-logger' or its corresponding type declarations.
+app/api/search/route.ts(26,50): error TS2307: Cannot find module '@/lib/security/rate-limiter' or its corresponding type declarations.
+app/api/seo-intelligence/route.ts(23,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/seo/embed-code/route.ts(16,8): error TS2307: Cannot find module '@/lib/seo/embed-engine' or its corresponding type declarations.
+app/api/seo/rss-ping/route.ts(9,82): error TS2307: Cannot find module '@/lib/seo/rss-ping-service' or its corresponding type declarations.
+app/api/sia-news/generate/route.ts(19,37): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/sia-news/index-google/route.ts(21,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/sia-news/live-blog/route.ts(3,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/sovereign-core/start/route.ts(8,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/sovereign-core/stop/route.ts(8,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/sovereign-core/trigger/route.ts(3,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/upload/route.ts(5,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/videos/latest/route.ts(18,32): error TS2307: Cannot find module '@/lib/security/rate-limiter' or its corresponding type declarations.
+app/api/war-room/mark-published/route.ts(7,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/war-room/publish-breaking/route.ts(3,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/war-room/save/route.ts(22,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/war-room/wipe/route.ts(23,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/war-room/wipe/route.ts(24,34): error TS2307: Cannot find module '@/lib/security/csrf-middleware' or its corresponding type declarations.
+app/api/war-room/wipe/route.ts(25,50): error TS2307: Cannot find module '@/lib/security/rate-limiter' or its corresponding type declarations.
+app/api/war-room/wipe/route.ts(68,22): error TS2345: Argument of type '"wipe_request_rate_limited"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(93,20): error TS2345: Argument of type '"wipe_confirmation_requested"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(140,22): error TS2345: Argument of type '"wipe_csrf_failed"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(157,22): error TS2345: Argument of type '"wipe_execute_rate_limited"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(179,22): error TS2345: Argument of type '"wipe_invalid_request"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(196,22): error TS2345: Argument of type '"wipe_invalid_session"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(212,22): error TS2345: Argument of type '"wipe_code_expired"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(226,22): error TS2345: Argument of type '"wipe_user_mismatch"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(240,22): error TS2345: Argument of type '"wipe_invalid_code"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(257,22): error TS2345: Argument of type '"wipe_invalid_password"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(277,20): error TS2345: Argument of type '"wipe_executed"' is not assignable to parameter of type 'AuditEventType'.
+app/api/war-room/wipe/route.ts(296,20): error TS2345: Argument of type '"wipe_error"' is not assignable to parameter of type 'AuditEventType'.
+app/api/whale-alert/route.ts(6,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+app/api/whale-autopilot/route.ts(17,38): error TS2307: Cannot find module '@/lib/security/api-auth-middleware' or its corresponding type declarations.
+components/FaqSchema.tsx(12,68): error TS2307: Cannot find module '@/lib/seo/faq-schema-generator' or its corresponding type declarations.
+components/seo/SourceVerificationCTA.tsx(5,62): error TS2307: Cannot find module '@/lib/seo/cta-link-integration' or its corresponding type declarations.
+hooks/useKeyboardNavigation.ts(13,35): error TS2307: Cannot find module '@/lib/search/types' or its corresponding type declarations.
+lib/ai-generator.ts(5,35): error TS2307: Cannot find module './neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/baidu-optimizer.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/deep-dive-generator.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/deep-intelligence-pro.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/embedding-service.ts(7,42): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/global-cpm-master.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/global-intelligence-generator.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/sealed-depth-protocol.ts(12,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/seo-meta-architect.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/ai/translation-service.ts(6,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/auth.ts(53,23): error TS2305: Module '"./auth/auth-config"' has no exported member 'auth'.
+lib/auth/backup-codes.ts(118,20): error TS2345: Argument of type '"backup_code_failed"' is not assignable to parameter of type 'AuditEventType'.
+lib/auth/backup-codes.ts(136,20): error TS2345: Argument of type '"backup_code_failed"' is not assignable to parameter of type 'AuditEventType'.
+lib/auth/backup-codes.ts(169,18): error TS2345: Argument of type '"backup_code_failed"' is not assignable to parameter of type 'AuditEventType'.
+lib/auth/totp-manager.ts(112,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Uint8Array<ArrayBufferLike>' is not assignable to parameter of type 'BufferSource'.
+      Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+        Types of property 'buffer' are incompatible.
+          Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+            Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
+              Types of property '[Symbol.toStringTag]' are incompatible.
+                Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.
+lib/dispatcher/publishing-service-fixed.ts(360,48): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+lib/dispatcher/publishing-service-fixed.ts(412,48): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+lib/dispatcher/publishing-service-fixed.ts(474,48): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+lib/dispatcher/publishing-service.ts(197,50): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+lib/dispatcher/publishing-service.ts(241,48): error TS2307: Cannot find module '@/lib/neural-assembly/database' or its corresponding type declarations.
+lib/dispatcher/seo-generator.ts(7,56): error TS2307: Cannot find module '@/lib/seo/url-slug-engine' or its corresponding type declarations.
+lib/dispatcher/seo-generator.ts(8,45): error TS2307: Cannot find module '@/lib/seo/multilingual-metadata-generator' or its corresponding type declarations.
+lib/dispatcher/translation-engine.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/hooks/useNeuralHealer.ts(2,30): error TS2307: Cannot find module '@/components/admin/NeuralCellAuditRow' or its corresponding type declarations.
+lib/hooks/useNeuralHealer.ts(108,18): error TS18046: 'c' is of type 'unknown'.
+lib/hooks/useNeuralHealer.ts(108,43): error TS18046: 'c' is of type 'unknown'.
+lib/neural-assembly/ai-supervisor.ts(1,55): error TS2307: Cannot find module './master-orchestrator' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(3,40): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(4,31): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(5,35): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(7,43): error TS2307: Cannot find module './stabilization/confidence-scoring' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(8,70): error TS2307: Cannot find module './stabilization/config' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(9,61): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(54,33): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/ai-supervisor.ts(59,34): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/blackboard-system.ts(15,35): error TS2307: Cannot find module './database' or its corresponding type declarations.
+lib/neural-assembly/cells/body-cell.ts(9,92): error TS2307: Cannot find module '../editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(62,43): error TS2307: Cannot find module './stabilization/confidence-scoring' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(63,65): error TS2307: Cannot find module './stabilization/config' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(64,57): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(69,8): error TS2307: Cannot find module '../sia-news/failure-engine/multilingual-headline-integrity' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(70,46): error TS2307: Cannot find module '../sia-news/failure-engine/narrative-discipline' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(71,37): error TS2307: Cannot find module '../sia-news/failure-engine/evidence-ledger' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(72,76): error TS2307: Cannot find module '../sia-news/failure-engine/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(1,26): error TS2307: Cannot find module '../search/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(3,32): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(4,44): error TS2307: Cannot find module '../sia-news/failure-engine/multilingual-headline-integrity' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(5,38): error TS2307: Cannot find module '../sia-news/failure-engine/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(6,26): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/manual-override.ts(16,45): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/security-middleware.ts(18,35): error TS2307: Cannot find module './database' or its corresponding type declarations.
+lib/neural-assembly/speed-cell.ts(7,37): error TS2307: Cannot find module '@/lib/seo/global-search-engine-push' or its corresponding type declarations.
+lib/neural-assembly/stabilization/crypto-provider.ts(16,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(1,48): error TS2307: Cannot find module '../master-orchestrator' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(2,26): error TS2307: Cannot find module '../editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(3,40): error TS2307: Cannot find module './types' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(123,69): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/stabilization/operator-precheck.ts(2,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/pecl-enforcer.ts(13,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(2,48): error TS2307: Cannot find module '../master-orchestrator' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(4,40): error TS2307: Cannot find module './types' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(5,31): error TS2307: Cannot find module '../editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(165,66): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts(23,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/trace.ts(2,36): error TS2307: Cannot find module './types' or its corresponding type declarations.
+lib/neural-assembly/stabilization/trace.ts(3,35): error TS2307: Cannot find module '../database' or its corresponding type declarations.
+lib/security/api-middleware.ts(61,21): error TS2345: Argument of type 'NextRequest' is not assignable to parameter of type 'string'.
+lib/security/api-middleware.ts(87,17): error TS2345: Argument of type 'NextRequest' is not assignable to parameter of type 'string'.
+lib/security/idempotency.ts(85,24): error TS2345: Argument of type '"admin_action_duplicate"' is not assignable to parameter of type 'AuditEventType'.
+lib/security/session-hardening.ts(158,11): error TS2304: Cannot find name 'logAuditEvent'.
+lib/security/session-hardening.ts(179,9): error TS2304: Cannot find name 'logAuditEvent'.
+lib/security/telegram-alerting.ts(49,5): error TS2322: Type '"admin_action_security_change"' is not assignable to type 'AuditEventType'.
+lib/security/telegram-alerting.ts(103,7): error TS2367: This comparison appears to be unintentional because the types '"login_success" | "login_failed" | "logout" | "session_created" | "session_expired" | "session_rotated" | "2fa_setup_started" | "2fa_enabled" | "2fa_verified" | "2fa_failed" | ... 27 more ... | "waf_block_suspected"' and '"admin_action_security_change"' have no overlap.
+lib/services/SiaIntelligenceProcessor.ts(6,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/sovereign-core/neuro-sync-kernel.ts(9,59): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/speedcell/global-discovery-engine.ts(9,41): error TS2307: Cannot find module '@/lib/seo/google-indexing-api' or its corresponding type declarations.
+lib/speedcell/global-discovery-engine.ts(10,42): error TS2307: Cannot find module '@/lib/seo/global-search-engine-push' or its corresponding type declarations.
+lib/speedcell/global-discovery-engine.ts(11,37): error TS2307: Cannot find module '@/lib/seo/rss-ping-service' or its corresponding type declarations.
+test-chief-editor-integration.ts(6,36): error TS2307: Cannot find module './lib/neural-assembly/master-orchestrator' or its corresponding type declarations.
+test-chief-editor-integration.ts(7,77): error TS2307: Cannot find module './lib/neural-assembly/master-orchestrator' or its corresponding type declarations.

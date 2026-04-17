@@ -1,0 +1,15 @@
+app/api/admin/normalize-workspace/route.ts:512:    const stats = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'].map((lang) => {
+app/api/admin/normalize-workspace/route.ts:582:    const TRANSLATE_LANGS = ['tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'].filter(
+app/api/admin/sync-workspace/route.ts:99:      { s: 'Ar', k: 'ar' },
+app/api/admin/sync-workspace/route.ts:100:      { s: 'Jp', k: 'jp' },
+app/api/ai/adsense-content/route.ts:94:    supportedLanguages: ['en', 'tr', 'de', 'es', 'fr', 'ar'],
+app/api/eeat-protocols/enhance/route.ts:83:  if (!body.language || !['en', 'tr', 'de', 'es', 'fr', 'ar'].includes(body.language)) {
+app/api/ghost-editor/route.ts:53:          languages: ['EN', 'TR', 'DE', 'ES', 'FR', 'AR', 'RU'],
+app/api/sia-news/generate/route.ts:386:    jp: 'JP',
+app/api/warroom/analytics/route.ts:8:type Language = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+app/api/warroom/analytics/route.ts:9:type Region = 'US' | 'TR' | 'DE' | 'FR' | 'ES' | 'RU' | 'AE' | 'JP' | 'CN'
+app/api/warroom/analytics/route.ts:19:  jp: 'JP',
+app/api/warroom/analytics/route.ts:80:  const languages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+app/api/warroom/broadcast/route.ts:31:    const targetLanguages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+app/api/warroom/broadcast/route.ts:169:    const languages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+app/api/warroom/broadcast/route.ts:207:    languages: ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'],

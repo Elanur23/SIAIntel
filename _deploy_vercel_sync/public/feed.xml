@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" 
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+     xmlns:georss="http://www.georss.org/georss"
+     xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+  <channel>
+    <title><![CDATA[US News Today - Breaking News & Latest Headlines]]></title>
+    <description><![CDATA[Stay informed with the latest breaking news, politics, business, sports, technology, and entertainment coverage from across the United States.]]></description>
+    <link>https://your-news-site.com</link>
+    <atom:link href="https://your-news-site.com/feed.xml" rel="self" type="application/rss+xml" />
+    <language>en-US</language>
+    <copyright><![CDATA[Copyright 2026 US News Today. All rights reserved.]]></copyright>
+    <managingEditor><![CDATA[editor@usnewstoday.com (US News Today Editorial Team)]]></managingEditor>
+    <webMaster><![CDATA[webmaster@usnewstoday.com (US News Today Technical Team)]]></webMaster>
+    <pubDate>Sat, 01 Feb 2026 12:00:00 GMT</pubDate>
+    <lastBuildDate>Sat, 01 Feb 2026 12:00:00 GMT</lastBuildDate>
+    <category><![CDATA[News]]></category>
+    <generator><![CDATA[US News Today RSS Generator v1.0]]></generator>
+    <docs>https://www.rssboard.org/rss-specification</docs>
+    <ttl>60</ttl>
+    <image>
+      <url>https://your-news-site.com/logo-rss.png</url>
+      <title><![CDATA[US News Today - Breaking News & Latest Headlines]]></title>
+      <link>https://your-news-site.com</link>
+      <width>144</width>
+      <height>144</height>
+      <description><![CDATA[US News Today - Breaking News & Latest Headlines Logo]]></description>
+    </image>
+    <sy:updatePeriod>hourly</sy:updatePeriod>
+    <sy:updateFrequency>1</sy:updateFrequency>
+    
+    <item>
+      <title><![CDATA[Federal Reserve Announces Emergency Rate Cut]]></title>
+      <description><![CDATA[In a surprise move, the Federal Reserve cut interest rates by 0.75% to address rising inflation concerns and support economic growth across America.]]></description>
+      <content:encoded><![CDATA[<p>In a surprise move that sent shockwaves through financial markets, the Federal Reserve announced an emergency interest rate cut of 0.75 percentage points, bringing the federal funds rate to its lowest level in over a decade.</p><p>The decision, made during an unscheduled meeting of the Federal Open Market Committee, comes as policymakers grapple with mounting economic pressures and concerns about slowing growth in key sectors of the American economy.</p><p>Fed Chair Jerome Powell stated in a press conference that the rate cut was necessary to "provide additional monetary accommodation to support the U.S. economy" and help maintain the central bank's dual mandate of price stability and maximum employment.</p>]]></content:encoded>
+      <link>https://your-news-site.com/news/federal-reserve-emergency-rate-cut</link>
+      <guid isPermaLink="true">https://your-news-site.com/news/federal-reserve-emergency-rate-cut</guid>
+      <pubDate>Sat, 01 Feb 2026 10:30:00 GMT</pubDate>
+      <author><![CDATA[US News Today Staff]]></author>
+      <dc:creator><![CDATA[US News Today Staff]]></dc:creator>
+      <category><![CDATA[Business]]></category>
+      <source url="https://your-news-site.com/feed.xml">US News Today</source>
+      <georss:featurename>Washington D.C.</georss:featurename>
+      <slash:comments>0</slash:comments>
+    </item>
+    
+    <item>
+      <title><![CDATA[Silicon Valley AI Startup Boom Reaches New Heights]]></title>
+      <description><![CDATA[Venture capital funding for artificial intelligence startups in Silicon Valley has reached unprecedented levels, with over $15 billion invested in the first quarter alone.]]></description>
+      <content:encoded><![CDATA[<p>Silicon Valley's artificial intelligence sector is experiencing an unprecedented boom, with venture capital investments reaching record-breaking levels as investors rush to capitalize on the AI revolution.</p><p>According to new data from leading venture capital firms, AI startups in the Bay Area have attracted over $15 billion in funding during the first quarter of 2026, representing a 300% increase compared to the same period last year.</p><p>The surge in investment comes as companies across industries seek to integrate AI technologies into their operations, creating massive opportunities for innovative startups developing cutting-edge solutions.</p>]]></content:encoded>
+      <link>https://your-news-site.com/news/silicon-valley-ai-startup-boom</link>
+      <guid isPermaLink="true">https://your-news-site.com/news/silicon-valley-ai-startup-boom</guid>
+      <pubDate>Sat, 01 Feb 2026 09:15:00 GMT</pubDate>
+      <author><![CDATA[US News Today Staff]]></author>
+      <dc:creator><![CDATA[US News Today Staff]]></dc:creator>
+      <category><![CDATA[Technology]]></category>
+      <source url="https://your-news-site.com/feed.xml">US News Today</source>
+      <georss:featurename>Silicon Valley</georss:featurename>
+      <slash:comments>0</slash:comments>
+    </item>
+    
+    <item>
+      <title><![CDATA[Wall Street Bitcoin ETF Surge Continues]]></title>
+      <description><![CDATA[Bitcoin exchange-traded funds are experiencing massive inflows as institutional investors embrace cryptocurrency investments, with over $2 billion in new investments this week.]]></description>
+      <content:encoded><![CDATA[<p>Wall Street's embrace of Bitcoin continues to accelerate, with exchange-traded funds focused on the leading cryptocurrency experiencing unprecedented inflows from institutional investors.</p><p>Data from financial services firms shows that Bitcoin ETFs have attracted over $2 billion in new investments this week alone, bringing total assets under management to record highs.</p><p>The surge reflects growing institutional acceptance of cryptocurrency as a legitimate asset class, with major pension funds, insurance companies, and investment firms allocating significant portions of their portfolios to digital assets.</p>]]></content:encoded>
+      <link>https://your-news-site.com/news/wall-street-bitcoin-etf-surge</link>
+      <guid isPermaLink="true">https://your-news-site.com/news/wall-street-bitcoin-etf-surge</guid>
+      <pubDate>Sat, 01 Feb 2026 08:45:00 GMT</pubDate>
+      <author><![CDATA[US News Today Staff]]></author>
+      <dc:creator><![CDATA[US News Today Staff]]></dc:creator>
+      <category><![CDATA[Business]]></category>
+      <source url="https://your-news-site.com/feed.xml">US News Today</source>
+      <georss:featurename>New York</georss:featurename>
+      <slash:comments>0</slash:comments>
+    </item>
+    
+    <item>
+      <title><![CDATA[NASA Artemis Moon Base Construction Set for 2027]]></title>
+      <description><![CDATA[NASA announces ambitious timeline for permanent lunar base construction as part of the Artemis program, with first modules scheduled for deployment in late 2027.]]></description>
+      <content:encoded><![CDATA[<p>NASA has unveiled an ambitious timeline for the construction of America's first permanent lunar base, with initial modules scheduled for deployment as early as late 2027 as part of the expanded Artemis program.</p><p>The announcement comes as the space agency accelerates its plans to establish a sustainable human presence on the Moon, serving as a stepping stone for future missions to Mars and beyond.</p><p>According to NASA Administrator Bill Nelson, the lunar base will serve as a critical research facility and staging ground for deep space exploration, representing the most significant expansion of human presence beyond Earth since the Apollo missions.</p>]]></content:encoded>
+      <link>https://your-news-site.com/news/nasa-artemis-moon-base-2027</link>
+      <guid isPermaLink="true">https://your-news-site.com/news/nasa-artemis-moon-base-2027</guid>
+      <pubDate>Sat, 01 Feb 2026 07:30:00 GMT</pubDate>
+      <author><![CDATA[US News Today Staff]]></author>
+      <dc:creator><![CDATA[US News Today Staff]]></dc:creator>
+      <category><![CDATA[Science]]></category>
+      <source url="https://your-news-site.com/feed.xml">US News Today</source>
+      <georss:featurename>Houston</georss:featurename>
+      <slash:comments>0</slash:comments>
+    </item>
+  </channel>
+</rss>

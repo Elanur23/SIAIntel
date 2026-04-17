@@ -1,0 +1,195 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Conflicting routes - DO NOT CREATE THESE
+app/news/[slug]/
+app/[lang]/news/[id]/
+
+# Cache
+.cache
+node_modules/.cache
+
+# ============================================
+# CLEANUP: Prevent future clutter
+# ============================================
+
+# Test HTML files
+TEST-*.html
+AC-SIMDI*.html
+HEMEN-*.html
+test-*.html
+
+# Turkish documentation duplicates
+*-TR.md
+*-OZET-TR.md
+*-HIZLI-*.md
+
+# Old version files
+V7-*.md
+V8-*.md
+V12-*.md
+V13-*.md
+
+# Unused features
+ORACLE-*.md
+ORACLE-*.html
+WHALE-*.md
+WAR-ROOM-*.md
+SIAINTEL-*.md
+QUANTUM-*.md
+
+# Temporary scripts (root level only, not scripts/ folder)
+add-*.js
+check-*.js
+seed-*.bat
+test-*.bat
+start-*.bat
+fix-*.ps1
+*.vbs
+
+# Allow scripts/ folder contents
+!scripts/*.js
+!scripts/*.bat
+
+# Old databases
+autonom_news.db
+sentinel-x.db
+
+# Context transfer files
+CONTEXT-TRANSFER-*.md
+
+# Task complete files
+TASK-*-COMPLETE.md
+*-COMPLETE.md
+*-TAMAMLANDI.md
+
+# Quickstart duplicates
+*-QUICKSTART.md
+*-QUICK-START.md
+
+# Visual summary files
+*-VISUAL-SUMMARY.html
+*-GORSEL-OZET.html
+
+# Duplicate images
+image.png
+image-1.png
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# ============================================
+# 🚨 CRITICAL SECURITY: Sensitive Files
+# ============================================
+
+# Full code dumps (SECURITY RISK)
+WAR-ROOM-FULL-CODE.txt
+*-FULL-CODE.txt
+*-CODE-DUMP.txt
+
+# Environment files with real credentials
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.env
+
+# Database files with real data
+*.db
+*.sqlite
+*.sqlite3
+dev.db
+prod.db
+
+# API key files
+*-api-keys.txt
+*-credentials.txt
+*-secrets.txt
+
+# Logs that might contain sensitive data
+*.log
+logs/
+*.log.*
+
+# Python environment
+sovereign-core/.env
+python-backend/.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+
+# ============================================
+# 🧹 CLEANUP: Prevent Clutter
+# ============================================
+
+# Backup files (use Git instead)
+*.old
+*.backup
+*.bak
+*~
+*.swp
+*.swo
+
+# Backup directories
+*_backup_*/
+backup_*/
+old_*/
+
+# Disabled files
+*.disabled
+*.off
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.vscode/settings.json
+.idea/workspace.xml
+*.sublime-workspace
+
+.next

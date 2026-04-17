@@ -1,0 +1,5 @@
+SEARCH_TERMS=PROVENANCE_UNAVAILABLE|TERMINAL_SINK_ENFORCER|Denied publish|MISSING_AUTH|PROVENANCE_MISMATCH|FORENSIC-4-ENFORCER|context.mic|MODULE_NOT_FOUND|Cannot find module '../lib/neural-assembly/master-orchestrator'
+HITS_START
+5:Error: Cannot find module '../lib/neural-assembly/master-orchestrator'
+18:  code: 'MODULE_NOT_FOUND',
+HITS_END

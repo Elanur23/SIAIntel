@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIA Intelligence Terminal — Neural Assembly Line v4.0</title>
+<link rel="stylesheet" href="/neural-assembly-styles.css">
+</head>
+<body>
+<!-- HEADER -->
+<header class="header">
+<div class="logo">
+<div class="logo-mark">SIA</div>
+<div>
+<div class="logo-text">INTELLIGENCE TERMINAL</div>
+<div class="logo-sub">NEURAL ASSEMBLY LINE v4.0 — SOVEREIGN CELLULAR AUDIT</div>
+</div>
+</div>
+<div class="status-bar">
+<div class="status-pill ver">⬡ GEMINI 1.5 PRO</div>
+<div class="status-pill live"><span class="pulse"></span> PIPELINE ACTIVE</div>
+<div class="status-pill ver" id="langCount">9 LANGUAGES</div>
+<div class="status-pill ver" id="clock">--:--:-- UTC</div>
+</div>
+</header>
+
+<div class="main">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div>
+<div class="sidebar-section-label">Article Queue</div>
+<div id="articleList"></div>
+</div>
+<div>
+<div class="sidebar-section-label">Language Matrix</div>
+<div id="langMatrix" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+</div>
+</aside>
+
+<!-- CONTENT -->
+<main class="content" id="mainContent">
+<div id="dashContent"></div>
+</main>
+</div>
+
+<script src="/neural-assembly-script.js"></script>
+</body>
+</html>

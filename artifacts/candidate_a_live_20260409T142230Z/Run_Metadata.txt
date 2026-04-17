@@ -1,0 +1,12 @@
+RUN_ID=candidate_a_live_20260409T142230Z
+START_UTC=2026-04-09T14:22:30Z
+PWD=/workspaces/SIAIntel
+HEAD=20c7c8a7b23cf1f04ce168e442d7fc5a5deda143
+BRANCH=main
+NODE_VERSION=v24.14.0
+NPM_VERSION=11.9.0
+COMMAND=npx tsx scripts/execute-batch-07-live.ts
+END_UTC=2026-04-09T14:22:32Z
+EXIT_CODE=1
+ARTIFACT_DIR=artifacts/candidate_a_live_20260409T142230Z
+RAW_TRANSCRIPT=artifacts/candidate_a_live_20260409T142230Z/Raw_Transcript.txt

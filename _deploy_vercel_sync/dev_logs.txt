@@ -1,0 +1,10 @@
+﻿
+> siaintel-terminal@1.0.0 dev
+> next dev -p 3003
+
+  Ôû▓ Next.js 14.2.35
+  - Local:        http://localhost:3003
+  - Environments: .env.local, .env
+
+ Ô£ô Starting...
+ Ô£ô Ready in 3.9s

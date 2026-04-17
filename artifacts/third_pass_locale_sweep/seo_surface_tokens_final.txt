@@ -1,0 +1,239 @@
+app/api/seo/generate-schema/route.ts:17: * - Meta tags (robots, canonical, etc.)
+app/api/seo/generate-schema/route.ts:134:      metaTags: 'Robots, canonical, description, keywords',
+app/[lang]/about/page.tsx:34:    alternates: { canonical: `${baseUrl}/${lang}/about` },
+app/[lang]/ai/layout.tsx:72:    alternates: {
+app/[lang]/ai/layout.tsx:73:      canonical: currentUrl,
+app/[lang]/ai/layout.tsx:120:    inLanguage: HREFLANG_BY_ROUTE_LOCALE[routeLang],
+app/[lang]/ai/page.tsx:93:    alternates: { canonical: `https://siaintel.com/${lang}/ai` }
+app/[lang]/ai-transparency/page.tsx:72:  return { title: t.title, description: t.description, alternates: { canonical: `https://siaintel.com/${lang}/ai-transparency` } }
+app/[lang]/crypto/layout.tsx:70:    alternates: {
+app/[lang]/crypto/layout.tsx:71:      canonical: currentUrl,
+app/[lang]/crypto/layout.tsx:109:    inLanguage: HREFLANG_BY_ROUTE_LOCALE[routeLang],
+app/[lang]/crypto/page.tsx:93:    alternates: { canonical: `https://siaintel.com/${lang}/crypto` }
+app/[lang]/economy/layout.tsx:70:    alternates: {
+app/[lang]/economy/layout.tsx:71:      canonical: currentUrl,
+app/[lang]/economy/layout.tsx:109:    inLanguage: HREFLANG_BY_ROUTE_LOCALE[routeLang],
+app/[lang]/economy/page.tsx:93:    alternates: { canonical: `https://siaintel.com/${lang}/economy` }
+app/[lang]/editorial-policy/page.tsx:72:  return { title: t.title, description: t.description, alternates: { canonical: `https://siaintel.com/${lang}/editorial-policy` } }
+app/[lang]/experts/page.tsx:34:    alternates: { canonical: `${baseUrl}/${lang}/experts` },
+app/[lang]/intelligence/page.tsx:80:    alternates: { canonical: `https://siaintel.com/${lang}/intelligence` }
+app/[lang]/layout.tsx:38:    alternates: {
+app/[lang]/layout.tsx:39:      canonical: `/${routeLang}`,
+app/[lang]/news/[slug]/page.tsx:82:    alternates: {
+app/[lang]/news/[slug]/page.tsx:83:      canonical: articleUrl,
+app/[lang]/privacy-policy/page.tsx:28:    alternates: { canonical: `${baseUrl}/${lang}/privacy-policy` },
+app/[lang]/search/layout.tsx:17:    alternates: {
+app/[lang]/search/layout.tsx:18:      canonical: `${BASE_URL}/${routeLang}/search`,
+app/[lang]/stocks/layout.tsx:70:    alternates: {
+app/[lang]/stocks/layout.tsx:71:      canonical: currentUrl,
+app/[lang]/stocks/layout.tsx:109:    inLanguage: HREFLANG_BY_ROUTE_LOCALE[routeLang],
+app/[lang]/stocks/page.tsx:93:    alternates: { canonical: `https://siaintel.com/${lang}/stocks` }
+app/[lang]/terms/page.tsx:33:    alternates: { canonical: `${baseUrl}/${lang}/terms` },
+lib/ai/seo-meta-architect.ts:63:  canonicalUrl: string
+lib/ai/seo-meta-architect.ts:101:  "canonicalUrl": "string"
+lib/ai/seo-meta-architect.ts:192:      canonicalUrl: parsed.canonicalUrl || `${baseUrl}/intelligence/${slug}`,
+lib/api.ts:32:    canonicalUrl: string
+lib/api.ts:91:      canonicalUrl: '/news/federal-reserve-economic-policy-changes-announced',
+lib/api.ts:128:      canonicalUrl: '/news/nfl-playoffs-dramatic-overtime-victory-championship',
+lib/api.ts:165:      canonicalUrl: '/news/tech-giants-ai-breakthrough-healthcare-applications',
+lib/api.ts:202:      canonicalUrl: '/news/hollywood-stars-annual-awards-ceremony-red-carpet',
+lib/api.ts:239:      canonicalUrl: '/news/severe-weather-alert-storm-system-east-coast',
+lib/database.ts:136:      canonical_batch_id: news.batch_id || null,
+lib/dispatcher/publishing-service-fixed.ts:500:   * Uses canonical JSON representation for consistent hashing
+lib/dispatcher/publishing-service-fixed.ts:503:    const { canonicalizeJSON } = require('@/lib/neural-assembly/stabilization/crypto-provider');
+lib/dispatcher/publishing-service-fixed.ts:505:    const canonical = canonicalizeJSON({
+lib/dispatcher/publishing-service-fixed.ts:515:      .update(canonical, 'utf8')
+lib/dispatcher/seo-generator.ts:42:    // Generate hreflang tags
+lib/dispatcher/seo-generator.ts:43:    const hreflangTags = this.generateHreflangTags(urls)
+lib/dispatcher/seo-generator.ts:51:        canonicalUrl: urls[language],
+lib/dispatcher/seo-generator.ts:58:        hreflangTags,
+lib/dispatcher/seo-generator.ts:101:   * Generate hreflang tags for all language versions
+lib/dispatcher/seo-generator.ts:232:    // Validate canonical URL
+lib/dispatcher/seo-generator.ts:233:    if (!seoPackage.canonicalUrl.startsWith('https://')) {
+lib/dispatcher/seo-generator.ts:237:    // Validate hreflang tags
+lib/dispatcher/seo-generator.ts:238:    if (seoPackage.hreflangTags.length < 9) {
+lib/dispatcher/seo-generator.ts:239:      issues.push('Missing hreflang tags for some languages')
+lib/dispatcher/seo-generator.ts:274:    if (seoPackage.hreflangTags.length < 9) score -= 10
+lib/dispatcher/seo-generator.ts:275:    if (seoPackage.hreflangTags.length === 0) score -= 20
+lib/dispatcher/types.ts:105:  canonicalUrl: string
+lib/dispatcher/types.ts:108:  hreflangTags: HreflangTag[]
+lib/neural-assembly/blackboard-system.ts:213:      'content.hreflang_tags',
+lib/neural-assembly/chief-editor-engine.ts:78:import { getGlobalCryptoProvider, getGlobalKeyProvider, normalizePECLKeyId, canonicalizeJSON } from './stabilization/crypto-provider';
+lib/neural-assembly/chief-editor-engine.ts:999:          e.content.canonical_url?.split('/').pop() || generateSlug(e.content.title)
+lib/neural-assembly/chief-editor-engine.ts:1017:    const manifest_hash = crypto.createHash('sha256').update(canonicalizeJSON(locked_package)).digest('hex');
+lib/neural-assembly/core-types.ts:897:    hreflang_tags?: Record<Language, string> // Dynamic SEO tags
+lib/neural-assembly/core-types.ts:898:    canonical_url?: string // Canonical consistency
+lib/neural-assembly/deep-linker.ts:164:      const linkHtml = `<a href="${targetUrl}" class="cross-lang-link" hreflang="${article.language}">${languageFlag} ${article.title}</a>`
+lib/neural-assembly/field-dependency-engine.ts:39:  | 'content.hreflang_tags'
+lib/neural-assembly/field-dependency-engine.ts:193:    field: 'content.hreflang_tags',
+lib/neural-assembly/field-dependency-engine.ts:445:      'content.hreflang_tags',
+lib/neural-assembly/headline-intelligence/editor-review-payload.ts:569:      ? `Detected ${inconsistentPairs.length} title-surface inconsistency pair(s). Prioritize canonical/editorial alignment.`
+lib/neural-assembly/headline-intelligence/rulebook.ts:155:    description: 'Editorial/canonical/SEO/OG/social/homepage titles materially conflict.',
+lib/neural-assembly/headline-intelligence/rulebook.ts:157:    correctionHint: 'Synchronize title surfaces around one thesis-safe canonical meaning.',
+lib/neural-assembly/headline-intelligence/title-surface-resolver.ts:79:  const canonical = value.match(/\b(?:20\d{2}|19\d{2}|Q[1-4]|JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/gi) || []
+lib/neural-assembly/headline-intelligence/title-surface-resolver.ts:83:  return [...canonical, ...numericDate, ...japaneseDate].map(token => token.toUpperCase())
+lib/neural-assembly/headline-intelligence/title-surface-resolver.ts:138:  const canonicalTitle = resolveSurface(
+lib/neural-assembly/headline-intelligence/title-surface-resolver.ts:147:    canonicalTitle.value
+lib/neural-assembly/headline-intelligence/title-surface-resolver.ts:176:    canonicalTitle,
+lib/neural-assembly/speed-cell.ts:70:      // SEO Header Injection: hreflang tags for all 9 languages
+lib/neural-assembly/speed-cell.ts:71:      const hreflangTags = languages.map(l =>
+lib/neural-assembly/speed-cell.ts:72:        `<link rel="alternate" hreflang="${l}" href="${baseUrl}/${l}/news/${targetArticleID}" />`
+lib/neural-assembly/speed-cell.ts:75:      // SEO Header Injection: canonical tag to the primary (EN) version
+lib/neural-assembly/speed-cell.ts:76:      const canonicalTag = `<link rel="canonical" href="${baseUrl}/en/news/${targetArticleID}" />`;
+lib/neural-assembly/speed-cell.ts:78:      const seoHeaders = `${hreflangTags}\n${canonicalTag}`;
+lib/neural-assembly/speed-cell.ts:86:        hreflangs: languages.map(l => ({ lang: l, url: `${baseUrl}/${l}/news/${targetArticleID}` })),
+lib/neural-assembly/speed-cell.ts:87:        canonical: `${baseUrl}/en/news/${targetArticleID}`,
+lib/neural-assembly/stabilization/crypto-provider.ts:225:export function canonicalizeJSON(obj: any): string {
+lib/neural-assembly/stabilization/crypto-provider.ts:235:    const items = obj.map(item => canonicalizeJSON(item));
+lib/neural-assembly/stabilization/crypto-provider.ts:242:      const value = canonicalizeJSON(obj[key]);
+lib/neural-assembly/stabilization/crypto-provider.ts:266:   * @param data - Data to sign (will be canonicalized if object)
+lib/neural-assembly/stabilization/crypto-provider.ts:275:      const canonical = typeof data === 'string' ? data : canonicalizeJSON(data);
+lib/neural-assembly/stabilization/crypto-provider.ts:301:      const signature = crypto.sign(null, Buffer.from(canonical, 'utf8'), privateKey);
+lib/neural-assembly/stabilization/crypto-provider.ts:316:   * @param data - Data that was signed (will be canonicalized if object)
+lib/neural-assembly/stabilization/crypto-provider.ts:329:      const canonical = typeof data === 'string' ? data : canonicalizeJSON(data);
+lib/neural-assembly/stabilization/crypto-provider.ts:347:      return crypto.verify(null, Buffer.from(canonical, 'utf8'), publicKey, signatureBuffer);
+lib/neural-assembly/stabilization/pecl-enforcer.ts:9: * over canonicalized signed claims object with all metadata inside signature boundary.
+lib/neural-assembly/stabilization/pecl-enforcer.ts:14:import { getGlobalCryptoProvider, canonicalizeJSON } from './crypto-provider';
+lib/neural-assembly/stabilization/pecl-enforcer.ts:56: * - Deterministic canonicalization prevents tampering
+lib/neural-assembly/stabilization/pecl-enforcer.ts:137:      .update(canonicalizeJSON(context.manifest))
+lib/neural-assembly/stabilization/pecl-enforcer.ts:229:        recomputed_hash_prefix: context.manifest ? crypto.createHash('sha256').update(canonicalizeJSON(context.manifest)).digest('hex').substring(0, 16) : signedClaims.manifest_hash.substring(0, 16),
+lib/neural-assembly/stabilization/pecl-enforcer.ts:354:      const dnaHash = crypto.createHash('sha256').update(canonicalizeJSON(manifest)).digest('hex');
+lib/neural-assembly/stabilization/provenance-binder.ts:6: * Implements deterministic canonicalization and hashing of raw provenance material
+lib/neural-assembly/stabilization/provenance-binder.ts:10: * - Deterministic canonicalization of claim graph and evidence ledger
+lib/neural-assembly/stabilization/provenance-binder.ts:17:import { canonicalizeJSON } from './crypto-provider';
+lib/neural-assembly/stabilization/provenance-binder.ts:84:  const canonical = canonicalizeJSON(claimGraph);
+lib/neural-assembly/stabilization/provenance-binder.ts:85:  return crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/provenance-binder.ts:89:  const canonical = canonicalizeJSON(evidenceLedger);
+lib/neural-assembly/stabilization/provenance-binder.ts:90:  return crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/publish-safety-gate.ts:28:    const hreflang = edition?.content?.hreflang_tags
+lib/neural-assembly/stabilization/publish-safety-gate.ts:29:    if (!hreflang || typeof hreflang !== 'object') {
+lib/neural-assembly/stabilization/publish-safety-gate.ts:30:      reasons.push(`hreflang_tags missing for ${lang}`)
+lib/neural-assembly/stabilization/publish-safety-gate.ts:35:      const value = (hreflang as any)[needed]
+lib/neural-assembly/stabilization/publish-safety-gate.ts:37:        reasons.push(`hreflang_tags.${needed} invalid for ${lang}`)
+lib/neural-assembly/stabilization/publish-safety-gate.ts:73:  // Only fill when missing; do not override existing (possibly corrupted) hreflang tags.
+lib/neural-assembly/stabilization/publish-safety-gate.ts:78:    const hreflang = (edition as any)?.content?.hreflang_tags
+lib/neural-assembly/stabilization/publish-safety-gate.ts:79:    const needsFill = !hreflang || (typeof hreflang === 'object' && Object.keys(hreflang).length === 0)
+lib/neural-assembly/stabilization/publish-safety-gate.ts:86:      ;(edition as any).content.hreflang_tags = dynamicHreflang as any
+lib/neural-assembly/stabilization/publish-safety-gate.ts:89:    if (!edition.content.canonical_url) {
+lib/neural-assembly/stabilization/publish-safety-gate.ts:90:      edition.content.canonical_url = `${cdnBase}/${lang}`
+lib/neural-assembly/stabilization/publish-safety-gate.ts:150:  // hreflang set validity
+lib/neural-assembly/stabilization/sink-verifier.ts:10: * - Sink-time payload canonicalization and hashing
+lib/neural-assembly/stabilization/sink-verifier.ts:17:import { canonicalizeJSON } from './crypto-provider';
+lib/neural-assembly/stabilization/sink-verifier.ts:87:    const canonical_payload = canonicalizeJSON(context.payload);
+lib/neural-assembly/stabilization/sink-verifier.ts:89:      .update(canonical_payload, 'utf8')
+lib/neural-assembly/stabilization/sink-verifier.ts:105:      expected_payload_raw: canonical_payload,
+lib/neural-assembly/stabilization/sink-verifier.ts:121:      frozen_payload: canonical_payload
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:24:import { getGlobalCryptoProvider, canonicalizeJSON } from './crypto-provider';
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:71:    .update(canonicalizeJSON(context.manifest))
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:85:        canonical_batch_id: context.manifest?.payload_id,
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:104:  const verifiedPayloadRaw = canonicalizeJSON(payload);
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:135:    .update(canonicalizeJSON(context.manifest))
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:3: * Tests for Ed25519 signing, verification, and canonicalization
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:11:  canonicalizeJSON,
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:16:describe('canonicalizeJSON', () => {
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:21:    expect(canonicalizeJSON(obj1)).toBe(canonicalizeJSON(obj2));
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:26:    const canonical = canonicalizeJSON(obj);
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:28:    expect(canonical).toBe('{"a":2,"m":3,"z":1}');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:43:    const canonical = canonicalizeJSON(obj);
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:44:    expect(canonical).toBe('{"inner":{"x":8,"y":9},"outer":{"a":1,"b":2}}');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:49:    const canonical = canonicalizeJSON(obj);
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:51:    expect(canonical).toBe('{"arr":[3,1,2],"key":"value"}');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:55:    expect(canonicalizeJSON(null)).toBe('null');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:56:    expect(canonicalizeJSON(true)).toBe('true');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:57:    expect(canonicalizeJSON(false)).toBe('false');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:58:    expect(canonicalizeJSON(42)).toBe('42');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:59:    expect(canonicalizeJSON('test')).toBe('"test"');
+lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:130:    it('should produce same signature for canonically equivalent objects', () => {
+lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts:10:import { Ed25519Provider, EnvironmentKeyProvider, resetGlobalCryptoProvider, canonicalizeJSON } from '../crypto-provider';
+lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts:128:  const manifestHash = crypto.createHash('sha256').update(canonicalizeJSON(mockManifest)).digest('hex');
+lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts:179:      canonical_url: 'https://example.com/test-article',
+lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts:180:      hreflang_tags: {}
+lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts:7:import { Ed25519Provider, EnvironmentKeyProvider, resetGlobalCryptoProvider, canonicalizeJSON } from '../crypto-provider';
+lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts:33:  const cgDigest = crypto.createHash('sha256').update(canonicalizeJSON(cgMaterial)).digest('hex');
+lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts:34:  const elDigest = crypto.createHash('sha256').update(canonicalizeJSON(elMaterial)).digest('hex');
+lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts:62:  const manifestHash = crypto.createHash('sha256').update(canonicalizeJSON(mockManifest)).digest('hex');
+lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts:5: * Proves real cryptographic provenance binding with deterministic canonicalization
+lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts:7:  canonicalizeJSON,
+lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts:77:    const manifestHash = crypto.createHash('sha256').update(canonicalizeJSON(manifest)).digest('hex')
+lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts:8:import { Ed25519Provider, EnvironmentKeyProvider, resetGlobalCryptoProvider, canonicalizeJSON } from '../crypto-provider';
+lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts:159:    const manifestHash = crypto.createHash('sha256').update(canonicalizeJSON(manifest)).digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts:306:      manifest_hash: crypto.createHash('sha256').update(canonicalizeJSON(manifest)).digest('hex'),
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:62:    const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:104:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:113:      const canonical = canonicalizeJSON(sinkPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:114:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:135:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:142:      const canonical = canonicalizeJSON(sinkPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:143:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:162:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:169:      const canonical = canonicalizeJSON(sinkPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:170:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:187:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:194:      const canonical = canonicalizeJSON(sinkPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:195:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:214:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:221:      const canonical = canonicalizeJSON(sinkPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:222:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:242:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:249:      const canonical = canonicalizeJSON(sinkPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:250:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:268:      const { canonicalizeJSON } = require('../crypto-provider');
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:276:      const canonical = canonicalizeJSON(originalPayload);
+lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:277:      const manifestHash = crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts:7:import { Ed25519Provider, EnvironmentKeyProvider, resetGlobalCryptoProvider, canonicalizeJSON } from '../crypto-provider';
+lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts:50:  const manifestHash = crypto.createHash('sha256').update(canonicalizeJSON(mockManifest)).digest('hex');
+lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:12:import { canonicalizeJSON } from '../crypto-provider';
+lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:49:      const canonical1 = canonicalizeJSON(article);
+lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:50:      const hash1 = crypto.createHash('sha256').update(canonical1, 'utf8').digest('hex');
+lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:52:      const canonical2 = canonicalizeJSON(article);
+lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:53:      const hash2 = crypto.createHash('sha256').update(canonical2, 'utf8').digest('hex');
+lib/neural-assembly/__tests__/fixtures/hiol-adversarial-corpus.ts:244:      canonicalTitle: 'Nova Retail keeps guidance after flat quarterly margin',
+lib/neural-assembly/__tests__/fixtures/hiol-golden-corpus.ts:115:      canonicalTitle: 'Market report: indexes close mixed while yields hold a narrow range',
+lib/neural-assembly/__tests__/fixtures/hiol-golden-corpus.ts:247:      canonicalTitle: 'Regulator extends consultation window for digital asset disclosures',
+lib/neural-assembly/__tests__/fixtures/hiol-golden-corpus.ts:487:      canonicalTitle: 'Aster Telecom keeps annual guidance after stable quarter',
+lib/neural-assembly/__tests__/fixtures/hiol-title-surface-divergence-corpus.ts:20:      canonicalTitle: 'Indexes close mixed as yields remain range-bound in late trade',
+lib/neural-assembly/__tests__/fixtures/hiol-title-surface-divergence-corpus.ts:54:      canonicalTitle: 'Commission opens consultation on cross-border payment disclosures',
+lib/neural-assembly/__tests__/fixtures/hiol-title-surface-divergence-corpus.ts:88:      canonicalTitle: 'Model lab releases audited update with expanded multilingual support',
+lib/neural-assembly/__tests__/fixtures/hiol-title-surface-divergence-corpus.ts:122:      canonicalTitle: 'Agency briefs on contained incident and ongoing monitoring measures',
+lib/neural-assembly/__tests__/fixtures/hiol-title-surface-divergence-corpus.ts:156:      canonicalTitle: 'Inflation eases while sector dispersion keeps policy outlook cautious',
+lib/neural-assembly/__tests__/fixtures/hiol-title-surface-divergence-corpus.ts:190:      canonicalTitle: 'Vertex maintains guidance after stable quarterly margin',
+lib/neural-assembly/__tests__/fixtures/hiol-validation-corpus-types.ts:58:  canonicalTitle?: string
+lib/neural-assembly/__tests__/headline-intelligence-corpus-foundation.test.ts:83:    headline: surfaces?.canonicalTitle || headline
+lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts:66:        inLanguage: language
+lib/seo/json-ld-v3-engine.ts:128:    inLanguage: article.language,
+lib/seo/json-ld-v3-engine.ts:172:    inLanguage: article.language,
+lib/seo/json-ld-v3-engine.ts:217:    inLanguage: article.language
+lib/seo/json-ld-v3-engine.ts:272:      inLanguage: article.language,
+lib/seo/knowledge-graph.ts:166:    'inLanguage': ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'ja', 'zh'],
+lib/seo/NewsArticleSchema.ts:116:      inLanguage: article.language
+lib/seo/NewsArticleSchema.ts:181:<link rel="canonical" href="${article.url}" />
+lib/seo/NewsArticleSchema.ts:341:    alternates: {
+lib/seo/NewsArticleSchema.ts:342:      canonical: article.url
+lib/sia-news/live-blog-manager.ts:49:  inLanguage: string
+lib/sia-news/live-blog-manager.ts:335:    inLanguage: article.language,
+lib/sia-news/performance-monitor.ts:54:  hreflang_check: 'Valid' | 'Missing' | 'Invalid'
+lib/sia-news/performance-monitor.ts:57:  canonical_url: string
+lib/sia-news/performance-monitor.ts:191:  // Check hreflang (multilingual support)
+lib/sia-news/performance-monitor.ts:192:  const hreflang_check: 'Valid' | 'Missing' | 'Invalid' = 'Valid' // Assume valid for now
+lib/sia-news/performance-monitor.ts:203:  // Generate canonical URL
+lib/sia-news/performance-monitor.ts:204:  const canonical_url = `https://siaintel.com/${article.language}/news/${generateSlug(article.headline)}`
+lib/sia-news/performance-monitor.ts:218:    hreflang_check,
+lib/sia-news/performance-monitor.ts:221:    canonical_url,
+lib/sia-news/structured-data-generator.ts:37:  inLanguage: string
+lib/sia-news/structured-data-generator.ts:70:  inLanguage: string
+lib/sia-news/structured-data-generator.ts:271: * Generate mainEntityOfPage with hreflang compliance
+lib/sia-news/structured-data-generator.ts:284:    inLanguage: article.language,
+lib/sia-news/structured-data-generator.ts:445:    inLanguage: article.language,
+lib/speedcell/global-discovery-engine.ts:31:    hreflangValidation: HreflangValidationResult
+lib/speedcell/global-discovery-engine.ts:104:    console.log(`   [ACTION 2] Validating hreflang reciprocal links...`)
+lib/speedcell/global-discovery-engine.ts:105:    const hreflangResult = await this.validateHreflang(config.articleId, config.languages, baseUrl)
+lib/speedcell/global-discovery-engine.ts:106:    if (!hreflangResult.validated) {
+lib/speedcell/global-discovery-engine.ts:107:      issues.push(`Hreflang validation failed: ${hreflangResult.issues.join(', ')}`)
+lib/speedcell/global-discovery-engine.ts:130:      hreflang: hreflangResult,
+lib/speedcell/global-discovery-engine.ts:147:        hreflangValidation: hreflangResult,
+lib/speedcell/global-discovery-engine.ts:202:   * ACTION 2: Validate hreflang reciprocal links
+lib/speedcell/global-discovery-engine.ts:213:    // For now, we assume the hreflang tags are correctly generated
+lib/speedcell/global-discovery-engine.ts:217:    console.log(`      ✓ Validated ${reciprocalLinks} reciprocal hreflang links`)
+lib/speedcell/global-discovery-engine.ts:329:    hreflang: HreflangValidationResult
+lib/speedcell/global-discovery-engine.ts:335:    const hreflangScore = results.hreflang.validated ? 10 : 5 // 0-10
+lib/speedcell/global-discovery-engine.ts:340:    const score = indexScore * 0.4 + hreflangScore * 0.2 + sitemapScore * 0.2 + pingScore * 0.2

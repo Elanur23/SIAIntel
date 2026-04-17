@@ -1,0 +1,41 @@
+# SOVEREIGN V14 - THE FACTORY
+# Autonomous Financial Intelligence & Video Production System
+
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# AI & Intelligence
+google-generativeai==0.3.2
+
+# RSS & News Aggregation
+feedparser==6.0.10
+
+# Voice Synthesis
+edge-tts==6.1.9
+
+# Video Composition
+moviepy==1.0.3
+pillow>=10.4.0
+
+# Financial Data
+yfinance>=0.2.50
+matplotlib>=3.10.0
+
+# Data Validation
+pydantic>=2.10.0
+
+# Scheduling
+apscheduler==3.10.4
+
+# Environment & Config
+python-dotenv==1.0.0
+
+# HTTP Client
+httpx==0.26.0
+
+# Database (SQLite is built-in to Python)
+# No additional package needed for sqlite3
+
+# Logging & Utilities
+python-multipart==0.0.6

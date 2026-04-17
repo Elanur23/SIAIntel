@@ -1,0 +1,3 @@
+ADJUDICATION=INCONCLUSIVE
+REASON=Run aborted before live harness execution due module resolution error (master-orchestrator not found), so required runtime markers were not reachable in the same run.
+RUN_COMPLETION_STATE=EARLY_ABORT_PRE_STEP1

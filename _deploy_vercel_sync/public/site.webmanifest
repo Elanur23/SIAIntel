@@ -1,0 +1,128 @@
+{
+  "name": "Professional News Portal - Breaking News & Analysis",
+  "short_name": "News Portal",
+  "description": "Your trusted source for breaking news, in-depth analysis, and real-time updates. Stay informed with the latest headlines from around the world.",
+  "start_url": "/?utm_source=pwa",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["news", "media", "information", "business", "technology"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Breaking News",
+      "short_name": "Breaking",
+      "description": "View breaking news and urgent updates",
+      "url": "/breaking?utm_source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/breaking-news.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Technology",
+      "short_name": "Tech",
+      "description": "Latest technology news and innovations",
+      "url": "/category/technology?utm_source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/technology.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Business",
+      "short_name": "Business",
+      "description": "Business news and market updates",
+      "url": "/category/business?utm_source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/business.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Politics",
+      "short_name": "Politics",
+      "description": "Political news and analysis",
+      "url": "/category/politics?utm_source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/politics.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Homepage view with latest news"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile view with breaking news"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+news",
+      "url": "/news?url=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

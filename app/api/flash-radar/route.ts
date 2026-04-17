@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { runFlashRadarScan, generateMockSignals, isRadarCoolingDown, getRadarCooldownMessage } from '@/lib/ai/flash-radar'
+import { runFlashRadarScan, generateMockSignals, isRadarCoolingDown, getRadarCooldownMessage } from '../../../lib/ai/flash-radar'
 
 const LIVE_CACHE_MS  = 5 * 60 * 1000  // 5 min when Groq responds
 const MOCK_CACHE_MS  = 2 * 60 * 1000  // 2 min for mock / cooldown data

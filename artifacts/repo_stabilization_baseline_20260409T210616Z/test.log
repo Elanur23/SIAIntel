@@ -1,0 +1,1469 @@
+
+> siaintel-terminal@1.0.0 test
+> jest
+
+PASS lib/neural-assembly/__tests__/headline-title-surface-resolver.test.ts (5.275 s)
+PASS lib/neural-assembly/__tests__/headline-intelligence-tuning-preparation-pack.test.ts (5.46 s)
+FAIL lib/sia-news/__tests__/transparency-display.test.ts (5.514 s)
+  ● Transparency Layer Display › should display verification URLs
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "🔗 Verify: https://glassnode.com"
+    Received string:    "SIA_SENTINEL Intelligence Platform·
+    Summary text·
+    SIA Insight text··
+    📊 Data Sources & Verification·
+    1. According to Glassnode data from Mar 1, 2024, Whale accumulation shows +34%
+    2. According to CryptoQuant data from Mar 1, 2024, Exchange inflows shows $2.3B
+    3. According to Glassnode data from Mar 1, 2024, Stablecoin inflows shows -18%·
+    📚 Technical Terms·
+    • Whale Wallet: Large holders of cryptocurrency who can influence market prices·
+    Verified by E-E-A-T protocols··
+    Risk disclaimer text"
+
+      180 |     )
+      181 |
+    > 182 |     expect(content).toContain('🔗 Verify: https://glassnode.com')
+          |                     ^
+      183 |     expect(content).toContain('🔗 Verify: https://cryptoquant.com')
+      184 |   })
+      185 |
+
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-display.test.ts:182:21)
+
+  ● Transparency Layer Display › should display transparency badge with metrics
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "✓ Transparency Score: 85/100"
+    Received string:    "SIA_SENTINEL Intelligence Platform·
+    Summary text·
+    SIA Insight text··
+    📊 Data Sources & Verification·
+    1. According to Glassnode data from Mar 1, 2024, Whale accumulation shows +34%
+    2. According to CryptoQuant data from Mar 1, 2024, Exchange inflows shows $2.3B
+    3. According to Glassnode data from Mar 1, 2024, Stablecoin inflows shows -18%·
+    📚 Technical Terms·
+    • Whale Wallet: Large holders of cryptocurrency who can influence market prices·
+    Verified by E-E-A-T protocols··
+    Risk disclaimer text"
+
+      194 |     )
+      195 |
+    > 196 |     expect(content).toContain('✓ Transparency Score: 85/100')
+          |                     ^
+      197 |     expect(content).toContain('Citation Density: 4.2 per 100 words')
+      198 |   })
+      199 |
+
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-display.test.ts:196:21)
+
+  ● Transparency Layer Display › should support multilingual transparency headers
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "📊 Datenquellen und Verifizierung"
+    Received string:    "SIA_SENTINEL Intelligence Platform·
+    Summary text·
+    SIA Insight text··
+    📊 Datenquellen & Verifizierung·
+    1. According to Glassnode data from Mar 1, 2024, Whale accumulation shows +34%
+    2. According to CryptoQuant data from Mar 1, 2024, Exchange inflows shows $2.3B
+    3. According to Glassnode data from Mar 1, 2024, Stablecoin inflows shows -18%·
+    📚 Technische Begriffe·
+    • Whale Wallet: Large holders of cryptocurrency who can influence market prices·
+    Verified by E-E-A-T protocols··
+    Risk disclaimer text"
+
+      220 |       )
+      221 |
+    > 222 |       expect(content).toContain(expectedHeaders[language])
+          |                       ^
+      223 |     })
+      224 |   })
+      225 |
+
+      at lib/sia-news/__tests__/transparency-display.test.ts:222:23
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-display.test.ts:212:15)
+
+PASS lib/neural-assembly/__tests__/headline-editor-review-payload.test.ts (5.456 s)
+PASS lib/neural-assembly/__tests__/headline-intelligence-calibration.test.ts (5.825 s)
+FAIL lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts'
+
+      17 |
+      18 | // Mock the config module to force ENFORCE mode
+    > 19 | jest.mock('../config', () => ({
+         |      ^
+      20 |   ...jest.requireActual('../config'),
+      21 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      22 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:19:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts'
+
+      11 |
+      12 | // Force ENFORCE mode
+    > 13 | jest.mock('../config', () => ({
+         |      ^
+      14 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      15 | }));
+      16 |
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts:13:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/terminal-sink-enforcer.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/terminal-sink-enforcer.ts
+      lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts
+
+      21 |   MasterIntelligenceCore
+      22 | } from '../core-types';
+    > 23 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      24 | import { getGlobalCryptoProvider, canonicalizeJSON } from './crypto-provider';
+      25 | import { logOperation } from '../observability';
+      26 | import {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:23:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts:3:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/provenance-binder.ts
+      lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/provenance-binder.ts:17:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts:9:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/pecl-enforcer-provenance.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/pecl-enforcer-provenance.test.ts'
+
+      13 |
+      14 | // Mock the config module to force ENFORCE mode
+    > 15 | jest.mock('../config', () => ({
+         |      ^
+      16 |   ...jest.requireActual('../config'),
+      17 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      18 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/pecl-enforcer-provenance.test.ts:15:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6.test.ts'
+
+      11 |
+      12 | // Mock the config module to force ENFORCE mode
+    > 13 | jest.mock('../config', () => ({
+         |      ^
+      14 |   ...jest.requireActual('../config'),
+      15 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      16 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6.test.ts:13:6)
+
+PASS lib/rbac/__tests__/privilege-escalation.test.ts (7.304 s)
+FAIL lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts'
+
+      10 |
+      11 | // Mock the config module to force ENFORCE mode
+    > 12 | jest.mock('../config', () => ({
+         |      ^
+      13 |   ...jest.requireActual('../config'),
+      14 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      15 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts:12:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts'
+
+      13 |
+      14 | // Force ENFORCE mode
+    > 15 | jest.mock('../config', () => ({
+         |      ^
+      16 |   PECL_DEPLOYMENT_MODE: 'ENFORCE',
+      17 |   DEFAULT_CONFIDENCE_CONFIG: {
+      18 |     min_confidence_approve_all: 85,
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts:15:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/operator-precheck.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/__tests__/operator-precheck.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/operator-precheck.test.ts:4:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:8:1)
+
+PASS lib/sia-news/__tests__/monitoring.test.ts (8.214 s)
+FAIL lib/neural-assembly/stabilization/__tests__/key-loading-posture.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/__tests__/key-loading-posture.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/key-loading-posture.test.ts:2:1)
+
+FAIL lib/sia-news/__tests__/transparency-integration.test.ts (8.478 s)
+  ● Transparency Layer Integration › should include transparency layers in generated content
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:117:21)
+
+  ● Transparency Layer Integration › should display verification URLs when available
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:145:21)
+
+  ● Transparency Layer Integration › should support multilingual transparency headers
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:168:23)
+
+  ● Transparency Layer Integration › should calculate citation density correctly
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:187:21)
+
+  ● Transparency Layer Integration › should include source breakdown by type
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:207:21)
+
+FAIL lib/ai/__tests__/groq-validation-quota-profile.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../groq-provider' from 'lib/ai/__tests__/groq-validation-quota-profile.test.ts'
+
+      21 |
+      22 | import * as quotaGuard from '../quota-guard'
+    > 23 | import { generateQuality } from '../groq-provider'
+         | ^
+      24 |
+      25 | describe('Groq strict validation quota profile remediation', () => {
+      26 |   const originalEnv = {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/ai/__tests__/groq-validation-quota-profile.test.ts:23:1)
+
+FAIL lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../master-orchestrator' from 'lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts'
+
+    > 1 | import { MasterOrchestrator } from '../master-orchestrator'
+        | ^
+      2 | import type { BatchJob, ChiefEditorDecision, Language, LanguageEdition, MasterIntelligenceCore } from '../core-types'
+      3 | import { getGlobalBlackboard, resetGlobalBlackboard } from '../blackboard-system'
+      4 | import * as chiefEditorModule from '../chief-editor-engine'
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts:1:1)
+
+FAIL lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../master-orchestrator' from 'lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts'
+
+      1 | import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals'
+    > 2 | import { MasterOrchestrator } from '../master-orchestrator'
+        | ^
+      3 | import type {
+      4 |   BatchJob,
+      5 |   ChiefEditorDecision,
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts:2:1)
+
+FAIL lib/ai/__tests__/groq-controlled-gemini-fallback.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../neural-assembly/gemini-central-provider' from 'lib/ai/__tests__/groq-controlled-gemini-fallback.test.ts'
+
+      32 | }))
+      33 |
+    > 34 | jest.mock('../../neural-assembly/gemini-central-provider', () => ({
+         |      ^
+      35 |   callGeminiCentral: mockCallGeminiCentral
+      36 | }))
+      37 |
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/ai/__tests__/groq-controlled-gemini-fallback.test.ts:34:6)
+
+PASS lib/sia-news/__tests__/generate-route-boundary.test.ts (9.808 s)
+FAIL lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts'
+
+      10 |
+      11 | // Force ENFORCE mode for testing
+    > 12 | jest.mock('../config', () => ({
+         |      ^
+      13 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      14 | }));
+      15 |
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts:12:6)
+
+PASS lib/neural-assembly/__tests__/headline-intelligence-corpus-foundation.test.ts (9.993 s)
+PASS lib/sia-news/__tests__/entity-mapping.test.ts (9.701 s)
+FAIL lib/sia-news/__tests__/e2e-integration.test.ts (11.273 s)
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should process full pipeline from raw event to published article
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "BTC"
+    Received: "UNKNOWN"
+
+      66 |       expect(normalizedEvent.isValid).toBe(true)
+      67 |       expect(normalizedEvent.isDuplicate).toBe(false)
+    > 68 |       expect(normalizedEvent.asset).toBe('BTC')
+         |                                     ^
+      69 |
+      70 |       // Step 2: Verify source
+      71 |       const verifiedData = await verifySource(normalizedEvent)
+
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:68:37)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should generate all 6 languages correctly
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:181:25)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should validate multi-agent consensus mechanism
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:233:23)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should test autonomous publication flow
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:292:23)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should verify webhook notifications
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:350:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete processing in < 8 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:407:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete validation in < 3 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:437:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete publishing in < 2 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:471:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete total pipeline in < 15 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:514:23)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should verify E-E-A-T score ≥ 75/100 for all generated content
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:563:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should check originality score ≥ 70/100
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:596:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should validate AdSense compliance 100%
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:629:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should test technical depth scoring
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:681:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should validate all quality metrics together
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:729:25)
+
+/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:201
+                        throw new Error('Test failure');
+                              ^
+
+Error: Test failure
+    at /workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:236:19
+    at CircuitBreaker.execute (/workspaces/SIAIntel/lib/sia-news/circuit-breaker.ts:135:28)
+    at Object.<anonymous> (/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:235:19)
+    at Promise.then.completed (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:316:40)
+    at _runTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at run (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/workspaces/SIAIntel/node_modules/jest-runner/build/testWorker.js:106:12)
+
+Node.js v24.14.0
+FAIL lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../database' from 'lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts'
+
+       8 |
+       9 | import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+    > 10 | import { getGlobalDatabase, resetGlobalDatabase } from '../../database';
+         | ^
+      11 | import { recordEmergencyBypass, type EmergencyBypassContext } from '../sink-verifier';
+      12 | import { canonicalizeJSON } from '../crypto-provider';
+      13 | import crypto from 'crypto';
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:10:1)
+
+/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:201
+                        throw new Error('Test failure');
+                              ^
+
+Error: Test failure
+    at /workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:236:19
+    at CircuitBreaker.execute (/workspaces/SIAIntel/lib/sia-news/circuit-breaker.ts:135:28)
+    at Object.<anonymous> (/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:235:19)
+    at Promise.then.completed (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:316:40)
+    at _runTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at run (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/workspaces/SIAIntel/node_modules/jest-runner/build/testWorker.js:106:12)
+
+Node.js v24.14.0
+PASS lib/sia-news/__tests__/retry-strategies.test.ts (29.106 s)
+/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:201
+                        throw new Error('Test failure');
+                              ^
+
+Error: Test failure
+    at /workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:236:19
+    at CircuitBreaker.execute (/workspaces/SIAIntel/lib/sia-news/circuit-breaker.ts:135:28)
+    at Object.<anonymous> (/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:235:19)
+    at Promise.then.completed (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:316:40)
+    at _runTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at run (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/workspaces/SIAIntel/node_modules/jest-runner/build/testWorker.js:106:12)
+
+Node.js v24.14.0
+/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:201
+                        throw new Error('Test failure');
+                              ^
+
+Error: Test failure
+    at /workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:236:19
+    at CircuitBreaker.execute (/workspaces/SIAIntel/lib/sia-news/circuit-breaker.ts:135:28)
+    at Object.<anonymous> (/workspaces/SIAIntel/lib/sia-news/__tests__/circuit-breaker.test.ts:235:19)
+    at Promise.then.completed (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (/workspaces/SIAIntel/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:316:40)
+    at _runTest (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at _runTestsForDescribeBlock (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:121:9)
+    at run (/workspaces/SIAIntel/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/workspaces/SIAIntel/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/workspaces/SIAIntel/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/workspaces/SIAIntel/node_modules/jest-runner/build/testWorker.js:106:12)
+
+Node.js v24.14.0
+FAIL lib/sia-news/__tests__/circuit-breaker.test.ts
+  ● Test suite failed to run
+
+    Jest worker encountered 4 child process exceptions, exceeding retry limit
+
+      at ChildProcessWorker.initialize (node_modules/jest-worker/build/workers/ChildProcessWorker.js:181:21)
+
+Summary of all failing tests
+FAIL lib/sia-news/__tests__/transparency-display.test.ts (5.514 s)
+  ● Transparency Layer Display › should display verification URLs
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "�� Verify: https://glassnode.com"
+    Received string:    "SIA_SENTINEL Intelligence Platform·
+    Summary text·
+    SIA Insight text··
+    �� Data Sources & Verification·
+    1. According to Glassnode data from Mar 1, 2024, Whale accumulation shows +34%
+    2. According to CryptoQuant data from Mar 1, 2024, Exchange inflows shows $2.3B
+    3. According to Glassnode data from Mar 1, 2024, Stablecoin inflows shows -18%·
+    �� Technical Terms·
+    • Whale Wallet: Large holders of cryptocurrency who can influence market prices·
+    Verified by E-E-A-T protocols··
+    Risk disclaimer text"
+
+      180 |     )
+      181 |
+    > 182 |     expect(content).toContain('�� Verify: https://glassnode.com')
+          |                     ^
+      183 |     expect(content).toContain('�� Verify: https://cryptoquant.com')
+      184 |   })
+      185 |
+
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-display.test.ts:182:21)
+
+  ● Transparency Layer Display › should display transparency badge with metrics
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "✓ Transparency Score: 85/100"
+    Received string:    "SIA_SENTINEL Intelligence Platform·
+    Summary text·
+    SIA Insight text··
+    �� Data Sources & Verification·
+    1. According to Glassnode data from Mar 1, 2024, Whale accumulation shows +34%
+    2. According to CryptoQuant data from Mar 1, 2024, Exchange inflows shows $2.3B
+    3. According to Glassnode data from Mar 1, 2024, Stablecoin inflows shows -18%·
+    �� Technical Terms·
+    • Whale Wallet: Large holders of cryptocurrency who can influence market prices·
+    Verified by E-E-A-T protocols··
+    Risk disclaimer text"
+
+      194 |     )
+      195 |
+    > 196 |     expect(content).toContain('✓ Transparency Score: 85/100')
+          |                     ^
+      197 |     expect(content).toContain('Citation Density: 4.2 per 100 words')
+      198 |   })
+      199 |
+
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-display.test.ts:196:21)
+
+  ● Transparency Layer Display › should support multilingual transparency headers
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "�� Datenquellen und Verifizierung"
+    Received string:    "SIA_SENTINEL Intelligence Platform·
+    Summary text·
+    SIA Insight text··
+    �� Datenquellen & Verifizierung·
+    1. According to Glassnode data from Mar 1, 2024, Whale accumulation shows +34%
+    2. According to CryptoQuant data from Mar 1, 2024, Exchange inflows shows $2.3B
+    3. According to Glassnode data from Mar 1, 2024, Stablecoin inflows shows -18%·
+    �� Technische Begriffe·
+    • Whale Wallet: Large holders of cryptocurrency who can influence market prices·
+    Verified by E-E-A-T protocols··
+    Risk disclaimer text"
+
+      220 |       )
+      221 |
+    > 222 |       expect(content).toContain(expectedHeaders[language])
+          |                       ^
+      223 |     })
+      224 |   })
+      225 |
+
+      at lib/sia-news/__tests__/transparency-display.test.ts:222:23
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-display.test.ts:212:15)
+
+FAIL lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts'
+
+      17 |
+      18 | // Mock the config module to force ENFORCE mode
+    > 19 | jest.mock('../config', () => ({
+         |      ^
+      20 |   ...jest.requireActual('../config'),
+      21 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      22 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/sink-verifier.test.ts:19:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts'
+
+      11 |
+      12 | // Force ENFORCE mode
+    > 13 | jest.mock('../config', () => ({
+         |      ^
+      14 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      15 | }));
+      16 |
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/sink-reference-escape.test.ts:13:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/terminal-sink-enforcer.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/terminal-sink-enforcer.ts
+      lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts
+
+      21 |   MasterIntelligenceCore
+      22 | } from '../core-types';
+    > 23 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      24 | import { getGlobalCryptoProvider, canonicalizeJSON } from './crypto-provider';
+      25 | import { logOperation } from '../observability';
+      26 | import {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/terminal-sink-enforcer.ts:23:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/recovery-signature-verification.test.ts:3:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/provenance-binder.ts
+      lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/provenance-binder.ts:17:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/provenance-binder.test.ts:9:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/pecl-enforcer-provenance.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/pecl-enforcer-provenance.test.ts'
+
+      13 |
+      14 | // Mock the config module to force ENFORCE mode
+    > 15 | jest.mock('../config', () => ({
+         |      ^
+      16 |   ...jest.requireActual('../config'),
+      17 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      18 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/pecl-enforcer-provenance.test.ts:15:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6.test.ts'
+
+      11 |
+      12 | // Mock the config module to force ENFORCE mode
+    > 13 | jest.mock('../config', () => ({
+         |      ^
+      14 |   ...jest.requireActual('../config'),
+      15 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      16 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6.test.ts:13:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts'
+
+      10 |
+      11 | // Mock the config module to force ENFORCE mode
+    > 12 | jest.mock('../config', () => ({
+         |      ^
+      13 |   ...jest.requireActual('../config'),
+      14 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      15 | }));
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/pecl-enforcer-l6-blk-004.test.ts:12:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts'
+
+      13 |
+      14 | // Force ENFORCE mode
+    > 15 | jest.mock('../config', () => ({
+         |      ^
+      16 |   PECL_DEPLOYMENT_MODE: 'ENFORCE',
+      17 |   DEFAULT_CONFIDENCE_CONFIG: {
+      18 |     min_confidence_approve_all: 85,
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/decision-dna-provenance.test.ts:15:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/operator-precheck.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/__tests__/operator-precheck.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/operator-precheck.test.ts:4:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/crypto-provider.test.ts:8:1)
+
+FAIL lib/neural-assembly/stabilization/__tests__/key-loading-posture.test.ts
+  ● Test suite failed to run
+
+    Cannot find module './config' from 'lib/neural-assembly/stabilization/crypto-provider.ts'
+
+    Require stack:
+      lib/neural-assembly/stabilization/crypto-provider.ts
+      lib/neural-assembly/stabilization/__tests__/key-loading-posture.test.ts
+
+      14 |
+      15 | import crypto from 'crypto';
+    > 16 | import { PECL_DEPLOYMENT_MODE } from './config';
+         | ^
+      17 | import { logOperation } from '../observability';
+      18 |
+      19 | export interface Ed25519KeyPair {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/crypto-provider.ts:16:1)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/key-loading-posture.test.ts:2:1)
+
+FAIL lib/sia-news/__tests__/transparency-integration.test.ts (8.478 s)
+  ● Transparency Layer Integration › should include transparency layers in generated content
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:117:21)
+
+  ● Transparency Layer Integration › should display verification URLs when available
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:145:21)
+
+  ● Transparency Layer Integration › should support multilingual transparency headers
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:168:23)
+
+  ● Transparency Layer Integration › should calculate citation density correctly
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:187:21)
+
+  ● Transparency Layer Integration › should include source breakdown by type
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 300 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/transparency-integration.test.ts:207:21)
+
+FAIL lib/ai/__tests__/groq-validation-quota-profile.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../groq-provider' from 'lib/ai/__tests__/groq-validation-quota-profile.test.ts'
+
+      21 |
+      22 | import * as quotaGuard from '../quota-guard'
+    > 23 | import { generateQuality } from '../groq-provider'
+         | ^
+      24 |
+      25 | describe('Groq strict validation quota profile remediation', () => {
+      26 |   const originalEnv = {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/ai/__tests__/groq-validation-quota-profile.test.ts:23:1)
+
+FAIL lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../master-orchestrator' from 'lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts'
+
+    > 1 | import { MasterOrchestrator } from '../master-orchestrator'
+        | ^
+      2 | import type { BatchJob, ChiefEditorDecision, Language, LanguageEdition, MasterIntelligenceCore } from '../core-types'
+      3 | import { getGlobalBlackboard, resetGlobalBlackboard } from '../blackboard-system'
+      4 | import * as chiefEditorModule from '../chief-editor-engine'
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts:1:1)
+
+FAIL lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../master-orchestrator' from 'lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts'
+
+      1 | import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals'
+    > 2 | import { MasterOrchestrator } from '../master-orchestrator'
+        | ^
+      3 | import type {
+      4 |   BatchJob,
+      5 |   ChiefEditorDecision,
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts:2:1)
+
+FAIL lib/ai/__tests__/groq-controlled-gemini-fallback.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../neural-assembly/gemini-central-provider' from 'lib/ai/__tests__/groq-controlled-gemini-fallback.test.ts'
+
+      32 | }))
+      33 |
+    > 34 | jest.mock('../../neural-assembly/gemini-central-provider', () => ({
+         |      ^
+      35 |   callGeminiCentral: mockCallGeminiCentral
+      36 | }))
+      37 |
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/ai/__tests__/groq-controlled-gemini-fallback.test.ts:34:6)
+
+FAIL lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../config' from 'lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts'
+
+      10 |
+      11 | // Force ENFORCE mode for testing
+    > 12 | jest.mock('../config', () => ({
+         |      ^
+      13 |   PECL_DEPLOYMENT_MODE: 'ENFORCE'
+      14 | }));
+      15 |
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/terminal-sink-enforcer.test.ts:12:6)
+
+FAIL lib/sia-news/__tests__/e2e-integration.test.ts (11.273 s)
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should process full pipeline from raw event to published article
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "BTC"
+    Received: "UNKNOWN"
+
+      66 |       expect(normalizedEvent.isValid).toBe(true)
+      67 |       expect(normalizedEvent.isDuplicate).toBe(false)
+    > 68 |       expect(normalizedEvent.asset).toBe('BTC')
+         |                                     ^
+      69 |
+      70 |       // Step 2: Verify source
+      71 |       const verifiedData = await verifySource(normalizedEvent)
+
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:68:37)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should generate all 6 languages correctly
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:181:25)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should validate multi-agent consensus mechanism
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:233:23)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should test autonomous publication flow
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:292:23)
+
+  ● SIA News E2E Integration Tests › Task 25.1: Complete Pipeline Test › should verify webhook notifications
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:350:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete processing in < 8 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:407:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete validation in < 3 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:437:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete publishing in < 2 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:471:23)
+
+  ● SIA News E2E Integration Tests › Task 25.2: Performance Validation › should complete total pipeline in < 15 seconds
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:514:23)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should verify E-E-A-T score ≥ 75/100 for all generated content
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:563:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should check originality score ≥ 70/100
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:596:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should validate AdSense compliance 100%
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:629:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should test technical depth scoring
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:681:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should validate all quality metrics together
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:729:25)
+
+FAIL lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../database' from 'lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts'
+
+       8 |
+       9 | import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+    > 10 | import { getGlobalDatabase, resetGlobalDatabase } from '../../database';
+         | ^
+      11 | import { recordEmergencyBypass, type EmergencyBypassContext } from '../sink-verifier';
+      12 | import { canonicalizeJSON } from '../crypto-provider';
+      13 | import crypto from 'crypto';
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:10:1)
+
+FAIL lib/sia-news/__tests__/circuit-breaker.test.ts
+  ● Test suite failed to run
+
+    Jest worker encountered 4 child process exceptions, exceeding retry limit
+
+      at ChildProcessWorker.initialize (node_modules/jest-worker/build/workers/ChildProcessWorker.js:181:21)
+
+
+Test Suites: 21 failed, 10 passed, 31 total
+Tests:       22 failed, 143 passed, 165 total
+Snapshots:   0 total
+Time:        54.436 s
+Ran all test suites.

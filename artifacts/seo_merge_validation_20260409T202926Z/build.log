@@ -1,0 +1,43 @@
+
+> siaintel-terminal@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for client (static)...
+ ○ (pwa) Service worker: /workspaces/SIAIntel/public/sw.js
+ ○ (pwa)   URL: /sw.js
+ ○ (pwa)   Scope: /
+Failed to compile.
+
+./app/api/admin/csrf-token/route.ts
+Module not found: Can't resolve '@/lib/security/csrf-middleware'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/analytics/article-metrics/route.ts
+Module not found: Can't resolve '@/lib/signals/google-analytics-service'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/contact/route.ts
+Module not found: Can't resolve '@/lib/security/csrf-middleware'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/contact/route.ts
+Module not found: Can't resolve '@/lib/security/rate-limiter'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/distribution/execute/route.ts
+Module not found: Can't resolve '@/lib/distribution/distribution-engine'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors

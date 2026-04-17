@@ -1,0 +1,22 @@
+node:internal/modules/cjs/loader:1456
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '../lib/neural-assembly/master-orchestrator'
+Require stack:
+- /workspaces/SIAIntel/scripts/execute-batch-07-live.ts
+    at node:internal/modules/cjs/loader:1456:15
+    at nextResolveSimple (/workspaces/SIAIntel/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /workspaces/SIAIntel/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /workspaces/SIAIntel/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/workspaces/SIAIntel/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /workspaces/SIAIntel/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///workspaces/SIAIntel/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1242:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/workspaces/SIAIntel/scripts/execute-batch-07-live.ts' ]
+}
+
+Node.js v24.14.0

@@ -1,0 +1,121 @@
+
+> siaintel-terminal@1.0.0 lint
+> next lint
+
+
+./app/[lang]/admin/google-test/page.tsx
+229:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/[lang]/admin/sync/page.tsx
+199:6  Warning: React Hook useEffect has a missing dependency: 'scanWorkspace'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+313:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/[lang]/admin/warroom/page.tsx
+215:36  Warning: React Hook useEffect has a missing dependency: 'loadFeed'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/[lang]/news/page.tsx
+233:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/admin/featured-articles/page.tsx
+34:6  Warning: React Hook useEffect has a missing dependency: 'loadArticles'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+230:41  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/AdBanner.tsx
+90:6  Warning: React Hook useEffect has missing dependencies: 'isLoaded' and 'loadAd'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/CategorySection.tsx
+81:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/ClientPageWrapper.tsx
+278:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+278:21  Warning: img elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./components/EditorInsightBox.tsx
+115:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/FeaturedStories.tsx
+96:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+186:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/LatestIntelligenceReports.tsx
+15:6  Warning: React Hook useEffect has a missing dependency: 'fetchReports'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/LiveBlogBadge.tsx
+35:6  Warning: React Hook useEffect has a missing dependency: 'checkLiveStatus'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/LiveBlogUpdates.tsx
+55:6  Warning: React Hook useEffect has a missing dependency: 'loadUpdates'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+189:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/LiveDecisionMetrics.tsx
+118:6  Warning: React Hook useMemo has an unnecessary dependency: 'currentLang'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/RelatedIntelligenceNodes.tsx
+108:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/SEOMetadataPreview.tsx
+106:11  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./components/SiaAdUnit.tsx
+120:6  Warning: React Hook useEffect has a missing dependency: 'adConfig.id'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/SiaAudioPlayer.tsx
+33:6  Warning: React Hook useEffect has a missing dependency: 'loadAudio'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/SiaRadarVisual.tsx
+109:77  Warning: The ref value 'animationFrameRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'animationFrameRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+
+./components/TechnicalChart.tsx
+187:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/ArticlesAdminPage.tsx
+95:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/top-stories-grid.tsx
+128:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./lib/compliance/ban-shield.ts
+285:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/content/content-buffer-system.ts
+616:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/editorial/ghost-editor-system.ts
+363:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/featured/featured-articles-db.ts
+100:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/hooks/useArticleGA4Metrics.ts
+97:6  Warning: React Hook useEffect has a missing dependency: 'fetchMetrics'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+166:6  Warning: React Hook useEffect has missing dependencies: 'articleUrls.length' and 'fetchBatchMetrics'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+166:7  Warning: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+
+./lib/hooks/useLiveIntel.ts
+225:6  Warning: React Hook useEffect has a missing dependency: 'fetchLivePrices'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/hooks/useLiveIntelStream.ts
+422:6  Warning: React Hook useEffect has a missing dependency: 'fetchLiveAlpha'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/hooks/useNeuralAudit.ts
+177:6  Warning: React Hook useEffect has missing dependencies: 'onHealingComplete' and 'startAutonomousHealing'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/infrastructure/database-connection-pool.ts
+501:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/infrastructure/edge-cache-strategy.ts
+396:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/seo/auto-silo-linking.ts
+536:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/seo/instant-indexing-push.ts
+424:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/seo/json-ld-v3-engine.ts
+480:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/utils/seo-keywords.ts
+294:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

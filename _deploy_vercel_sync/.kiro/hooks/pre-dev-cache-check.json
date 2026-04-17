@@ -1,0 +1,12 @@
+{
+  "name": "Pre-Dev Cache Check",
+  "version": "1.0.0",
+  "description": "Checks and cleans cache before starting dev server to prevent Tailwind CSS issues",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if .next folder exists and is older than 1 hour. If yes, suggest running scripts/clean-cache.bat before starting dev server. This prevents Tailwind CSS caching issues."
+  }
+}

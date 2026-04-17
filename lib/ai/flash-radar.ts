@@ -9,7 +9,7 @@
  * Calling convention: runFlashRadarScan() returns FlashSignal[].
  */
 
-import { withQuotaGuard, isCoolingDown, getCooldownMessage } from '@/lib/ai/quota-guard'
+import { withQuotaGuard, isCoolingDown, getCooldownMessage } from './quota-guard'
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
 

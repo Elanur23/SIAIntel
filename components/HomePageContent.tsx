@@ -27,12 +27,14 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
   useEffect(() => {
     async function fetchArticles() {
       try {
-        const response = await fetch('/api/articles?status=published')
+        const url = '/api/news'
+        const response = await fetch(url)
         if (!response.ok) {
           throw new Error('Failed to fetch articles')
         }
-        const data = await response.json()
-        setArticles(data || [])
+        const result = await response.json()
+        const fetchedArticles = result.success && Array.isArray(result.data) ? result.data : []
+        setArticles(fetchedArticles)
       } catch (err) {
         console.error('Error fetching articles:', err)
         setError(err instanceof Error ? err.message : 'Unknown error')

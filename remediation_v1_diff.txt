@@ -1,0 +1,517 @@
+diff --git a/lib/neural-assembly/core-types.ts b/lib/neural-assembly/core-types.ts
+index aab98b4..a46dff3 100644
+--- a/lib/neural-assembly/core-types.ts
++++ b/lib/neural-assembly/core-types.ts
+@@ -1,8 +1,311 @@
+ import { Language } from '../search/types'
+ import { CellType } from './field-dependency-engine'
+ import { ConfidenceBand } from './stabilization/types'
++import { MultilingualHeadlineResult } from '../sia-news/failure-engine/multilingual-headline-integrity'
++import type { NarrativeResult } from '../sia-news/failure-engine/types'
++import { PECLMode } from './stabilization/types'
+ 
+-export { Language }
++export type { Language }
++
++/**
++ * PECL CANONICAL DECISION VOCABULARY
++ */
++export type PECLDecisionStatus =
++  | 'PUBLISH_APPROVED'
++  | 'REMEDIATION_REQUIRED'
++  | 'ESCALATION_REQUIRED'
++  | 'TERMINAL_BLOCK';
++
++export type PECLGateDecision = 'PASS' | 'CORRECTION' | 'REVIEW' | 'BLOCK';
++
++export type TruthClassification = 'SUPPORTED' | 'DISPUTED' | 'UNVERIFIABLE' | 'PROVENANCE_MISSING';
++
++export type TrustGateVerdict = 'TRUST_PASS' | 'TRUST_CORRECTION' | 'TRUST_REVIEW' | 'TRUST_BLOCK';
++
++export type SurfaceGateVerdict = 'SURFACE_PASS' | 'SURFACE_CORRECTION' | 'SURFACE_REVIEW' | 'SURFACE_BLOCK';
++
++export type MultilingualIntegrityVerdict =
++  | 'MULTILINGUAL_PASS'
++  | 'MULTILINGUAL_CORRECTION'
++  | 'MULTILINGUAL_REVIEW'
++  | 'MULTILINGUAL_BLOCK';
++
++export type RemediationRecommendedAction =
++  | 'CORRECTION_REQUIRED'
++  | 'HUMAN_REVIEW'
++  | 'ABANDON'
++  | 'RETRY_LATER';
++
++export type RemediationConfidence = 'LOW' | 'MEDIUM' | 'HIGH';
++
++export type RemediationCategory =
++  | 'LOW_RISK_SURFACE_PACKAGING'
++  | 'LOW_RISK_MULTILINGUAL_SURFACE_DRIFT'
++  | 'HIGH_RISK_TRUTH_OR_TRUST'
++  | 'HIGH_RISK_CLAIM_OR_EVIDENCE'
++  | 'STRUCTURAL_PROVIDER_FAILURE'
++  | 'UNCLASSIFIED_HIGH_RISK';
++
++export interface RemediationClassificationResult {
++  remediation_present: boolean;
++  remediable: boolean;
++  category: RemediationCategory;
++  reason_code: string;
++  recommended_action: RemediationRecommendedAction;
++  confidence: RemediationConfidence;
++  fail_closed: boolean;
++  source_gate_ids: string[];
++  source_reason_codes: string[];
++  source_languages: Language[];
++}
++
++export interface TrustGateResult {
++  gate_decision: PECLGateDecision;
++  trust_verdict: TrustGateVerdict;
++  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
++  reason_codes: string[];
++  reasoning: string;
++  fail_closed: boolean;
++  contributing_signals: {
++    narrative_gate: PECLGateDecision | 'MISSING';
++    evidence_gate: PECLGateDecision | 'MISSING';
++    truth_gate: PECLGateDecision | 'MISSING';
++    claim_compliance_gate: PECLGateDecision | 'MISSING';
++  };
++}
++
++export interface SurfaceGateResult {
++  gate_decision: PECLGateDecision;
++  surface_verdict: SurfaceGateVerdict;
++  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
++  reason_codes: string[];
++  reasoning: string;
++  base_language: Language | 'unknown';
++  fail_closed: boolean;
++  contributing_surface_fields: {
++    title_present: boolean;
++    lead_present: boolean;
++    summary_present: boolean;
++    trusted_term_overlap_ratio: number;
++  };
++  trust_binding: {
++    trust_verdict: TrustGateResult['trust_verdict'] | 'MISSING';
++    truth_outcome: TruthGateResult['critical_truth_outcome'] | 'MISSING';
++    claim_gate: PECLGateDecision | 'MISSING';
++  };
++}
++
++export interface MultilingualIntegrityResult {
++  gate_decision: PECLGateDecision;
++  multilingual_verdict: MultilingualIntegrityVerdict;
++  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
++  source_language: Language;
++  target_language: Language;
++  reason_codes: string[];
++  reasoning: string;
++  fail_closed: boolean;
++  checked_surfaces: {
++    headline_checked: boolean;
++    summary_checked: boolean;
++  };
++  trust_binding: {
++    trust_verdict: TrustGateResult['trust_verdict'] | 'MISSING';
++    source_surface_verdict: SurfaceGateResult['surface_verdict'] | 'MISSING';
++    truth_outcome: TruthGateResult['critical_truth_outcome'] | 'MISSING';
++  };
++}
++
++export interface TruthGateResult {
++  gate_decision: PECLGateDecision;
++  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
++  critical_truth_outcome: TruthClassification;
++  reason_codes: string[];
++  reasoning: string;
++  truth_markers: {
++    total_critical_claims: number;
++    supported_claims: number;
++    disputed_claims: number;
++    unverifiable_claims: number;
++    unsupported_claims: number;
++    provenance_missing_claims: number;
++  };
++  provenance_binding: {
++    claim_graph_digest_prefix: string;
++    evidence_ledger_digest_prefix: string;
++    bound_to_provenance: boolean;
++  };
++}
++
++export interface ClaimAwareComplianceResult {
++  gate_decision: PECLGateDecision;
++  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
++  reason_codes: string[];
++  reasoning: string;
++  claim_metrics: {
++    total_claims: number;
++    verified_claims: number;
++    unverified_claims: number;
++    disputed_claims: number;
++    unsupported_claims: number;
++  };
++  provenance: {
++    claim_graph_digest_prefix: string;
++    evidence_ledger_digest_prefix: string;
++    missing_claim_provenance: boolean;
++  };
++  compliance_surface: {
++    policy_risk: number;
++    legal_risk: number;
++    brand_safety_risk: number;
++  };
++}
++
++/**
++ * PECS SOVEREIGN CONTRACTS (V7.0)
++ */
++
++export interface LockedContentPackage {
++  payload_id: string;
++  manifest_id: string;
++  manifest_version: string;
++  timestamp: string;
++  base_language: string;
++  expected_languages: string[];
++  content: {
++    headlines: Record<string, string>;
++    slugs: Record<string, string>;
++    leads: Record<string, string>;
++    bodies: Record<string, string>;
++    summaries: Record<string, string>;
++  };
++  intelligence: {
++    claim_graph_hash: string;
++    evidence_ledger_ref: string;
++    trust_score_upstream: number;
++  };
++  metadata: {
++    topic_sensitivity: "STANDARD" | "HIGH" | "CRITICAL";
++    category: string;
++    urgency: "STANDARD" | "BREAKING";
++  };
++}
++
++export interface StructuredRemediationPayload {
++  remediation_id: string;
++  source_gate: string;
++  instructions: Array<{
++    target_node: string;
++    violation_type: string;
++    current_value: string;
++    expected_constraint: string;
++    operation: "REGENERATE" | "MODIFY" | "DELETE";
++  }>;
++  retry_policy: {
++    retry_count: number;
++    max_retry_loops: number;
++    loop_guard_key: string;
++  };
++}
++
++export interface SovereignGateResult {
++  gate_id: string;
++  gate_version: string;
++  manifest_hash: string;
++  trace_id: string;
++  decision: PECLGateDecision;
++  severity: string;
++  confidence_score: number;
++  risk_reasons: string[];
++  reasoning: string;
++  affected_languages: string[];
++  mitigation_instructions: StructuredRemediationPayload | null;
++  reason_codes?: string[];
++  claim_metrics?: ClaimAwareComplianceResult['claim_metrics'];
++  provenance_metrics?: ClaimAwareComplianceResult['provenance'];
++  compliance_surface?: ClaimAwareComplianceResult['compliance_surface'];
++  truth_classification?: TruthGateResult['critical_truth_outcome'];
++  truth_markers?: TruthGateResult['truth_markers'];
++  truth_provenance_binding?: TruthGateResult['provenance_binding'];
++  trust_verdict?: TrustGateResult['trust_verdict'];
++  trust_fail_closed?: TrustGateResult['fail_closed'];
++  trust_contributing_signals?: TrustGateResult['contributing_signals'];
++  surface_verdict?: SurfaceGateResult['surface_verdict'];
++  surface_fail_closed?: SurfaceGateResult['fail_closed'];
++  surface_base_language?: SurfaceGateResult['base_language'];
++  surface_fields?: SurfaceGateResult['contributing_surface_fields'];
++  surface_trust_binding?: SurfaceGateResult['trust_binding'];
++  multilingual_verdict?: MultilingualIntegrityResult['multilingual_verdict'];
++  multilingual_source_language?: MultilingualIntegrityResult['source_language'];
++  multilingual_target_language?: MultilingualIntegrityResult['target_language'];
++  multilingual_fail_closed?: MultilingualIntegrityResult['fail_closed'];
++  multilingual_checked_surfaces?: MultilingualIntegrityResult['checked_surfaces'];
++  multilingual_trust_binding?: MultilingualIntegrityResult['trust_binding'];
++  execution_telemetry: {
++    status_code: number;
++    latency_ms: number;
++    started_at: string;
++    completed_at: string;
++  };
++}
++
++export interface PECLDecision {
++  final_decision: PECLDecisionStatus;
++  final_severity: string;
++  publish_authorization_state: boolean;
++  token_issuance_eligible: boolean;
++  veto_source_gate: string | null;
++  authorized_languages: string[];
++  quarantined_languages: string[];
++  trace_id: string;
++  manifest_hash: string;
++  p2p_token?: string; // Signed JWS attached to decision
++  issued_at: string;
++  mode: PECLMode;
++}
++
++/**
++ * PECL Authorization Envelope
++ * Bound to manifest and time-scoped.
++ */
++export interface PECLAuthorizationEnvelope {
++  version: string;
++  manifest_hash: string;
++  payload_id: string;
++  authorized_languages: string[];
++  expires_at: number;
++  issued_at: number;
++  signature_placeholder?: string; // To be replaced by real KMS signature
++}
++
++export interface DecisionDNA {
++  audit_id: string;
++  payload_id: string;
++  p2p_token: string; // Mandatory PECL Authorization Token
++  manifest_hash: string;
++  trace_id: string;
++  contract_version: string;
++  gate_results: SovereignGateResult[];
++  final_decision: PECLDecision;
++  remediation_history_count: number;
++  override_metadata: any | null;
++}
++
++export interface P2PTokenClaims {
++  jti: string;
++  sub: string; // manifest_hash
++  iss: string;
++  iat: number;
++  nbf: number;
++  exp: number;
++  trace_id: string;
++  payload_id: string;
++  scope: {
++    languages: string[];
++    targets: string[];
++  };
++  decision_digest: string;
++  kid: string;
++}
+ 
+ export type BatchStatus =
+   | 'PENDING'
+@@ -16,18 +319,22 @@ export type BatchStatus =
+   | 'TERMINAL_BLOCK'
+   | 'PARTIAL_PUBLISHED'
+   | 'FULLY_PUBLISHED'
++  | 'DELIVERY_FAILED'
++  | 'CORRECTION_REQUIRED'
+   // Optional human review state
+   | 'FAILED'
+   | 'MANUAL_REVIEW'
+   | 'HUMAN_REVIEW_FALLBACK'
+   | 'AUDITING'
+   | 'HEALING'
++  | 'ABANDONED'
+ 
+ export type EditionStatus =
+   | 'PENDING'
+   | 'GENERATING'
+   | 'AUDITING'
+   | 'HEALING'
++  | 'ABANDONED'
+   | 'APPROVED'
+   | 'REJECTED'
+   | 'STALE'
+@@ -135,11 +442,14 @@ export interface LanguageEdition {
+   }>
+ 
+   stale: boolean  // True if MIC changed after generation
++  is_mock?: boolean
++  shadow_run?: boolean
+ }
+ 
+ export interface BatchJob {
+   id: string
+   mic_id: string
++  user_id: string
+   status: BatchStatus
+   created_at: number
+   updated_at: number
+@@ -147,9 +457,37 @@ export interface BatchJob {
+   editions: Record<Language, LanguageEdition>
+ 
+   // Stabilization / safety-bounds
+-  escalation_depth: number
+-  chief_editor_escalated_to_supervisor: boolean
+-  supervisor_decision_made: boolean
++  escalation_depth?: number
++  chief_editor_escalated_to_supervisor?: boolean
++  supervisor_decision_made?: boolean
++  supervisor_decision?: string
++  supervisor_decision_confidence?: number
++  supervisor_trace?: string[]
++  chief_editor_decision?: string
++  chief_editor_decision_type?: string
++  decision_timestamp?: number
++  publish_blocked_reasons?: string[]
++  publish_gate_trace_id?: string
++  escalation_reasons?: string[]
++  requires_supervisor_review?: boolean
++  supervisor_review?: any
++  human_review_required?: boolean
++  published_urls?: Record<Language, string>
++  cdn_verification_results?: Record<Language, {
++    success: boolean,
++    status?: number,
++    duration_ms: number,
++    error?: string
++  }>
++  decision_type?: string
++  decision_source?: string
++  rejected_languages?: Language[]
++  delayed_languages?: Language[]
++  rejection_reasons?: string[]
++  terminal_fallback?: string
++  terminal_reason?: string
++  supervisor_failed?: boolean
++  error?: string
+ 
+   // Partial Publish Support
+   approved_languages: Language[]
+@@ -165,6 +503,14 @@ export interface BatchJob {
+   // Recirculation Tracking
+   recirculation_count: number
+   max_recirculation: number
++
++  is_mock?: boolean
++  shadow_run?: boolean
++
++  // PECL Integration
++  p2p_token?: string;
++  manifest_hash?: string;
++  manifest?: LockedContentPackage;
+ }
+ 
+ export type OverallDecision =
+@@ -179,12 +525,36 @@ export interface ChiefEditorDecision {
+   rejected_languages: Language[]
+   delayed_languages: Language[]
+   reasons: string[]
++  multilingual_headline_integrity?: MultilingualHeadlineResult
++  narrative_discipline?: NarrativeResult
++  surface_compliance_pack?: SurfaceGateResult
++  multilingual_integrity_en_tr?: MultilingualIntegrityResult
++  trust_gate_authorization?: TrustGateResult
++  truth_gate?: TruthGateResult
++  claim_aware_compliance?: ClaimAwareComplianceResult
++  evidence_ledger_safety?: {
++    ledger_safe: boolean
++    uncovered_claims: number
++    weak_evidence_records: number
++    missing_evidence_records: number
++    duplicate_evidence_records: number
++    incomplete_evidence_records: number
++  }
++  remediation_classification_v1?: RemediationClassificationResult
+   requires_supervisor_review: boolean
++  requires_manual_review?: boolean
+   confidence_score: number
+   confidence_band: ConfidenceBand
+   confidence_reasons: string[]
+   decision_trace: DecisionTrace
+   timestamp: number
++
++  // PECL Integration
++  pecl_decision?: PECLDecision;
++  manifest_hash?: string;
++  manifest?: LockedContentPackage;
++  p2p_token?: string; // Signed JWS
++  gate_results?: SovereignGateResult[]; // Real gate outputs (L6-BLK-005)
+ }
+ 
+ export interface DecisionTrace {
+@@ -194,11 +564,64 @@ export interface DecisionTrace {
+   confidence_score?: number
+   hard_rule_hits: string[]
+   reasons: string[]
++  multilingual_headline_integrity?: MultilingualHeadlineResult
++  narrative_discipline?: NarrativeResult
++  surface_compliance_pack?: SurfaceGateResult
++  multilingual_integrity_en_tr?: MultilingualIntegrityResult
++  trust_gate_authorization?: TrustGateResult
++  truth_gate?: TruthGateResult
++  claim_aware_compliance?: ClaimAwareComplianceResult
++  evidence_ledger_safety?: {
++    ledger_safe: boolean
++    uncovered_claims: number
++    weak_evidence_records: number
++    missing_evidence_records: number
++    duplicate_evidence_records: number
++    incomplete_evidence_records: number
++  }
++  remediation_classification_v1?: RemediationClassificationResult
+   emitted_events: string[]
+   state_transition?: string
+   timestamp: string
+-  rule_checks?: any[]
+-  semantic_analysis?: any
+-  risk_assessment?: any
+-  final_reasoning?: string
++  rule_checks: RuleCheckResult[]
++  semantic_analysis: SemanticAnalysisResult | null
++  risk_assessment: RiskAssessmentResult
++  final_reasoning: string
++}
++
++export interface RuleCheckResult {
++  rule_name: string
++  passed: boolean
++  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
++  affected_languages: Language[]
++  details: string
++  timestamp: number
++}
++
++export interface SemanticAnalysisResult {
++  consistency_score: number  // 0-100
++  drift_detected: boolean
++  drift_threshold: number
++  inconsistencies: Array<{
++    language_pair: [Language, Language]
++    field: string
++    drift_score: number
++    description: string
++  }>
++  ai_confidence: number
++}
++
++export interface RiskAssessmentResult {
++  overall_risk_score: number  // 0-100 (higher = more risky)
++  policy_risk: number
++  financial_risk: number
++  geopolitical_risk: number
++  legal_risk: number
++  brand_safety_risk: number
++  risk_factors: Array<{
++    type: 'policy' | 'financial' | 'geopolitical' | 'legal' | 'brand_safety'
++    severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
++    description: string
++    affected_languages: Language[]
++  }>
+ }

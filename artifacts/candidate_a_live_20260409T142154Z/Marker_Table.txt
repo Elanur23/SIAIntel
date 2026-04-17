@@ -1,0 +1,10 @@
+MARKER_CHECK_START
+constrained_production_pass=
+non_shadow_context=
+mic_save_marker=
+mic_immediate_retrieval=
+terminal_tpd_observed=
+abandoned_markers=
+final_persistence_marker=
+final_status_block=
+MARKER_CHECK_END

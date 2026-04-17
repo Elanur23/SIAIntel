@@ -1,0 +1,146 @@
+{
+  "articles": [
+    {
+      "id": "demo-001",
+      "title": "Federal Reserve Signals Potential Rate Cuts Amid Economic Uncertainty",
+      "link": "https://example.com/fed-rate-cuts",
+      "published": "2026-02-28T14:22:05Z",
+      "source": "BLOOMBERG",
+      "processed_at": "2026-02-28T14:22:05Z",
+      "total_cpm": 540,
+      "languages": [
+        {
+          "code": "en",
+          "language": "English",
+          "flag": "🇺🇸",
+          "cpm": 90,
+          "title": "FED INTEREST RATE SPECULATION DRIVES NASDAQ VOLATILITY",
+          "meta": "Federal Reserve signals potential rate cuts as economic indicators weaken",
+          "executive_summary": "Federal Reserve officials hint at possible rate cuts in Q2 2026 as inflation cools to 2.3% and unemployment ticks up to 4.1%. Market volatility spikes as institutional investors reposition portfolios.",
+          "market_impact": 8,
+          "sovereign_insight": "This signals coordination between Fed and ECB to prevent dollar strengthening that could destabilize emerging markets. Large holders are accumulating tech stocks ahead of the pivot.",
+          "risk_assessment": "Primary risk: Sudden dollar volatility if rate cut exceeds market expectations. Watch for EUR/USD breaking 1.12 resistance.",
+          "sentiment": "BULLISH",
+          "sentiment_score": 94,
+          "content_brief": "Fed rate cut speculation, market volatility, institutional repositioning",
+          "cpm_tags": ["federal reserve", "interest rates", "nasdaq", "market volatility"],
+          "full_content": "Full article content here...",
+          "video": "/videos/demo-001-en.mp4"
+        },
+        {
+          "code": "tr",
+          "language": "Turkish",
+          "flag": "🇹🇷",
+          "cpm": 85,
+          "title": "FED FAİZ İNDİRİMİ SİNYALİ NASDAQ'TA DALGALANMA YARATTI",
+          "meta": "Federal Reserve ekonomik göstergelerin zayıflaması üzerine faiz indirimi sinyali verdi",
+          "executive_summary": "Federal Reserve yetkilileri 2026 2. çeyrekte olası faiz indirimleri konusunda ipucu verdi. Enflasyon %2.3'e düşerken işsizlik %4.1'e yükseldi. Kurumsal yatırımcılar portföylerini yeniden konumlandırırken piyasa volatilitesi arttı.",
+          "market_impact": 8,
+          "sovereign_insight": "Bu, Fed ve ECB arasında doların güçlenmesini önlemek için koordinasyona işaret ediyor. Büyük yatırımcılar pivot öncesi teknoloji hisselerini biriktiriyor.",
+          "risk_assessment": "Birincil risk: Faiz indirimi piyasa beklentilerini aşarsa ani dolar volatilitesi. EUR/USD'nin 1.12 direncini kırmasını izleyin.",
+          "sentiment": "BULLISH",
+          "sentiment_score": 94,
+          "content_brief": "Fed faiz indirimi spekülasyonu, piyasa volatilitesi, kurumsal yeniden konumlandırma",
+          "cpm_tags": ["federal reserve", "faiz oranları", "nasdaq", "piyasa volatilitesi"],
+          "full_content": "Tam makale içeriği burada...",
+          "video": "/videos/demo-001-tr.mp4"
+        }
+      ]
+    },
+    {
+      "id": "demo-002",
+      "title": "Middle East Oil Pipeline Disruption Sends Energy Markets Higher",
+      "link": "https://example.com/oil-pipeline",
+      "published": "2026-02-28T14:18:30Z",
+      "source": "REUTERS",
+      "processed_at": "2026-02-28T14:18:30Z",
+      "total_cpm": 510,
+      "languages": [
+        {
+          "code": "en",
+          "language": "English",
+          "flag": "🇺🇸",
+          "cpm": 85,
+          "title": "MIDDLE EAST OIL PIPELINE DISRUPTION: IMPACT ANALYSIS",
+          "meta": "Major pipeline disruption in Gulf region threatens global oil supply",
+          "executive_summary": "Critical pipeline infrastructure in the Gulf region experiences unexpected shutdown, reducing daily output by 2.1 million barrels. Brent crude surges 4.2% to $84.50 as traders price in supply constraints.",
+          "market_impact": 7,
+          "sovereign_insight": "Saudi Arabia and UAE are using this disruption as leverage in OPEC+ negotiations. Expect coordinated production increases within 72 hours to stabilize prices and maintain market share.",
+          "risk_assessment": "Short-term spike risk if disruption extends beyond 5 days. Energy sector equities will outperform, but watch for profit-taking at $88 resistance.",
+          "sentiment": "BULLISH",
+          "sentiment_score": 88,
+          "content_brief": "Oil pipeline disruption, energy market surge, OPEC+ dynamics",
+          "cpm_tags": ["oil", "energy", "middle east", "pipeline", "brent crude"],
+          "full_content": "Full article content here...",
+          "video": "/videos/demo-002-en.mp4"
+        },
+        {
+          "code": "ar",
+          "language": "Arabic",
+          "flag": "🇸🇦",
+          "cpm": 90,
+          "title": "اضطراب خط أنابيب النفط في الشرق الأوسط: تحليل التأثير",
+          "meta": "اضطراب كبير في خط الأنابيب في منطقة الخليج يهدد إمدادات النفط العالمية",
+          "executive_summary": "تعرضت البنية التحتية الحيوية لخطوط الأنابيب في منطقة الخليج لإغلاق غير متوقع، مما أدى إلى تقليل الإنتاج اليومي بمقدار 2.1 مليون برميل. ارتفع خام برنت بنسبة 4.2٪ إلى 84.50 دولار.",
+          "market_impact": 7,
+          "sovereign_insight": "تستخدم السعودية والإمارات هذا الاضطراب كورقة ضغط في مفاوضات أوبك+. نتوقع زيادات إنتاج منسقة خلال 72 ساعة لتثبيت الأسعار.",
+          "risk_assessment": "خطر ارتفاع قصير الأجل إذا امتد الاضطراب لأكثر من 5 أيام. أسهم قطاع الطاقة ستتفوق، لكن راقب جني الأرباح عند مقاومة 88 دولار.",
+          "sentiment": "BULLISH",
+          "sentiment_score": 88,
+          "content_brief": "اضطراب خط أنابيب النفط، ارتفاع سوق الطاقة، ديناميكيات أوبك+",
+          "cpm_tags": ["نفط", "طاقة", "شرق أوسط", "خط أنابيب", "برنت"],
+          "full_content": "محتوى المقال الكامل هنا...",
+          "video": "/videos/demo-002-ar.mp4"
+        }
+      ]
+    },
+    {
+      "id": "demo-003",
+      "title": "EU Parliament Passes Comprehensive Crypto Regulatory Framework",
+      "link": "https://example.com/eu-crypto",
+      "published": "2026-02-28T14:10:12Z",
+      "source": "COINDESK",
+      "processed_at": "2026-02-28T14:10:12Z",
+      "total_cpm": 495,
+      "languages": [
+        {
+          "code": "en",
+          "language": "English",
+          "flag": "🇺🇸",
+          "cpm": 85,
+          "title": "CRYPTO REGULATORY FRAMEWORK PASSED IN EU PARLIAMENT",
+          "meta": "European Union establishes clear regulatory guidelines for digital assets",
+          "executive_summary": "EU Parliament approves MiCA 2.0 framework with 487-152 vote, establishing comprehensive rules for crypto exchanges, stablecoins, and DeFi protocols. Bitcoin rallies 6.8% on regulatory clarity.",
+          "market_impact": 9,
+          "sovereign_insight": "This is the first major economy to provide legal certainty for institutional crypto adoption. Expect $50B+ in institutional capital flows into EU-regulated exchanges within 6 months. US SEC will face pressure to follow.",
+          "risk_assessment": "Minimal downside risk. Regulatory clarity removes major uncertainty. Watch for exchange tokens (BNB, FTT successors) to outperform as compliance becomes competitive advantage.",
+          "sentiment": "BULLISH",
+          "sentiment_score": 96,
+          "content_brief": "EU crypto regulation, MiCA 2.0, institutional adoption, Bitcoin rally",
+          "cpm_tags": ["cryptocurrency", "bitcoin", "regulation", "european union", "mica"],
+          "full_content": "Full article content here...",
+          "video": "/videos/demo-003-en.mp4"
+        },
+        {
+          "code": "de",
+          "language": "German",
+          "flag": "🇩🇪",
+          "cpm": 80,
+          "title": "EU-PARLAMENT VERABSCHIEDET UMFASSENDEN KRYPTO-REGULIERUNGSRAHMEN",
+          "meta": "Europäische Union schafft klare regulatorische Richtlinien für digitale Vermögenswerte",
+          "executive_summary": "EU-Parlament genehmigt MiCA 2.0-Rahmen mit 487-152 Stimmen und etabliert umfassende Regeln für Krypto-Börsen, Stablecoins und DeFi-Protokolle. Bitcoin steigt um 6,8% aufgrund regulatorischer Klarheit.",
+          "market_impact": 9,
+          "sovereign_insight": "Dies ist die erste große Volkswirtschaft, die rechtliche Sicherheit für institutionelle Krypto-Adoption bietet. Erwarten Sie 50B$+ institutionelle Kapitalflüsse in EU-regulierte Börsen innerhalb von 6 Monaten.",
+          "risk_assessment": "Minimales Abwärtsrisiko. Regulatorische Klarheit beseitigt große Unsicherheit. Beobachten Sie Exchange-Token (BNB, FTT-Nachfolger) für Outperformance.",
+          "sentiment": "BULLISH",
+          "sentiment_score": 96,
+          "content_brief": "EU-Krypto-Regulierung, MiCA 2.0, institutionelle Adoption, Bitcoin-Rally",
+          "cpm_tags": ["kryptowährung", "bitcoin", "regulierung", "europäische union", "mica"],
+          "full_content": "Vollständiger Artikelinhalt hier...",
+          "video": "/videos/demo-003-de.mp4"
+        }
+      ]
+    }
+  ],
+  "last_updated": "2026-02-28T14:22:05Z"
+}

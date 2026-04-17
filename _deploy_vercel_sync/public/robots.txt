@@ -1,0 +1,26 @@
+# SIA Intelligence - Authorized Robots
+# DISCOVER & NEWS ACCELERATION PROTOCOL V6.0
+
+User-agent: *
+Allow: /
+Allow: /rss.xml
+Allow: /news-sitemap.xml
+Allow: /_next/static/css/
+Allow: /_next/static/chunks/
+Allow: /_next/static/media/
+
+# Block non-public areas to save crawl budget
+Disallow: */admin/
+Disallow: */login/
+Disallow: /api/
+Disallow: /_next/data/
+
+# SIA Sitemaps & Feeds
+Sitemap: https://siaintel.com/sitemap.xml
+Sitemap: https://siaintel.com/news-sitemap.xml
+
+# Special instructions for Googlebot-News
+User-agent: Googlebot-News
+Allow: /
+Allow: /news-sitemap.xml
+Allow: /rss.xml

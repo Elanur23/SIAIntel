@@ -1,0 +1,52 @@
+# Security Policy for SIA Intelligence Terminal
+# https://securitytxt.org/
+
+Contact: mailto:security@siaintel.com
+Contact: https://siaintel.com/security
+Expires: 2027-03-22T00:00:00.000Z
+Preferred-Languages: en, tr
+Canonical: https://siaintel.com/.well-known/security.txt
+
+# Encryption
+Encryption: https://siaintel.com/pgp-key.txt
+
+# Acknowledgments
+Acknowledgments: https://siaintel.com/security/hall-of-fame
+
+# Policy
+Policy: https://siaintel.com/security/disclosure-policy
+
+# Hiring
+Hiring: https://siaintel.com/careers
+
+# Security Disclosure Policy
+# We take security seriously. If you discover a security vulnerability,
+# please report it to us responsibly.
+#
+# What to report:
+# - Authentication bypass
+# - SQL injection
+# - XSS vulnerabilities
+# - CSRF vulnerabilities
+# - Remote code execution
+# - Sensitive data exposure
+# - Any other security issues
+#
+# What NOT to report:
+# - Issues in third-party services
+# - Social engineering attacks
+# - Physical security issues
+# - Denial of service attacks
+#
+# Response time:
+# - Initial response: Within 24 hours
+# - Status update: Within 72 hours
+# - Resolution: Depends on severity
+#
+# Reward:
+# - We offer recognition in our Hall of Fame
+# - Bounties may be available for critical issues
+#
+# Safe Harbor:
+# We will not pursue legal action against security researchers
+# who follow responsible disclosure practices.

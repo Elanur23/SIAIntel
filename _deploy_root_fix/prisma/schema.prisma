@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model WarRoomArticle {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  sourceId        String?
+  source          String?   @default("SIAINTEL")
+  publishedAt     DateTime  @default(now())
+  sentiment       String?
+  confidence      Int       @default(90)
+  marketImpact    Int       @default(5)
+  category        String?   @default("GENERAL")
+  region          String?   @default("GLOBAL")
+  authorName      String?   @default("SIA Intelligence Unit")
+  authorRole      String?   @default("Senior Analyst")
+  authorBio       String?
+  titleTr         String?
+  summaryTr       String?
+  titleEn         String?
+  summaryEn       String?
+  siaInsightTr    String?
+  riskShieldTr    String?
+  siaInsightEn    String?
+  riskShieldEn    String?
+  socialSnippetTr String?
+  socialSnippetEn String?
+  contentTr       String?
+  contentEn       String?
+  imageUrl        String?
+  visualData      String?
+  status          String    @default("published")
+  contentAr       String?
+  contentDe       String?
+  contentEs       String?
+  contentFr       String?
+  contentJp       String?
+  contentRu       String?
+  contentZh       String?
+  riskShieldAr    String?
+  riskShieldDe    String?
+  riskShieldEs    String?
+  riskShieldFr    String?
+  riskShieldJp    String?
+  riskShieldRu    String?
+  riskShieldZh    String?
+  siaInsightAr    String?
+  siaInsightDe    String?
+  siaInsightEs    String?
+  siaInsightFr    String?
+  siaInsightJp    String?
+  siaInsightRu    String?
+  siaInsightZh    String?
+  socialSnippetAr String?
+  socialSnippetDe String?
+  socialSnippetEs String?
+  socialSnippetFr String?
+  socialSnippetJp String?
+  socialSnippetRu String?
+  socialSnippetZh String?
+  summaryAr       String?
+  summaryDe       String?
+  summaryEs       String?
+  summaryFr       String?
+  summaryJp       String?
+  summaryRu       String?
+  summaryZh       String?
+  titleAr         String?
+  titleDe         String?
+  titleEs         String?
+  titleFr         String?
+  titleJp         String?
+  titleRu         String?
+  titleZh         String?
+  comments        Comment[]
+
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model Comment {
+  id         String         @id @default(cuid())
+  createdAt  DateTime       @default(now())
+  content    String
+  authorName String         @default("Anonymous Analyst")
+  isVerified Boolean        @default(false)
+  status     String         @default("pending")
+  lang       String         @default("en")
+  articleId  String
+  article    WarRoomArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+}
+
+// ============================================
+// DISTRIBUTION OS - PHASE 1 (Added 2026-03-20)
+// ============================================
+
+model DistributionJob {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  articleId       String
+  platforms       String
+  languages       String
+  mode            String
+  status          String   @default("draft")
+  scheduledAt     DateTime?
+  trustScore      Int      @default(0)
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  variants        DistributionVariant[]
+  @@index([articleId])
+  @@index([status])
+}
+
+model DistributionVariant {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  jobId           String
+  job             DistributionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  platform        String
+  language        String
+  content         String
+  mediaUrls       String?
+  publishedAt     DateTime?
+  externalId      String?
+  externalUrl     String?
+  views           Int      @default(0)
+  engagements     Int      @default(0)
+  clicks          Int      @default(0)
+  @@index([jobId])
+  @@index([platform])
+}
+
+model GlossaryTerm {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  term            String
+  category        String
+  translationEn   String?
+  translationTr   String?
+  translationDe   String?
+  translationEs   String?
+  translationFr   String?
+  translationRu   String?
+  translationAr   String?
+  translationJp   String?
+  translationZh   String?
+  context         String?
+  alternatives    String?
+  @@unique([term, category])
+}
+
+// ============================================
+// SECURITY STATE - PHASE 4B (Added 2026-03-21)
+// Database-agnostic models (SQLite → PostgreSQL ready)
+// ============================================
+
+model User {
+  id                  String        @id @default(cuid())
+  username            String        @unique
+  passwordHash        String
+  role                String        @default("viewer")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  twoFactorEnabled    Boolean       @default(false)
+  twoFactorSecret     String?
+  twoFactorEnabledAt  DateTime?
+  enabled             Boolean       @default(true)
+  passwordChangedAt   DateTime?
+  backupCodes         BackupCode[]
+  passwordHistory     PasswordHistory[]
+  
+  @@index([username])
+  @@index([role])
+  @@index([enabled])
+}
+
+model BackupCode {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash    String
+  used        Boolean   @default(false)
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([used])
+}
+
+model Session {
+  id              String   @id @default(cuid())
+  hashedToken     String   @unique
+  userId          String
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+  lastAccessedAt  DateTime @default(now())
+  ipAddress       String?
+  userAgent       String?
+  twoFactorVerified Boolean @default(false)
+  
+  @@index([hashedToken])
+  @@index([expiresAt])
+  @@index([userId])
+}
+
+model RateLimit {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  count         Int      @default(1)
+  resetTime     DateTime
+  firstAttempt  DateTime @default(now())
+  
+  @@index([key])
+  @@index([resetTime])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  timestamp     DateTime @default(now())
+  action        String
+  userId        String?
+  ipAddress     String?
+  userAgent     String?
+  success       Boolean
+  errorMessage  String?
+  metadata      String?  // JSON string for flexibility
+  
+  @@index([action])
+  @@index([userId])
+  @@index([timestamp])
+  @@index([success])
+}
+
+model RecoveryCode {
+  id            String    @id @default(cuid())
+  userId        String
+  code          String    // bcrypt hashed
+  used          Boolean   @default(false)
+  usedAt        DateTime?
+  invalidatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([used])
+  @@index([invalidatedAt])
+}
+
+model PasswordHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  changedAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([changedAt])
+}
+
+model BlockedIP {
+  id        String    @id @default(cuid())
+  ip        String    @unique
+  reason    String
+  blockedAt DateTime  @default(now())
+  expiresAt DateTime?
+  blockedBy String?
+  
+  @@index([ip])
+  @@index([expiresAt])
+}

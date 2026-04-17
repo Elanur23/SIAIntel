@@ -1,0 +1,17 @@
+5:FAIL lib/neural-assembly/__tests__/master-orchestrator.test.ts (8.596 s)
+48:  ● RecirculationTracker › should detect loop after 3 consecutive occurrences
+52:    Expected: false
+53:    Received: true
+63:      at Object.<anonymous> (lib/neural-assembly/__tests__/master-orchestrator.test.ts:38:28)
+65:  ● RecirculationTracker › should get all active fingerprints
+81:      at Object.<anonymous> (lib/neural-assembly/__tests__/master-orchestrator.test.ts:85:26)
+83:  ● MasterOrchestrator › handleManualOverride › should apply manual override successfully
+87:    Expected: "APPROVED"
+88:    Received: "HEALING"
+98:      at Object.<anonymous> (lib/neural-assembly/__tests__/master-orchestrator.test.ts:463:30)
+100:  ● Chief Editor Integration › should return decision trace for audit compliance
+112:      at ChiefEditorEngine.makeDecision (lib/neural-assembly/chief-editor-engine.ts:864:13)
+113:      at MasterOrchestrator.chiefEditorReview (lib/neural-assembly/master-orchestrator.ts:1678:40)
+114:      at Object.<anonymous> (lib/neural-assembly/__tests__/master-orchestrator.test.ts:790:41)
+116:  ● Chief Editor Decision Routing › should be idempotent - routing same decision twice should not duplicate state
+170:      at Object.<anonymous> (lib/neural-assembly/__tests__/master-orchestrator.test.ts:1097:20)

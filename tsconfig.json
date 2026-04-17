@@ -35,6 +35,13 @@
   "exclude": [
     "node_modules",
     "**/__tests__",
-    "scripts"
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "scripts",
+    "_deploy_root_fix",
+    "_deploy_vercel_sync",
+    "_release_align_main",
+    "_stage7_push_worktree",
+    "_stage8_push_worktree"
   ]
 }

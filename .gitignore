@@ -1,53 +1,10 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Testing
-coverage/
-
-# Next.js
-.next/
-out/
-build/
-dist/
-
-# Production
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables
-.env
-.env*.local
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Workspace directories (deployment/staging)
-_deploy_vercel_sync/
-_release_align_main/
-_stage7_push_worktree/
-_stage8_push_worktree/
-_deploy_root_fix/
-
-# Temporary files
-*.tmp
-*.temp
-.cache/
+node_modules
+.next
+.env*
+!.env.example
+*.db
+build
+dist
+.vscode
+.idea
+.artifacts

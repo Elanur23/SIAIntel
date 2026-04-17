@@ -1,0 +1,139 @@
+app/admin/featured-articles/page.tsx:140:              <option value="ar">AR</option>
+app/admin/featured-articles/page.tsx:141:              <option value="jp">JP</option>
+app/admin/featured-articles/page.tsx:190:                    <option value="ar">AR</option>
+app/admin/featured-articles/page.tsx:191:                    <option value="jp">JP</option>
+app/api/sia-news/generate/route.ts:387:    ja: 'JP',
+app/api/warroom/analytics/route.ts:15:type Region = 'US' | 'TR' | 'DE' | 'FR' | 'ES' | 'RU' | 'JP' | 'CN' | 'BR'
+app/api/warroom/analytics/route.ts:24:  ja: 'JP',
+app/legal/privacy/page.tsx:541:        <section id="ar" className="mb-16 scroll-mt-8" dir="rtl">
+app/legal/terms/page.tsx:386:        <section id="ar" className="mb-16 scroll-mt-8" dir="rtl">
+app/[lang]/admin/sync/page.tsx:12:const SUPPORTED_LANGS = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'];
+app/[lang]/admin/warroom/page.tsx:18:const SUPPORTED_LANGS = ['en', 'de', 'es', 'fr', 'ru', 'ar', 'jp', 'zh', 'tr'] as const;
+app/[lang]/admin/warroom/page.tsx:30:    en: 'En', tr: 'Tr', de: 'De', es: 'Es', fr: 'Fr', ru: 'Ru', ar: 'Ar', jp: 'Jp', zh: 'Zh'
+lib/ai/authority-manifesto-generator.ts:202:  } else if (language === 'ar') {
+lib/ai/authority-manifesto-generator.ts:295:  if (language === 'ar') {
+lib/ai/deep-dive-generator.ts:12:  language: 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/ai/global-cpm-master.ts:206:    const effectiveCode = languageCode === 'ae' ? 'ar' : languageCode
+lib/ai/global-cpm-master.ts:265:  return flags[code] || flags[code === 'ae' ? 'ar' : code] || '🌍'
+lib/ai/global-cpm-master.ts:281:  return regions[code] || regions[code === 'ae' ? 'ar' : code] || 'Global'
+lib/ai/global-intelligence-generator.ts:9:export type Language = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/ai/global-intelligence-generator.ts:119:  const targetLanguages = request.targetLanguages || ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/ai/sealed-depth-protocol.ts:16:export const SEALED_DEPTH_LANGS = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'] as const
+lib/ai/sealed-depth-protocol.ts:123:  const targetLangs = ['tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'] as const
+lib/ai/translate-workspace.ts:12:export type SupportedLanguage = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/ai/translate-workspace.ts:148:  const targetLanguages: SupportedLanguage[] = ['tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/ai/workspace-io.ts:115:const ALL_LANGS = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'] as const
+lib/articles/slugify.ts:75:    case 'ar':
+lib/articles/slugify.ts:84:    case 'jp':
+lib/articles/types.ts:8:export type SupportedLang = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/articles/types.ts:17:  'ar',
+lib/articles/types.ts:18:  'jp',
+lib/articles/types.ts:34:export const RTL_LANGUAGES: SupportedLang[] = ['ar']
+lib/content/sia-master-protocol-v4.ts:44:  JPY: { symbol: '¥', name: 'Japanese Yen', region: 'JP' },
+lib/content/sia-master-protocol-v4.ts:486:  const allLanguages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/dispatcher/types.ts:6:export type Language = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/dispatcher/types.ts:7:export type Region = 'US' | 'TR' | 'DE' | 'FR' | 'ES' | 'RU' | 'AE' | 'JP' | 'CN'
+lib/dispatcher/types.ts:13:  return ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'].includes(value)
+lib/distribution/core/constants.ts:23:  'ar',
+lib/distribution/core/constants.ts:24:  'jp',
+lib/distribution/core/types.ts:7:export type DistributionLanguage = 'en' | 'tr' | 'de' | 'es' | 'fr' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/distribution/editorial/variant-recommendation-service.ts:278:  const conservativeLocales: Language[] = ['de', 'jp', 'ar', 'tr']
+lib/distribution/scheduling/timezone-map.ts:56:    region: 'JP'
+lib/distribution/types.ts:37:export type Language = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/distribution/types.ts:39:export const LANGUAGES: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/distribution/types.ts:41:export type Region = 'US' | 'TR' | 'DE' | 'FR' | 'ES' | 'RU' | 'AE' | 'JP' | 'CN'
+lib/google/translation-service.ts:51:  targetLanguages: string[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'ja', 'zh']
+lib/hooks/useLiveIntel.ts:3:type VolatilityLang = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/hooks/useLiveIntel.ts:169:          lang === 'ar' ? 'ar-AE' : lang === 'ru' ? 'ru-RU' : 'en-US',
+lib/hooks/useMarketData.ts:76:  { symbol: 'TASI', name: 'Tadawul', price: 12450.6, change: 0.55, positive: true, region: 'ar' },
+lib/hooks/useMarketData.ts:91:    region: 'jp',
+lib/i18n/route-locales.ts:16:const LEGACY_ROUTE_SET = new Set<string>(['jp', 'ar', 'pt'])
+lib/i18n/route-locales.ts:78:  if (normalized === 'ja') return 'jp'
+lib/i18n-config.ts:3:  locales: ['en', 'tr', 'de', 'es', 'fr', 'ar', 'ru', 'jp', 'zh'],
+lib/i18n-config.ts:16:  jp: 'JP',
+lib/infrastructure/edge-cache-strategy.ts:231:  const languages = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar']
+lib/neural-assembly/chief-editor-engine.ts:440:      ['en', 'ar'],
+lib/neural-assembly/chief-editor-engine.ts:441:      ['en', 'jp'],
+lib/neural-assembly/deep-linker.ts:150:    const otherLanguages = (['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'] as Language[]).filter(
+lib/neural-assembly/headline-intelligence/multilingual-anchor.ts:27:const RUNTIME_TUNING_LANGUAGES: ReadonlySet<Language> = new Set(['en', 'es', 'jp'])
+lib/neural-assembly/revenue-calculator.ts:9:export type Language = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/neural-assembly/sia-sentinel-core.ts:224:  if (['zh', 'jp'].includes(language.toLowerCase()) && effectiveWordCount < (body.length / 2)) {
+lib/neural-assembly/speed-cell.ts:51:    const languages: LangKey[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'];
+lib/neural-assembly/stabilization/hard-rule-engine.ts:74:  const isCJK = ['zh', 'jp'].includes(String(edition.language).toLowerCase())
+lib/neural-assembly/validation-reduced-mode.ts:10:  'ar',
+lib/neural-assembly/validation-reduced-mode.ts:11:  'jp',
+lib/neural-assembly/validation-reduced-mode.ts:15:export const REDUCED_VALIDATION_LANGUAGE_TARGET: readonly Language[] = ['en', 'tr', 'jp'] as const
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:106:  'ar',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:107:  'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:114:  'jp'
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:122:  'ar',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:153:  language: 'es' | 'jp'
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:233:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:312:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:390:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:467:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:545:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:624:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:702:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:780:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-adversarial-parity-corpus.ts:865:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-simulation-corpus.ts:66:        language: 'ar',
+lib/neural-assembly/__tests__/fixtures/hiol-multilingual-simulation-corpus.ts:76:        language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-tuning-review-checklists.ts:10:  language: 'en' | 'es' | 'jp'
+lib/neural-assembly/__tests__/fixtures/hiol-tuning-review-checklists.ts:18:  language: Exclude<Language, 'en' | 'es' | 'jp'>
+lib/neural-assembly/__tests__/fixtures/hiol-tuning-review-checklists.ts:170:    language: 'jp',
+lib/neural-assembly/__tests__/fixtures/hiol-tuning-review-checklists.ts:248:    language: 'ar',
+lib/neural-assembly/__tests__/headline-editor-review-payload.test.ts:12:const ALL_LANGUAGES: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/neural-assembly/__tests__/headline-intelligence-calibration.test.ts:15:const ALL_LANGUAGES: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/neural-assembly/__tests__/headline-intelligence-calibration.test.ts:279:    const jpDrift = result.multilingualAssessment.driftByLanguage.find(item => item.language === 'jp')
+lib/neural-assembly/__tests__/headline-intelligence-corpus-foundation.test.ts:27:const ALL_LANGUAGES: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts:16:const ALL_LANGUAGES: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts:280:    const jpDrift = result.multilingualAssessment.driftByLanguage.find(item => item.language === 'jp')
+lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts:318:    const jpDrift = result.multilingualAssessment.driftByLanguage.find(item => item.language === 'jp')
+lib/neural-assembly/__tests__/headline-intelligence-operating-layer.test.ts:359:    const jpDrift = result.multilingualAssessment.driftByLanguage.find(item => item.language === 'jp')
+lib/neural-assembly/__tests__/headline-intelligence-tuning-preparation-pack.test.ts:58:      expect(active).toEqual(['es', 'jp'])
+lib/neural-assembly/__tests__/headline-intelligence-tuning-preparation-pack.test.ts:79:    expect(HIOL_TUNING_PREP_REDUCED_LANGUAGE_SET).toEqual(['en', 'es', 'jp'])
+lib/neural-assembly/__tests__/headline-intelligence-tuning-preparation-pack.test.ts:336:    expect(languageCoverage.has('jp')).toBe(true)
+lib/neural-assembly/__tests__/headline-intelligence-tuning-preparation-pack.test.ts:349:    for (const language of ['tr', 'de', 'fr', 'ru', 'ar', 'zh']) {
+lib/neural-assembly/__tests__/headline-title-surface-resolver.test.ts:5:function createEdition(language: 'en' | 'es' | 'jp', title: string, schema: Record<string, unknown>): LanguageEdition {
+lib/neural-assembly/__tests__/headline-title-surface-resolver.test.ts:53:    const edition = createEdition('jp', '日銀が政策を据え置き、物価鈍化を注視', {
+lib/neural-assembly/__tests__/orchestrator-headline-intelligence.test.ts:9:const ALL_LANGUAGES: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+lib/scale/scale-engine.ts:111:    const allLanguages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'];
+lib/seo/json-ld-v3-engine.ts:117:      availableLanguage: ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar']
+lib/seo/knowledge-graph.ts:166:    'inLanguage': ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'ja', 'zh'],
+lib/seo/NewsArticleSchema.ts:536:       article.language === 'ar' ? 'تمت المراجعة التحريرية.' :
+lib/seo/NewsArticleSchema.ts:599:        article.language === 'ar' ? 'سياسة التصحيح' :
+lib/services/SiaIntelligenceProcessor.ts:41:  "ar": { "title": "", "summary": "", "content": "", "siaInsight": "", "riskShield": "", "socialSnippet": "" },
+lib/services/SiaIntelligenceProcessor.ts:42:  "jp": { "title": "", "summary": "", "content": "", "siaInsight": "", "riskShield": "", "socialSnippet": "" },
+lib/sia-news/batch-indexing.ts:324:  languages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar']
+lib/sia-news/contextual-rewriting.ts:280:    region: 'JP',
+lib/sia-news/contextual-rewriting.ts:786:    AE: 'ar',
+lib/sia-news/contextual-rewriting.ts:787:    JP: 'jp',
+lib/sia-news/lisa-audit-engine.ts:327:  const langs = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'] as Language[]
+lib/sia-news/mock-regional-news.json:19:    "ar": {
+lib/sia-news/performance-monitor.ts:411:    AE: 'ar',
+lib/sia-news/performance-monitor.ts:412:    JP: 'jp',
+lib/sia-news/regional-news-formatter.ts:119:    language: 'ar',
+lib/sia-news/regional-news-formatter.ts:217:    language: 'jp',
+lib/sia-news/regional-news-formatter.ts:491:  content = applyLanguageFormatting(content, 'ar')
+lib/sia-news/regional-news-formatter.ts:648:    region: 'JP',
+lib/sia-news/regional-news-formatter.ts:935:    case 'ar':
+lib/sia-news/regional-news-formatter.ts:985:    jp: 'JP',
+lib/sia-news/regional-news-formatter.ts:1093:  const requiredLanguages: Language[] = ['tr', 'en', 'ar', 'de', 'fr', 'es', 'ru']
+lib/sia-news/test-language-formatting.ts:32:console.log(`Arabic:   ${formatNumber(testNumber, 'ar')}`)
+lib/sia-news/test-language-formatting.ts:42:console.log(`Arabic:   ${formatDate(testDate, 'ar')}`)
+lib/sia-news/test-language-formatting.ts:52:console.log(`Arabic (AED):  ${formatCurrency(testAmount, 'ar')}`)
+lib/sia-news/test-language-formatting.ts:120:const languages = ['tr', 'en', 'de', 'ar', 'fr', 'es', 'ru']
+lib/sia-news/types.ts:146:export type Region = 'TR' | 'US' | 'DE' | 'FR' | 'ES' | 'RU' | 'AE' | 'JP' | 'CN'
+lib/sia-news/types.ts:147:export type Language = 'tr' | 'en' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+lib/sovereign-core/neuro-sync-kernel.ts:375:      languageCode: 'ar',
+lib/store/language-store.ts:3:export type Language = 'en' | 'tr' | 'de' | 'es' | 'fr' | 'ar' | 'ru' | 'jp' | 'zh'
+lib/validation/api-schemas.ts:28:export const regionSchema = z.enum(['US', 'TR', 'DE', 'FR', 'ES', 'RU', 'AE', 'JP', 'CN', 'GLOBAL'])
+lib/warroom/analytics-engine.ts:151:      { language: 'ar', region: 'AE' },
+lib/warroom/analytics-engine.ts:152:      { language: 'jp', region: 'JP' },
+lib/warroom/article-localization.ts:1:export const ARTICLE_LANGS = ['tr', 'en', 'de', 'es', 'fr', 'ru', 'ar', 'jp', 'zh'] as const
+lib/warroom/article-localization.ts:20:  ar: 'Ar',
+lib/warroom/article-localization.ts:21:  jp: 'Jp',
+lib/warroom/article-localization.ts:52:  ja: 'jp',
+lib/warroom/article-localization.ts:123:  preferred: ArticleLanguage[] = ['tr', 'en', 'de', 'es', 'fr', 'ru', 'ar', 'jp', 'zh']
+lib/warroom/article-seo.ts:18:export type SupportedArticleLanguage = 'en' | 'tr' | 'de' | 'es' | 'fr' | 'ru' | 'ar' | 'jp' | 'zh'

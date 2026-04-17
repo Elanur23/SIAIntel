@@ -1,0 +1,3 @@
+# SIA Intelligence - Authorized Digital Sellers
+# IMPORTANT: Replace pub-XXXXXXXXXXXXXXXX with your actual AdSense Publisher ID
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

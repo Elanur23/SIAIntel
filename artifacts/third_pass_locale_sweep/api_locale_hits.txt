@@ -1,0 +1,134 @@
+app/api/admin/normalize-workspace/route.ts:512:    const stats = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'].map((lang) => {
+app/api/admin/normalize-workspace/route.ts:582:    const TRANSLATE_LANGS = ['tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'].filter(
+app/api/admin/normalize-workspace/route.ts:612:              targetLang: lang,
+app/api/admin/normalize-workspace/route.ts:613:              sourceLang: masterLang,
+app/api/admin/normalize-workspace/route.ts:617:              targetLang: lang,
+app/api/admin/normalize-workspace/route.ts:618:              sourceLang: masterLang,
+app/api/admin/normalize-workspace/route.ts:623:                  targetLang: lang,
+app/api/admin/normalize-workspace/route.ts:624:                  sourceLang: masterLang,
+app/api/admin/normalize-workspace/route.ts:630:                  targetLang: lang,
+app/api/admin/normalize-workspace/route.ts:631:                  sourceLang: masterLang,
+app/api/admin/normalize-workspace/route.ts:637:                  targetLang: lang,
+app/api/admin/normalize-workspace/route.ts:638:                  sourceLang: masterLang,
+app/api/admin/sync-workspace/route.ts:99:      { s: 'Ar', k: 'ar' },
+app/api/admin/sync-workspace/route.ts:100:      { s: 'Jp', k: 'jp' },
+app/api/ai/adsense-content/route.ts:60:        language: body.language || 'en',
+app/api/ai/adsense-content/route.ts:94:    supportedLanguages: ['en', 'tr', 'de', 'es', 'fr', 'ar'],
+app/api/ai/deep-dive/route.ts:53:      language: dictionaryLanguage,
+app/api/ai/deep-dive/route.ts:69:      language: routeLanguage,
+app/api/ai/deep-dive/route.ts:140:      language: 'string - Target route language (en, tr, de, fr, es, ru, ja, zh, pt-br)',
+app/api/ai/deep-dive/route.ts:168:      language: 'en',
+app/api/ai/global-intelligence/route.ts:44:    const rawTargetLanguages = body.targetLanguages
+app/api/ai/global-intelligence/route.ts:48:          { error: 'targetLanguages must be an array of locale codes' },
+app/api/ai/global-intelligence/route.ts:64:            error: `Invalid languages: ${invalidLangs.join(', ')}`,
+app/api/ai/global-intelligence/route.ts:65:            supportedLanguages: PUBLIC_ROUTE_LOCALES,
+app/api/ai/global-intelligence/route.ts:89:      targetLanguages: internalTargetLanguages,
+app/api/ai/global-intelligence/route.ts:95:    console.log(`🌐 Languages: ${intelligenceRequest.targetLanguages?.length || 9}`)
+app/api/ai/global-intelligence/route.ts:121:            language: routeLanguage,
+app/api/ai/global-intelligence/route.ts:135:          language: routeLanguage,
+app/api/ai/global-intelligence/route.ts:215:      targetLanguages: 'string[] - Target route languages (default: en, tr, de, fr, es, ru, ja, zh, pt-br)',
+app/api/ai/global-intelligence/route.ts:219:    supportedLanguages: [...PUBLIC_ROUTE_LOCALES],
+app/api/ai/global-intelligence/route.ts:241:      targetLanguages: ['en', 'tr', 'ru', 'zh', 'pt-br'],
+app/api/analytics/cta-click/route.ts:59:                    language: data.lang,
+app/api/articles/route.ts:25:        { success: false, error: `Invalid language: ${requestedLang}` },
+app/api/articles/[id]/route.ts:76:    console.log(`[API] Available languages: ${getAvailableRouteLanguages(article).join(', ')}`)
+app/api/articles/[id]/route.ts:86:        console.log(`[API] Checking route language: ${routeLang} (dictionary: ${dictionaryLang})`)
+app/api/articles/[id]/route.ts:147:            languages: prefetchedLanguages,
+app/api/articles/[id]/route.ts:179:      console.error(`[API] Available languages: ${getAvailableRouteLanguages(article).join(', ')}`)
+app/api/articles/[id]/route.ts:199:          languages: getAvailableRouteLanguages(article),
+app/api/articles/[id]/route.ts:200:          requestedLanguage: routeLang,
+app/api/dispatcher/publish/route.ts:48:        language: lang as Language,
+app/api/dispatcher/rollback/route.ts:35:    const result = await publishingService.rollback(job.articleId || jobId, job.targetLanguages)
+app/api/dispatcher/translate/route.ts:16:    const { sourceLanguage, sourceContent, targetLanguages, options } = body
+app/api/dispatcher/translate/route.ts:18:    if (!sourceLanguage || !sourceContent || !targetLanguages) {
+app/api/dispatcher/translate/route.ts:22:          error: 'Missing required fields: sourceLanguage, sourceContent, targetLanguages',
+app/api/dispatcher/translate/route.ts:44:      sourceLanguage as Language,
+app/api/dispatcher/translate/route.ts:45:      targetLanguages as Language[],
+app/api/dispatcher/translate/route.ts:66:        sourceLanguage as Language,
+app/api/dispatcher/translate/route.ts:67:        targetLanguages as Language[]
+app/api/distribution/execute/route.ts:34:      languages: languages as Language[],
+app/api/distribution/jobs/route.ts:78:        languages: 'en',
+app/api/eeat-protocols/enhance/route.ts:83:  if (!body.language || !['en', 'tr', 'de', 'es', 'fr', 'ar'].includes(body.language)) {
+app/api/eeat-protocols/enhance/route.ts:208:      language: body.language,
+app/api/featured-articles/route.ts:101:      language: body.language,
+app/api/ghost-editor/route.ts:53:          languages: ['EN', 'TR', 'DE', 'ES', 'FR', 'AR', 'RU'],
+app/api/google/test-integration/route.ts:25:      language: language || 'en',
+app/api/neural-audit/route.ts:22:    const requestedLanguage = body.language || 'en'
+app/api/neural-audit/route.ts:40:      typeof requestedLanguage !== 'string' ||
+app/api/neural-audit/route.ts:42:        requestedLanguage.toLowerCase() as (typeof PUBLIC_ROUTE_LOCALES)[number]
+app/api/neural-audit/route.ts:54:    const routeLanguage = normalizePublicRouteLocale(requestedLanguage)
+app/api/neural-audit/route.ts:65:      language: auditLanguage
+app/api/neural-audit/route.ts:100:        language: routeLanguage,
+app/api/neural-audit/route.ts:137:      languages: [...PUBLIC_ROUTE_LOCALES],
+app/api/neural-healer/route.ts:11:  language: string
+app/api/neural-healer/route.ts:14:const HEALING_PROMPTS: Record<string, (content: string, language: string) => string> = {
+app/api/revenue/optimize/route.ts:11: * - update-language: Update language CPM data
+app/api/sealed-depth/route.ts:47:      languages: Object.keys(output),
+app/api/search/index-webhook/route.ts:92:      languages: event.languages,
+app/api/search/neural/route.ts:224:    languages: [...PUBLIC_ROUTE_LOCALES],
+app/api/search/route.ts:15: * - language: Filter by language (optional)
+app/api/search/route.ts:50:  language: SearchLanguageSchema.optional(),
+app/api/search/route.ts:94:      language: searchParams.get('language'),
+app/api/search/route.ts:150:      where.AND.push({ language: toDictionaryLocale(query.language) })
+app/api/search/route.ts:271:        language: query.language || 'en',
+app/api/search/route.ts:305:          language: query.language,
+app/api/seo/embed-code/route.ts:34:      language: body.language || 'en',
+app/api/seo/embed-code/route.ts:122:      language: 'string - Language code (en, tr, de, fr, es, ru, ar, jp, zh) - default: en',
+app/api/seo/embed-code/route.ts:148:      language: 'en',
+app/api/seo/generate-schema/route.ts:55:      language: body.language || 'en',
+app/api/seo/generate-schema/route.ts:169:        language: 'en',
+app/api/seo/news-sitemap/route.ts:47:      language: 'en',
+app/api/seo/rss-ping/route.ts:46:        languages: body.languages,
+app/api/seo/rss-ping/route.ts:59:      language: body.language || 'en',
+app/api/seo/rss-ping/route.ts:73:      language: pingRequest.language,
+app/api/seo/rss-ping/route.ts:115:      language: 'string - Language code (en, tr, de, fr, es, ru, ar, jp, zh) - default: en',
+app/api/seo/rss-ping/route.ts:118:      languages: 'string[] - For batch mode: array of language codes',
+app/api/seo/rss-ping/route.ts:146:        language: 'en',
+app/api/seo/rss-ping/route.ts:151:        languages: ['en', 'tr', 'de', 'zh'],
+app/api/sia-news/articles/route.ts:173:          language: query.language,
+app/api/sia-news/generate/route.ts:212:        { asset: body.asset, language: body.language }
+app/api/sia-news/generate/route.ts:254:          language: body.language,
+app/api/sia-news/generate/route.ts:268:          language: body.language,
+app/api/sia-news/generate/route.ts:377:function mapLanguageToRegion(language: Language): Region {
+app/api/sia-news/ssml/route.ts:63:        language: article.language,
+app/api/test-workspace/route.ts:18:      languages: article.languages,
+app/api/translate/route.ts:22:    const { text, targetLang, sourceLang = 'en' } = await request.json()
+app/api/translate/route.ts:29:      typeof targetLang !== 'string' ||
+app/api/translate/route.ts:30:      !PUBLIC_ROUTE_LOCALES.includes(targetLang.toLowerCase() as (typeof PUBLIC_ROUTE_LOCALES)[number])
+app/api/translate/route.ts:35:          error: `Invalid targetLang. Supported locales: ${PUBLIC_ROUTE_LOCALES.join(', ')}`,
+app/api/translate/route.ts:42:      typeof sourceLang !== 'string' ||
+app/api/translate/route.ts:43:      !PUBLIC_ROUTE_LOCALES.includes(sourceLang.toLowerCase() as (typeof PUBLIC_ROUTE_LOCALES)[number])
+app/api/translate/route.ts:48:          error: `Invalid sourceLang. Supported locales: ${PUBLIC_ROUTE_LOCALES.join(', ')}`,
+app/api/translate/route.ts:54:    const normalizedTargetLang = normalizePublicRouteLocale(targetLang)
+app/api/translate/route.ts:55:    const normalizedSourceLang = normalizePublicRouteLocale(sourceLang)
+app/api/translate/route.ts:59:      targetLang: toDictionaryLocale(normalizedTargetLang),
+app/api/translate/route.ts:60:      sourceLang: toDictionaryLocale(normalizedSourceLang),
+app/api/translate/route.ts:66:      targetLang: normalizedTargetLang,
+app/api/translate/route.ts:67:      sourceLang: normalizedSourceLang,
+app/api/videos/latest/route.ts:32:  language: string
+app/api/videos/latest/route.ts:43: * - language: string (optional)
+app/api/videos/latest/route.ts:154:      language: 'en',
+app/api/videos/latest/route.ts:168:      language: 'en',
+app/api/videos/latest/route.ts:181:      language: 'en',
+app/api/videos/latest/route.ts:194:      language: 'en',
+app/api/videos/latest/route.ts:207:      language: 'en',
+app/api/war-room/save/route.ts:195:        language: articleLang,
+app/api/war-room/workspace/route.ts:21:      languages: article.languages,
+app/api/warroom/analytics/route.ts:8:type Language = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh'
+app/api/warroom/analytics/route.ts:80:  const languages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+app/api/warroom/analytics/route.ts:87:      language: lang,
+app/api/warroom/analytics/route.ts:104:      language: lang as RevLanguage,
+app/api/warroom/analytics/route.ts:119:      language: language as Language,
+app/api/warroom/analytics/route.ts:145:        language: primaryLang as Language,
+app/api/warroom/broadcast/route.ts:31:    const targetLanguages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+app/api/warroom/broadcast/route.ts:34:    targetLanguages.forEach((lang) => {
+app/api/warroom/broadcast/route.ts:44:      targetLanguages,
+app/api/warroom/broadcast/route.ts:64:    const publishResults: Array<{ language: Language; success: boolean; url: string }> = []
+app/api/warroom/broadcast/route.ts:75:        language: lang,
+app/api/warroom/broadcast/route.ts:136:        languagesPublished: targetLanguages.length,
+app/api/warroom/broadcast/route.ts:146:        language: t.language,
+app/api/warroom/broadcast/route.ts:169:    const languages: Language[] = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh']
+app/api/warroom/broadcast/route.ts:207:    languages: ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'],
+app/api/whale-autopilot/route.ts:136:          targetLang: lang,
+app/api/whale-autopilot/route.ts:138:          sourceLang: 'en',
+app/api/whale-autopilot/route.ts:222:          language: lang,

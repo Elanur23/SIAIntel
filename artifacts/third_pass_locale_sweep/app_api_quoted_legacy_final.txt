@@ -1,0 +1,3 @@
+app/api/sia-news/generate/route.ts:387:    ja: 'JP',
+app/api/warroom/analytics/route.ts:15:type Region = 'US' | 'TR' | 'DE' | 'FR' | 'ES' | 'RU' | 'JP' | 'CN' | 'BR'
+app/api/warroom/analytics/route.ts:24:  ja: 'JP',

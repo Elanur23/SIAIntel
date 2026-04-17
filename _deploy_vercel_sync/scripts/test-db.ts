@@ -1,0 +1,7 @@
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+async function main() {
+  const count = await prisma.warRoomArticle.count()
+  console.log('DB_READY_COUNT:', count)
+}
+main().catch(e => console.error(e)).finally(() => prisma.$disconnect())

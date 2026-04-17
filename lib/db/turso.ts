@@ -3,11 +3,11 @@
  *
  * LibSQL adapter for Prisma Client.
  * Supports both local SQLite (development) and Turso (production).
+ * 
+ * NOTE: Uses lazy imports to avoid native module loading during Next.js build phase.
  */
 
 import { PrismaClient } from '@prisma/client'
-import { PrismaLibSQL } from '@prisma/adapter-libsql'
-import { createClient } from '@libsql/client'
 
 declare global {
   // eslint-disable-next-line no-var
@@ -42,6 +42,10 @@ function createPrismaClient(): PrismaClient {
     // Turso / LibSQL path (production or local dev with Turso configured)
     console.log('[DATABASE] Connecting to Turso LibSQL...')
 
+    // Lazy import to avoid native module loading during build
+    const { PrismaLibSQL } = require('@prisma/adapter-libsql')
+    const { createClient } = require('@libsql/client')
+
     const libsql = createClient({
       url: tursoUrl,
       authToken: process.env.TURSO_AUTH_TOKEN,
@@ -67,18 +71,30 @@ function createPrismaClient(): PrismaClient {
  * Prisma Client Singleton
  *
  * Prevents multiple instances in development (hot reload).
+ * Uses lazy initialization to avoid errors during build phase.
  */
-export const prisma = global.prisma || createPrismaClient()
+let _prisma: PrismaClient | undefined
 
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma
-}
+export const prisma = new Proxy({} as PrismaClient, {
+  get(target, prop) {
+    // Lazy initialize on first access
+    if (!_prisma) {
+      _prisma = global.prisma || createPrismaClient()
+      if (process.env.NODE_ENV !== 'production') {
+        global.prisma = _prisma
+      }
+    }
+    return (_prisma as any)[prop]
+  }
+})
 
 /**
  * Graceful shutdown
  */
 process.on('beforeExit', async () => {
-  await prisma.$disconnect()
+  if (_prisma) {
+    await _prisma.$disconnect()
+  }
 })
 
 /**

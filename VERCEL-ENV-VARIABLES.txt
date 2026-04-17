@@ -1,0 +1,64 @@
+# ============================================
+# VERCEL ENVIRONMENT VARIABLES
+# ============================================
+# Vercel Dashboard → Settings → Environment Variables
+# Her satırı ayrı ayrı ekleyin
+# ============================================
+
+# ============================================
+# 1. SECURITY (ZORUNLU - YENİ ÜRET)
+# ============================================
+# PowerShell'de çalıştır:
+# [Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))
+# [Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))
+# [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+
+NEXTAUTH_SECRET=<1. komutun çıktısını buraya yapıştır>
+SESSION_SECRET=<2. komutun çıktısını buraya yapıştır>
+ADMIN_SECRET=<3. komutun çıktısını buraya yapıştır>
+
+# ============================================
+# 2. TURSO DATABASE (HAZIR)
+# ============================================
+TURSO_DATABASE_URL=libsql://siaintel-prod-elanur.aws-eu-west-1.turso.io
+TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzQxMDU2MjgsImlkIjoiMDE5ZDEwZWUtOTAwMS03MzUwLWFhZWEtOGQzYjNjOTNhMWI0IiwicmlkIjoiM2Y3ZmUyYjUtM2UwMS00NjI0LTljMGMtNThjNTZmNmQxN2Y0In0.fWDklhVdcOvefn8QJG4aP_reWBWLiSb3OS6z4wswtK1600s1X2_GrCkxS1-seO9a0WqBwA91fsiVaNc4KRiODQ
+DATABASE_URL=libsql://siaintel-prod-elanur.aws-eu-west-1.turso.io?authToken=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzQxMDU2MjgsImlkIjoiMDE5ZDEwZWUtOTAwMS03MzUwLWFhZWEtOGQzYjNjOTNhMWI0IiwicmlkIjoiM2Y3ZmUyYjUtM2UwMS00NjI0LTljMGMtNThjNTZmNmQxN2Y0In0.fWDklhVdcOvefn8QJG4aP_reWBWLiSb3OS6z4wswtK1600s1X2_GrCkxS1-seO9a0WqBwA91fsiVaNc4KRiODQ
+
+# ============================================
+# 3. AI SERVICES (HAZIR)
+# ============================================
+# SECURITY: Real API keys have been sanitized. Use environment variables in production.
+GROQ_API_KEY=gsk_PLACEHOLDER_GROQ_API_KEY_REDACTED_FOR_SECURITY
+GEMINI_API_KEY=AIzaSy_PLACEHOLDER_GEMINI_API_KEY_REDACTED_FOR_SECURITY
+
+# ============================================
+# 4. SITE CONFIGURATION (HAZIR)
+# ============================================
+NEXTAUTH_URL=https://siaintel.vercel.app
+SITE_URL=https://siaintel.vercel.app
+SITE_NAME=SIA Intelligence Terminal
+NEXT_PUBLIC_SITE_URL=https://siaintel.vercel.app
+NEXT_PUBLIC_BASE_URL=https://siaintel.vercel.app
+NODE_ENV=production
+
+# ============================================
+# 5. BACKEND URLS (HAZIR)
+# ============================================
+SIAINTEL_BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_SIAINTEL_BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_REFRESH_INTERVAL=10000
+NEXT_PUBLIC_MAX_VIDEOS_DISPLAY=20
+
+# ============================================
+# 6. DISTRIBUTION (HAZIR)
+# ============================================
+DISTRIBUTION_ENABLED=false
+DISTRIBUTION_AUTO_PUBLISH=false
+DISTRIBUTION_REVIEW_REQUIRED=true
+
+# ============================================
+# TOPLAM: 20 değişken
+# ============================================
+# ✅ Hazır: 17 değişken
+# ⚠️  Üretilmesi gereken: 3 değişken (NEXTAUTH_SECRET, SESSION_SECRET, ADMIN_SECRET)
+# ============================================

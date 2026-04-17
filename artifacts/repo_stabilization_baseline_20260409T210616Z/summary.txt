@@ -1,0 +1,243 @@
+=== npm run type-check ===
+type-check EXIT_CODE=2
+LOG=artifacts/repo_stabilization_baseline_20260409T210616Z/type-check.log
+--- tail type-check ---
+lib/dispatcher/seo-generator.ts(7,56): error TS2307: Cannot find module '@/lib/seo/url-slug-engine' or its corresponding type declarations.
+lib/dispatcher/seo-generator.ts(8,45): error TS2307: Cannot find module '@/lib/seo/multilingual-metadata-generator' or its corresponding type declarations.
+lib/dispatcher/translation-engine.ts(7,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/hooks/useNeuralHealer.ts(2,30): error TS2307: Cannot find module '@/components/admin/NeuralCellAuditRow' or its corresponding type declarations.
+lib/hooks/useNeuralHealer.ts(108,18): error TS18046: 'c' is of type 'unknown'.
+lib/hooks/useNeuralHealer.ts(108,43): error TS18046: 'c' is of type 'unknown'.
+lib/neural-assembly/ai-supervisor.ts(1,55): error TS2307: Cannot find module './master-orchestrator' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(3,40): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(4,31): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(5,35): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(7,43): error TS2307: Cannot find module './stabilization/confidence-scoring' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(8,70): error TS2307: Cannot find module './stabilization/config' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(9,61): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/ai-supervisor.ts(54,33): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/ai-supervisor.ts(59,34): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/blackboard-system.ts(15,35): error TS2307: Cannot find module './database' or its corresponding type declarations.
+lib/neural-assembly/cells/body-cell.ts(9,92): error TS2307: Cannot find module '../editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(62,43): error TS2307: Cannot find module './stabilization/confidence-scoring' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(63,65): error TS2307: Cannot find module './stabilization/config' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(64,57): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(69,8): error TS2307: Cannot find module '../sia-news/failure-engine/multilingual-headline-integrity' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(70,46): error TS2307: Cannot find module '../sia-news/failure-engine/narrative-discipline' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(71,37): error TS2307: Cannot find module '../sia-news/failure-engine/evidence-ledger' or its corresponding type declarations.
+lib/neural-assembly/chief-editor-engine.ts(72,76): error TS2307: Cannot find module '../sia-news/failure-engine/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(1,26): error TS2307: Cannot find module '../search/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(3,32): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(4,44): error TS2307: Cannot find module '../sia-news/failure-engine/multilingual-headline-integrity' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(5,38): error TS2307: Cannot find module '../sia-news/failure-engine/types' or its corresponding type declarations.
+lib/neural-assembly/core-types.ts(6,26): error TS2307: Cannot find module './stabilization/types' or its corresponding type declarations.
+lib/neural-assembly/manual-override.ts(16,45): error TS2307: Cannot find module './editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/security-middleware.ts(18,35): error TS2307: Cannot find module './database' or its corresponding type declarations.
+lib/neural-assembly/speed-cell.ts(7,37): error TS2307: Cannot find module '@/lib/seo/global-search-engine-push' or its corresponding type declarations.
+lib/neural-assembly/stabilization/crypto-provider.ts(16,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(1,48): error TS2307: Cannot find module '../master-orchestrator' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(2,26): error TS2307: Cannot find module '../editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(3,40): error TS2307: Cannot find module './types' or its corresponding type declarations.
+lib/neural-assembly/stabilization/hard-rule-engine.ts(123,69): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/stabilization/operator-precheck.ts(2,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/pecl-enforcer.ts(13,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(2,48): error TS2307: Cannot find module '../master-orchestrator' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(4,40): error TS2307: Cannot find module './types' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(5,31): error TS2307: Cannot find module '../editorial-event-bus' or its corresponding type declarations.
+lib/neural-assembly/stabilization/publish-safety-gate.ts(165,66): error TS7006: Parameter 'i' implicitly has an 'any' type.
+lib/neural-assembly/stabilization/terminal-sink-enforcer.ts(23,38): error TS2307: Cannot find module './config' or its corresponding type declarations.
+lib/neural-assembly/stabilization/trace.ts(2,36): error TS2307: Cannot find module './types' or its corresponding type declarations.
+lib/neural-assembly/stabilization/trace.ts(3,35): error TS2307: Cannot find module '../database' or its corresponding type declarations.
+lib/security/api-middleware.ts(61,21): error TS2345: Argument of type 'NextRequest' is not assignable to parameter of type 'string'.
+lib/security/api-middleware.ts(87,17): error TS2345: Argument of type 'NextRequest' is not assignable to parameter of type 'string'.
+lib/security/idempotency.ts(85,24): error TS2345: Argument of type '"admin_action_duplicate"' is not assignable to parameter of type 'AuditEventType'.
+lib/security/session-hardening.ts(158,11): error TS2304: Cannot find name 'logAuditEvent'.
+lib/security/session-hardening.ts(179,9): error TS2304: Cannot find name 'logAuditEvent'.
+lib/security/telegram-alerting.ts(49,5): error TS2322: Type '"admin_action_security_change"' is not assignable to type 'AuditEventType'.
+lib/security/telegram-alerting.ts(103,7): error TS2367: This comparison appears to be unintentional because the types '"login_success" | "login_failed" | "logout" | "session_created" | "session_expired" | "session_rotated" | "2fa_setup_started" | "2fa_enabled" | "2fa_verified" | "2fa_failed" | ... 27 more ... | "waf_block_suspected"' and '"admin_action_security_change"' have no overlap.
+lib/services/SiaIntelligenceProcessor.ts(6,35): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/sovereign-core/neuro-sync-kernel.ts(9,59): error TS2307: Cannot find module '../neural-assembly/gemini-central-provider' or its corresponding type declarations.
+lib/speedcell/global-discovery-engine.ts(9,41): error TS2307: Cannot find module '@/lib/seo/google-indexing-api' or its corresponding type declarations.
+lib/speedcell/global-discovery-engine.ts(10,42): error TS2307: Cannot find module '@/lib/seo/global-search-engine-push' or its corresponding type declarations.
+lib/speedcell/global-discovery-engine.ts(11,37): error TS2307: Cannot find module '@/lib/seo/rss-ping-service' or its corresponding type declarations.
+test-chief-editor-integration.ts(6,36): error TS2307: Cannot find module './lib/neural-assembly/master-orchestrator' or its corresponding type declarations.
+test-chief-editor-integration.ts(7,77): error TS2307: Cannot find module './lib/neural-assembly/master-orchestrator' or its corresponding type declarations.
+
+=== npm run lint ===
+lint EXIT_CODE=0
+LOG=artifacts/repo_stabilization_baseline_20260409T210616Z/lint.log
+--- tail lint ---
+./components/SiaAudioPlayer.tsx
+33:6  Warning: React Hook useEffect has a missing dependency: 'loadAudio'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/SiaRadarVisual.tsx
+109:77  Warning: The ref value 'animationFrameRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'animationFrameRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+
+./components/TechnicalChart.tsx
+187:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/ArticlesAdminPage.tsx
+95:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/top-stories-grid.tsx
+128:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./lib/compliance/ban-shield.ts
+285:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/content/content-buffer-system.ts
+616:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/editorial/ghost-editor-system.ts
+363:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/featured/featured-articles-db.ts
+100:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/hooks/useArticleGA4Metrics.ts
+97:6  Warning: React Hook useEffect has a missing dependency: 'fetchMetrics'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+166:6  Warning: React Hook useEffect has missing dependencies: 'articleUrls.length' and 'fetchBatchMetrics'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+166:7  Warning: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+
+./lib/hooks/useLiveIntel.ts
+225:6  Warning: React Hook useEffect has a missing dependency: 'fetchLivePrices'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/hooks/useLiveIntelStream.ts
+422:6  Warning: React Hook useEffect has a missing dependency: 'fetchLiveAlpha'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/hooks/useNeuralAudit.ts
+177:6  Warning: React Hook useEffect has missing dependencies: 'onHealingComplete' and 'startAutonomousHealing'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/infrastructure/database-connection-pool.ts
+501:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/infrastructure/edge-cache-strategy.ts
+396:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/seo/auto-silo-linking.ts
+536:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/seo/instant-indexing-push.ts
+424:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/seo/json-ld-v3-engine.ts
+480:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./lib/utils/seo-keywords.ts
+294:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+
+=== npm run test ===
+test EXIT_CODE=1
+LOG=artifacts/repo_stabilization_baseline_20260409T210616Z/test.log
+--- tail test ---
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should test technical depth scoring
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:681:25)
+
+  ● SIA News E2E Integration Tests › Task 25.3: Quality Validation › should validate all quality metrics together
+
+    Content quality validation failed: Headline length mismatch (Target: 60-80 chars), Content depth too low: 298 words (SIA Target: 850-950)
+
+      180 |
+      181 |   if (!qualityValidation.isValid) {
+    > 182 |     throw new Error(`Content quality validation failed: ${qualityValidation.issues.join(', ')}`)
+          |           ^
+      183 |   }
+      184 |
+      185 |   const processingTime = Date.now() - startTime
+
+      at generateArticle (lib/sia-news/content-generation.ts:182:11)
+      at Object.<anonymous> (lib/sia-news/__tests__/e2e-integration.test.ts:729:25)
+
+FAIL lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../database' from 'lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts'
+
+       8 |
+       9 | import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+    > 10 | import { getGlobalDatabase, resetGlobalDatabase } from '../../database';
+         | ^
+      11 | import { recordEmergencyBypass, type EmergencyBypassContext } from '../sink-verifier';
+      12 | import { canonicalizeJSON } from '../crypto-provider';
+      13 | import crypto from 'crypto';
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (lib/neural-assembly/stabilization/__tests__/ultra-final-hardening.test.ts:10:1)
+
+FAIL lib/sia-news/__tests__/circuit-breaker.test.ts
+  ● Test suite failed to run
+
+    Jest worker encountered 4 child process exceptions, exceeding retry limit
+
+      at ChildProcessWorker.initialize (node_modules/jest-worker/build/workers/ChildProcessWorker.js:181:21)
+
+
+Test Suites: 21 failed, 10 passed, 31 total
+Tests:       22 failed, 143 passed, 165 total
+Snapshots:   0 total
+Time:        54.436 s
+Ran all test suites.
+
+=== npm run build ===
+build EXIT_CODE=1
+LOG=artifacts/repo_stabilization_baseline_20260409T210616Z/build.log
+--- tail build ---
+
+> siaintel-terminal@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for client (static)...
+ ○ (pwa) Service worker: /workspaces/SIAIntel/public/sw.js
+ ○ (pwa)   URL: /sw.js
+ ○ (pwa)   Scope: /
+Failed to compile.
+
+./app/api/admin/csrf-token/route.ts
+Module not found: Can't resolve '@/lib/security/csrf-middleware'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/analytics/article-metrics/route.ts
+Module not found: Can't resolve '@/lib/signals/google-analytics-service'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/contact/route.ts
+Module not found: Can't resolve '@/lib/security/csrf-middleware'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/contact/route.ts
+Module not found: Can't resolve '@/lib/security/rate-limiter'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/distribution/execute/route.ts
+Module not found: Can't resolve '@/lib/distribution/distribution-engine'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors
+

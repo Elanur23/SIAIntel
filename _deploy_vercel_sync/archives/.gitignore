@@ -1,0 +1,5 @@
+# Archive files
+*.json
+
+# Keep this directory
+!.gitignore
