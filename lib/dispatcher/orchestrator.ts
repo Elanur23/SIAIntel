@@ -4,7 +4,7 @@
  * Manages job lifecycle, concurrent processing, and error recovery
  */
 
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 import type {
   IntelligenceInput,
   DispatcherJob,
@@ -79,7 +79,7 @@ export class DispatcherOrchestrator {
     }
 
     // Create job
-    const jobId = uuidv4()
+    const jobId = randomUUID()
     const job: DispatcherJob = {
       id: jobId,
       status: 'pending',

@@ -6,7 +6,7 @@
  * PHASE 1.6: REAL ROLLBACK IMPLEMENTATION
  */
 
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 import type {
   Language,
   PublishableArticle,
@@ -32,7 +32,7 @@ export class PublishingService {
 
     try {
       // Generate shared article ID
-      const articleId = articles[Object.keys(articles)[0] as Language]?.id || uuidv4()
+      const articleId = articles[Object.keys(articles)[0] as Language]?.id || randomUUID()
 
       // Publish each language version
       for (const [lang, article] of Object.entries(articles)) {

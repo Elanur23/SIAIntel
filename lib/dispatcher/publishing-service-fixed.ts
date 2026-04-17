@@ -7,8 +7,7 @@
  * ULTRA-FINAL HARDENING: Deterministic delivery verification + atomic bypass enforcement
  */
 
-import crypto from 'crypto'
-import { v4 as uuidv4 } from 'uuid'
+import crypto, { randomUUID } from 'crypto'
 import type {
   Language,
   PublishableArticle,
@@ -35,7 +34,7 @@ export class PublishingService {
 
     try {
       // Generate shared article ID
-      const articleId = articles[Object.keys(articles)[0] as Language]?.id || uuidv4()
+      const articleId = articles[Object.keys(articles)[0] as Language]?.id || randomUUID()
 
       // L6-BLK-004: COMPLETE AUTHORIZATION VERIFICATION before publishing
       let frozenArticles: Record<Language, PublishableArticle> = articles;

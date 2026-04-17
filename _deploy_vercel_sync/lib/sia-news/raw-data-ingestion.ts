@@ -14,7 +14,7 @@
  */
 
 import { RawDataSource, RawEvent, NormalizedEvent } from './types'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 // ============================================================================
 // DATA SOURCE CONFIGURATIONS
@@ -567,7 +567,7 @@ export class RawDataIngestionManager {
  */
 export async function processRawEvent(event: RawEvent): Promise<NormalizedEvent> {
   const normalized: NormalizedEvent = {
-    id: uuidv4(),
+    id: randomUUID(),
     source: event.source,
     eventType: event.eventType,
     asset: extractAsset(event),
