@@ -13,42 +13,41 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/db/prisma'
 import { updateLastActivity } from './auth/idle-timeout'
 import * as bcrypt from 'bcryptjs'
-import type { NextAuthOptions } from 'next-auth'
 
 // Re-export for backward compatibility
 export type { RateLimitResult }
 
 /**
  * Validate API key against environment variables
- * 
+ *
  * SECURITY: No hardcoded keys, environment variables only
  */
 export function validateApiKey(apiKey: string | null): boolean {
   if (!apiKey) return false
-  
+
   // Only accept API keys from environment variables
   const validKeys = [
     process.env.AI_API_KEY,
     process.env.NEXT_PUBLIC_AI_API_KEY,
   ].filter(Boolean) // Remove undefined values
-  
+
   if (validKeys.length === 0) {
     console.warn('[AUTH] No API keys configured in environment variables')
     return false
   }
-  
+
   return validKeys.includes(apiKey)
 }
 
 /**
  * Rate limit check - delegates to dedicated rate limiter
- * 
+ *
  * @deprecated Use checkRateLimit from './auth/rate-limiter' directly
  */
 export async function rateLimitCheck(
-  clientId: string, 
-  action: string, 
-  limit: number = 100, 
+  clientId: string,
+  action: string,
+  limit: number = 100,
   windowMs: number = 60 * 60 * 1000 // 1 hour
 ): Promise<RateLimitResult> {
   // Delegate to new rate limiter
@@ -57,8 +56,9 @@ export async function rateLimitCheck(
 
 /**
  * NextAuth.js Configuration with Idle Timeout Support
+ * Typed as any to satisfy Auth.js v5 Beta 30 factory requirement
  */
-export const authOptions: NextAuthOptions = {
+export const authOptions: any = {
   adapter: PrismaAdapter(prisma) as any,
   
   session: {
@@ -68,7 +68,7 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     // JWT callback: Add lastActivity to token
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger }: any) {
       // On sign in, initialize lastActivity
       if (user) {
         token.id = user.id
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     // Session callback: Add lastActivity to session
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
         (session.user as any).id = token.id as string
         (session.user as any).role = token.role as string
