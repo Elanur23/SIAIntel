@@ -100,7 +100,7 @@ export function getAlertSeverity(
   
   // High severity
   if (eventType === '2fa_disabled') return 'high'
-  if (eventType === 'admin_action_security_change') return 'high'
+  if ((eventType as string) === 'admin_action_security_change') return 'high'
   if (eventType === 'csrf_failed') return 'high'
   if (riskScore && riskScore >= 30) return 'high'
   
