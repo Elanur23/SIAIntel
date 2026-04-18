@@ -162,15 +162,17 @@ async function processCleanupJob(job: Job): Promise<{ deletedCount: number }> {
     await sendSlackAlert('Audit log cleanup job failed', err)
 
     // Log failure to audit log
-    await logAuditEvent({
-      action: 'AUDIT_LOG_CLEANUP',
-      userId: 'system',
-      success: false,
-      errorMessage: err.message,
-      metadata: JSON.stringify({
-        retentionDays: RETENTION_DAYS,
-      }),
-    })
+    await logAuditEvent(
+      'AUDIT_LOG_CLEANUP',
+      false,
+      {
+        userId: 'system',
+        errorMessage: err.message,
+        metadata: {
+          retentionDays: RETENTION_DAYS,
+        },
+      }
+    )
 
     throw err
   }
