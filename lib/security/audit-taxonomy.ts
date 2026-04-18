@@ -24,6 +24,7 @@ export type AuditEventType =
   | '2fa_failed'
   | '2fa_disabled'
   | 'backup_code_used'
+  | 'backup_code_failed'
   | 'backup_codes_generated'
   | 'backup_codes_regenerated'
   
@@ -202,6 +203,7 @@ export const EVENT_DESCRIPTIONS: Record<AuditEventType, string> = {
   '2fa_failed': '2FA verification failed',
   '2fa_disabled': '2FA disabled for user',
   backup_code_used: 'Backup recovery code used',
+  backup_code_failed: 'Backup recovery code attempt failed',
   backup_codes_generated: 'New backup codes generated',
   backup_codes_regenerated: 'Backup codes regenerated (old codes invalidated)',
   
