@@ -1,0 +1,276 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  darkMode: ['class', '[data-theme="dark"]'],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-space-mono)', 'Space Mono', 'ui-monospace', 'monospace'],
+      },
+      colors: {
+        // Bloomberg Orange Theme
+        primary: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316', // Bloomberg Orange
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+          950: '#431407',
+        },
+        secondary: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+        accent: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          950: '#451a03',
+        },
+        success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+          950: '#052e16',
+        },
+        warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          950: '#451a03',
+        },
+        error: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+          950: '#450a0a',
+        },
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      maxWidth: {
+        '8xl': '88rem',
+        '9xl': '96rem',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-out',
+        'slide-in': 'slideIn 0.4s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out',
+        'bounce-slow': 'bounce 2s infinite',
+        'pulse-slow': 'pulse 3s infinite',
+        'marquee': 'marquee 30s linear infinite',
+        'marquee-reverse': 'marquee-reverse 30s linear infinite',
+        'ticker-slow': 'ticker-scroll 60s linear infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideIn: {
+          '0%': { opacity: '0', transform: 'translateX(-20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        'marquee-reverse': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        'ticker-scroll': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-33.333%)' },
+        },
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'var(--text-primary)',
+            lineHeight: '1.7',
+            fontSize: '1.1rem',
+            h1: {
+              color: 'var(--text-primary)',
+              fontWeight: '700',
+              fontSize: '2.5rem',
+              lineHeight: '1.2',
+              marginBottom: '1.5rem',
+            },
+            h2: {
+              color: 'var(--text-primary)',
+              fontWeight: '600',
+              fontSize: '2rem',
+              lineHeight: '1.3',
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            h3: {
+              color: 'var(--text-primary)',
+              fontWeight: '600',
+              fontSize: '1.5rem',
+              lineHeight: '1.4',
+              marginTop: '1.5rem',
+              marginBottom: '0.75rem',
+            },
+            p: {
+              marginBottom: '1.5rem',
+              color: 'var(--text-primary)',
+            },
+            a: {
+              color: 'var(--secondary-color)',
+              textDecoration: 'underline',
+              fontWeight: '500',
+              '&:hover': {
+                color: 'var(--primary-color)',
+              },
+            },
+            blockquote: {
+              borderLeftColor: 'var(--secondary-color)',
+              backgroundColor: 'var(--surface)',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              fontStyle: 'italic',
+              color: 'var(--text-secondary)',
+            },
+            code: {
+              backgroundColor: 'var(--surface)',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '0.25rem',
+              fontSize: '0.9em',
+              fontWeight: '500',
+            },
+            pre: {
+              backgroundColor: 'var(--surface)',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              overflow: 'auto',
+            },
+            img: {
+              borderRadius: '0.5rem',
+              margin: '2rem 0',
+            },
+            ul: {
+              listStyleType: 'disc',
+              paddingLeft: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            ol: {
+              listStyleType: 'decimal',
+              paddingLeft: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            li: {
+              marginBottom: '0.5rem',
+            },
+          },
+        },
+        lg: {
+          css: {
+            fontSize: '1.2rem',
+            lineHeight: '1.8',
+            h1: {
+              fontSize: '3rem',
+            },
+            h2: {
+              fontSize: '2.25rem',
+            },
+            h3: {
+              fontSize: '1.75rem',
+            },
+          },
+        },
+      },
+      screens: {
+        'xs': '475px',
+        '3xl': '1600px',
+      },
+      aspectRatio: {
+        '4/3': '4 / 3',
+        '3/2': '3 / 2',
+        '2/3': '2 / 3',
+        '9/16': '9 / 16',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      boxShadow: {
+        'inner-lg': 'inset 0 10px 15px -3px rgba(0, 0, 0, 0.1), inset 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'glow': '0 0 20px rgba(59, 130, 246, 0.5)',
+        'glow-lg': '0 0 40px rgba(59, 130, 246, 0.3)',
+      },
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      },
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+        '90': '90',
+        '100': '100',
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/aspect-ratio'),
+  ],
+}
