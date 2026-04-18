@@ -3,7 +3,7 @@
  * FEATURES: UNIFIED GOOGLE STACK INTEGRATION | AI-DRIVEN NEWS HUB
  */
 
-import { notifyGoogleIndexing } from '../google/indexing-service';
+import { notifyGoogleIndexingAPI } from '../seo/google-indexing-api';
 import { synthesizeSpeech } from '../google/tts-service';
 import { analyzeMarketPulse } from '../google/sentiment-service';
 import { analyzeLeakedEvidence } from '../google/vision-service';
@@ -79,7 +79,7 @@ export async function processIntelligenceLeak(article: NewsArticle): Promise<Pro
 
     // 5. PHASE: GOOGLE INDEXING (SEO Acceleration)
     const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/${article.language}/news/${article.id}`;
-    const indexing = await notifyGoogleIndexing(siteUrl);
+    const indexing = await notifyGoogleIndexingAPI(siteUrl);
 
     // 6. PHASE: DISCOVER IMAGE OPTIMIZATION (Metadata for Googlebot)
     // Ensures image is forced to high-res via URL parameters if it's from Unsplash/Placeholder
@@ -98,7 +98,7 @@ export async function processIntelligenceLeak(article: NewsArticle): Promise<Pro
         sentiment: sentiment
       },
       audioBriefBase64: audioBrief,
-      indexingStatus: indexing.message,
+      indexingStatus: indexing.success ? 'SUCCESS' : (indexing.error || 'FAILED'),
       evidenceAnalysis: evidenceResult,
       truthAnalysis: {
         truthScore: truth.truthScore,
