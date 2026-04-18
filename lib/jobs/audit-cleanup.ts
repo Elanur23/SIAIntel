@@ -124,16 +124,18 @@ async function cleanupAuditLogs(): Promise<number> {
     console.log(`[AUDIT-CLEANUP] Successfully deleted ${deletedCount} audit log entries`)
 
     // Log the cleanup action to audit log
-    await logAuditEvent({
-      action: 'AUDIT_LOG_CLEANUP',
-      userId: 'system',
-      success: true,
-      metadata: JSON.stringify({
-        deletedCount,
-        cutoffDate: cutoffDate.toISOString(),
-        retentionDays: RETENTION_DAYS,
-      }),
-    })
+    await logAuditEvent(
+      'AUDIT_LOG_CLEANUP',
+      true,
+      {
+        userId: 'system',
+        metadata: {
+          deletedCount,
+          cutoffDate: cutoffDate.toISOString(),
+          retentionDays: RETENTION_DAYS,
+        },
+      }
+    )
 
     return deletedCount
   } catch (error) {
