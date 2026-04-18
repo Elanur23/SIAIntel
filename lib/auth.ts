@@ -115,18 +115,19 @@ export const authOptions: any = {
           return null
         }
 
-        const username = String(credentials.username)
-        const password = String(credentials.password)
+        // Nuclear Type-Safe Extraction
+        const safeUsername: string = (credentials as any).username as string
+        const safePassword: string = (credentials as any).password as string
 
         const user = await prisma.user.findUnique({
-          where: { username },
+          where: { username: safeUsername },
         })
 
         if (!user || !user.enabled) {
           return null
         }
 
-        const isValid = await bcrypt.compare(password, user.passwordHash)
+        const isValid = await bcrypt.compare(safePassword, user.passwordHash)
         if (!isValid) {
           return null
         }
