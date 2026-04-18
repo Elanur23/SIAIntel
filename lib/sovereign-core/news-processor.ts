@@ -34,6 +34,7 @@ export interface ProcessedNewsResult {
   translations?: Record<string, string>;
   detectedLanguage?: string;
   credibilityScore: number; // 0-100 aggregated score
+  optimizedImageUrl?: string; // Discover-ready image URL
   timestamp: string;
 }
 
