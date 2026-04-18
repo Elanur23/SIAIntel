@@ -12,7 +12,7 @@
 
 import { prisma } from '@/lib/db/prisma'
 import { hashToken } from '@/lib/auth/session-manager'
-import { auditLog } from '@/lib/auth/audit-logger'
+import { auditLog, logAuditEvent } from '@/lib/auth/audit-logger'
 import { detectAllSuspiciousActivity } from '@/lib/security/suspicious-activity-detector'
 import { assessRisk, enforceRiskPolicy } from '@/lib/security/risk-scoring'
 
