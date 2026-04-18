@@ -46,7 +46,7 @@ export function shouldAlert(eventType: AuditEventType, riskScore?: number): bool
     'suspicious_activity_detected',
     'session_invalidated',
     '2fa_disabled',
-    'admin_action_security_change',
+    'admin_action_security_change' as any,
   ]
   
   if (criticalEvents.includes(eventType)) {
