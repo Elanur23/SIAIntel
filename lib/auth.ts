@@ -10,7 +10,7 @@
 import { checkRateLimit, resetRateLimit, type RateLimitResult } from './auth/rate-limiter'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from './db/prisma'
 import { updateLastActivity } from './auth/idle-timeout'
 import * as bcrypt from 'bcryptjs'
 
@@ -110,20 +110,23 @@ export const authOptions: any = {
         username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.username || !credentials?.password) {
           return null
         }
 
+        const username = String(credentials.username)
+        const password = String(credentials.password)
+
         const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
+          where: { username },
         })
 
         if (!user || !user.enabled) {
           return null
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+        const isValid = await bcrypt.compare(password, user.passwordHash)
         if (!isValid) {
           return null
         }
