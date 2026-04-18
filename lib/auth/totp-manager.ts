@@ -109,7 +109,7 @@ async function generateTotpCode(secret: string, timeStep?: number): Promise<stri
   // Import key for HMAC
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
-    key,
+    key as BufferSource,
     { name: 'HMAC', hash: 'SHA-1' },
     false,
     ['sign']
