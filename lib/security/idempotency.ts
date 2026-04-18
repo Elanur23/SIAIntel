@@ -82,7 +82,7 @@ export async function checkIdempotency(
       // Check if completed
       if (existing.completed) {
         // Duplicate request, return existing result
-        await auditLog('admin_action_duplicate', 'failure', {
+        await auditLog('admin_action_duplicate' as any, 'failure', {
           userId,
           reason: `Duplicate ${action} request blocked`,
           metadata: {
