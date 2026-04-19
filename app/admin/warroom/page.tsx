@@ -242,7 +242,7 @@ export default function WarRoom() {
     }
   }
 
-  const handlePublish = async () => {
+  const handlePublish = async (forceOverride = false) => {
     if (!selectedNews || !vault[activeLang].ready) return
     setIsPublishing(true)
 
@@ -273,6 +273,11 @@ export default function WarRoom() {
         status: 'published',
       }
 
+      // Add forceSave flag if override requested
+      if (forceOverride) {
+        savePayload.forceSave = true
+      }
+
       SUPPORTED_LANGS.forEach((lang) => {
         if (vault[lang].ready) {
           const suffix = getLangFieldSuffix(lang)
@@ -287,10 +292,33 @@ export default function WarRoom() {
         body: JSON.stringify(savePayload),
       })
 
-      if (saveRes.ok) alert(`🚀 GLOBAL DEPLOY SUCCESS: ${activeLang.toUpperCase()}`)
+      const saveData = await saveRes.json()
+
+      // Handle duplicate detection (409 Conflict)
+      if (saveRes.status === 409 && saveData.duplicate) {
+        setIsPublishing(false)
+        const matchedTitle = saveData.matchedTitle || 'Unknown article'
+        const confirmMsg = `⚠️ DUPLICATE DETECTED\n\nAn article with a similar title already exists:\n"${matchedTitle}"\n\nPublish anyway?`
+        
+        if (window.confirm(confirmMsg)) {
+          // Retry with forceSave flag
+          return handlePublish(true)
+        }
+        return // User cancelled
+      }
+
+      // Handle other errors
+      if (!saveRes.ok || !saveData.success) {
+        alert(`❌ PUBLISH FAILED: ${saveData.error || 'Unknown error'}`)
+        return
+      }
+
+      // Success
+      alert(`🚀 GLOBAL DEPLOY SUCCESS: ${activeLang.toUpperCase()}`)
       await loadFeed()
     } catch (publishErr) {
       console.error('[WARROOM] Publish failed:', (publishErr as Error).message)
+      alert(`❌ PUBLISH FAILED: ${(publishErr as Error).message}`)
     } finally {
       setIsPublishing(false)
     }
@@ -398,7 +426,7 @@ export default function WarRoom() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={handlePublish}
+                        onClick={() => handlePublish()}
                         disabled={isPublishing || !activeDraft.ready}
                         className="flex items-center gap-2 px-4 py-1.5 bg-emerald-600 text-white font-black uppercase text-[9px] rounded-sm hover:bg-emerald-500 disabled:opacity-20 shadow-lg shadow-emerald-900/20"
                       >
@@ -544,7 +572,7 @@ export default function WarRoom() {
                 </select>
               </label>
               <button
-                onClick={handlePublish}
+                onClick={() => handlePublish()}
                 disabled={!activeDraft.ready || isPublishing}
                 className="w-full py-5 bg-[#FFB800] text-black font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#FFB800]/80 transition-all flex items-center justify-center gap-3 rounded-sm"
               >
