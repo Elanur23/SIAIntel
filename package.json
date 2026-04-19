@@ -37,7 +37,7 @@
     "@google/generative-ai": "^0.24.1",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.2.0",
-    "@libsql/client": "^0.17.2",
+    "@libsql/client": "^0.8.1",
     "@prisma/adapter-libsql": "5.22.0",
     "@prisma/client": "^5.10.2",
     "@prisma/driver-adapter-utils": "5.22.0",
