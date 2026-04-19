@@ -30,6 +30,25 @@ export function middleware(request: NextRequest) {
   const segments = pathname.split('/')
   const firstSegment = segments[1]
 
+  // Bypass locale prefixing for admin routes
+  if (isAdminPath) {
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-nonce', Buffer.from(crypto.randomUUID()).toString('base64'))
+    requestHeaders.set('x-pathname', pathname)
+
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
+  }
+
   if (firstSegment && isLocaleSegment(firstSegment.toLowerCase())) {
     const normalizedLocale = normalizePublicRouteLocale(firstSegment)
     if (firstSegment !== normalizedLocale) {
