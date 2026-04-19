@@ -117,9 +117,9 @@ function CyberBox({
 }) {
   return (
     <div
-      className={`border border-white/20 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-sm flex flex-col min-h-0 overflow-hidden shadow-lg shadow-black/50 ${className}`}
+      className={`border border-white/15 bg-gradient-to-b from-[#151920]/92 via-[#0d1016]/92 to-[#080a0e]/95 backdrop-blur-md flex flex-col min-h-0 overflow-hidden rounded-lg ring-1 ring-white/10 shadow-[0_18px_34px_rgba(0,0,0,0.5)] ${className}`}
     >
-      <div className="border-b border-white/20 p-3 flex items-center justify-between bg-gradient-to-r from-white/10 to-white/5 shrink-0">
+      <div className="border-b border-white/15 px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white/12 via-white/7 to-white/4 shrink-0">
         <div className="flex items-center gap-2">
           {Icon && <Icon size={14} className="text-[#FFB800] drop-shadow-[0_0_4px_rgba(255,184,0,0.5)]" />}
           <span className="text-xs font-black uppercase tracking-wider text-white/80">
@@ -137,6 +137,30 @@ function CyberBox({
 }
 
 export default function WarRoom() {
+  // VISUAL CANARY: DO NOT REMOVE
+  const canaryBanner = (
+    <div
+      style={{
+        width: '100%',
+        background: '#FF0000',
+        border: '6px solid #FFD600',
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: '2rem',
+        textTransform: 'uppercase',
+        letterSpacing: '0.15em',
+        padding: '2rem 0',
+        textAlign: 'center',
+        zIndex: 9999,
+        position: 'relative',
+        boxShadow: '0 0 24px 8px #FFD600',
+        marginBottom: '2rem',
+      }}
+      data-canary="WARROOM_CANARY_V1"
+    >
+      WARROOM_CANARY_V1
+    </div>
+  )
   const [newsFeed, setNewsFeed] = useState<any[]>([])
   const [selectedNews, setSelectedNews] = useState<any>(null)
   const [activeLang, setActiveLang] = useState<SupportedLang>('en')
@@ -346,7 +370,8 @@ export default function WarRoom() {
   }, [])
 
   return (
-    <div className="flex flex-col h-screen w-full bg-[#050505] text-white font-mono text-[11px] overflow-hidden">
+    <div className="flex flex-col h-screen w-full bg-[radial-gradient(circle_at_top,rgba(255,184,0,0.08),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.08),transparent_35%),#050505] text-white font-mono text-[12px] overflow-hidden">
+      {canaryBanner}
       <header className="h-12 border-b border-white/20 bg-gradient-to-r from-black/90 to-black/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-50 shadow-lg shadow-black/50">
         <div className="flex items-center gap-6">
           <Shield className="w-5 h-5 text-[#FFB800] drop-shadow-[0_0_6px_rgba(255,184,0,0.6)]" />
@@ -356,7 +381,7 @@ export default function WarRoom() {
           <button
             onClick={syncFromAiWorkspace}
             disabled={isSyncingWorkspace}
-            className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600/30 border border-blue-500/50 rounded-sm text-xs font-black text-blue-300 hover:bg-blue-600/40 hover:border-blue-400/60 transition-all uppercase disabled:opacity-50 shadow-md shadow-blue-900/30"
+            className="ml-4 flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600/35 to-blue-500/20 border border-blue-400/45 rounded-md text-xs font-black text-blue-200 hover:from-blue-500/45 hover:to-blue-400/25 hover:border-blue-300/70 transition-all uppercase disabled:opacity-50 shadow-[0_10px_24px_rgba(37,99,235,0.28)] ring-1 ring-blue-300/20"
           >
             <Database size={12} /> {isSyncingWorkspace ? 'SYNCING...' : 'SYNC WORKSPACE'}
           </button>
@@ -370,16 +395,16 @@ export default function WarRoom() {
         </div>
       </header>
 
-      <main className="flex-1 grid grid-cols-12 gap-2 p-2 overflow-hidden min-h-0 bg-gradient-to-br from-[#050505] via-[#0a0a0a] to-[#050505]">
+      <main className="flex-1 grid grid-cols-12 gap-3 xl:gap-4 p-3 overflow-hidden min-h-0 bg-gradient-to-br from-[#050505] via-[#0a0a0a] to-[#050505]">
         {/* LEFT: RADAR */}
-        <div className="col-span-3 flex flex-col min-h-0 overflow-hidden">
+        <div className="col-span-3 flex flex-col min-h-0 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-1">
           <CyberBox
             title={`Intelligence Radar (${newsFeed.length})`}
             icon={Radio}
             className="h-full"
           >
             <div className="p-4 space-y-3">
-              <div className="flex items-center gap-2 bg-black/60 border border-white/10 rounded-sm p-3 mb-3 shadow-inner">
+              <div className="flex items-center gap-2 bg-black/65 border border-white/15 rounded-md px-3 py-3 mb-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                 <Search size={14} className="text-white/40" />
                 <input
                   value={feedQuery}
@@ -392,9 +417,9 @@ export default function WarRoom() {
                 <div
                   key={news.id}
                   onClick={() => selectNews(news)}
-                  className={`p-4 border transition-all cursor-pointer rounded-sm ${selectedNews?.id === news.id ? 'border-[#FFB800] bg-[#FFB800]/15 shadow-lg shadow-[#FFB800]/20' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/20'}`}
+                  className={`p-4 border transition-all cursor-pointer rounded-md ${selectedNews?.id === news.id ? 'border-[#FFB800]/80 bg-gradient-to-r from-[#FFB800]/20 to-[#FFB800]/8 shadow-[0_10px_22px_rgba(255,184,0,0.18)]' : 'border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] hover:from-white/[0.09] hover:to-white/[0.04] hover:border-white/30'}`}
                 >
-                  <p className="text-sm leading-relaxed line-clamp-2 uppercase tracking-tight text-white/90">
+                  <p className="text-[13px] font-semibold leading-relaxed line-clamp-2 uppercase tracking-tight text-white/92">
                     {news.title}
                   </p>
                 </div>
@@ -404,22 +429,22 @@ export default function WarRoom() {
         </div>
 
         {/* MIDDLE: EDITOR & PREVIEW */}
-        <div className="col-span-6 flex flex-col min-h-0 overflow-hidden">
-          <CyberBox title="Analysis Command Center" icon={Terminal} className="h-full">
+        <div className="col-span-6 flex flex-col min-h-0 overflow-hidden rounded-xl border border-[#FFB800]/20 bg-gradient-to-b from-[#1a1510]/65 via-black/35 to-black/70 p-1 shadow-[0_22px_42px_rgba(0,0,0,0.55)]">
+          <CyberBox title="Analysis Command Center" icon={Terminal} className="h-full border-[#FFB800]/25 ring-[#FFB800]/15">
             <div className="h-full flex flex-col p-4">
               {selectedNews ? (
                 <>
-                    <div className="flex items-center justify-between mb-4 shrink-0 border-b border-white/10 pb-4">
-                    <div className="flex bg-black/60 border border-white/20 rounded-sm overflow-hidden p-1 shadow-md">
+                    <div className="flex items-center justify-between mb-4 shrink-0 border border-white/15 rounded-md bg-black/35 px-3 py-3 shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                    <div className="flex bg-black/70 border border-white/20 rounded-md overflow-hidden p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                       <button
                         onClick={() => setViewMode('edit')}
-                        className={`px-5 py-2.5 text-sm font-black uppercase transition-all ${viewMode === 'edit' ? 'bg-[#FFB800] text-black shadow-lg shadow-[#FFB800]/30' : 'text-white/50 hover:text-white/80'}`}
+                        className={`px-5 py-2.5 text-sm font-black uppercase rounded-sm transition-all ${viewMode === 'edit' ? 'bg-[#FFB800] text-black shadow-[0_8px_16px_rgba(255,184,0,0.25)] ring-1 ring-[#FFB800]/40' : 'text-white/55 hover:text-white/85'}`}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => setViewMode('preview')}
-                        className={`px-5 py-2.5 text-sm font-black uppercase transition-all ${viewMode === 'preview' ? 'bg-[#FFB800] text-black shadow-lg shadow-[#FFB800]/30' : 'text-white/50 hover:text-white/80'}`}
+                        className={`px-5 py-2.5 text-sm font-black uppercase rounded-sm transition-all ${viewMode === 'preview' ? 'bg-[#FFB800] text-black shadow-[0_8px_16px_rgba(255,184,0,0.25)] ring-1 ring-[#FFB800]/40' : 'text-white/55 hover:text-white/85'}`}
                       >
                         Preview
                       </button>
@@ -428,7 +453,7 @@ export default function WarRoom() {
                       <button
                         onClick={() => handlePublish()}
                         disabled={isPublishing || !activeDraft.ready}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-[#FFB800] text-black font-black uppercase text-sm rounded-sm hover:bg-[#FFB800]/90 disabled:opacity-20 shadow-xl shadow-[#FFB800]/30 transition-all"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-sm rounded-md hover:from-[#FFC524] hover:to-[#FFD86D] disabled:opacity-20 shadow-[0_12px_24px_rgba(255,184,0,0.28)] ring-1 ring-[#FFB800]/50 transition-all"
                       >
                         {isPublishing ? (
                           <Loader2 size={14} className="animate-spin" />
@@ -451,13 +476,13 @@ export default function WarRoom() {
                               [activeLang]: { ...activeDraft, title: e.target.value },
                             })
                           }
-                          className="w-full bg-black/70 border border-white/20 p-4 text-base font-bold text-[#FFB800] outline-none shrink-0 rounded-sm shadow-inner focus:border-[#FFB800]/50 transition-colors"
+                          className="w-full bg-black/70 border border-white/20 p-4 text-lg font-bold text-[#FFB800] outline-none shrink-0 rounded-md shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/50 transition-colors"
                           placeholder="ENTER HEADLINE..."
                         />
 
                         {/* Edit Mode Mini Preview */}
                         {imageUrl && (
-                          <div className="relative h-28 w-full rounded-sm overflow-hidden border border-white/10 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-help shrink-0 shadow-lg">
+                          <div className="relative h-28 w-full rounded-md overflow-hidden border border-white/15 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-help shrink-0 shadow-lg">
                             <Image
                               src={imageUrl}
                               alt="Haber Görseli"
@@ -483,14 +508,14 @@ export default function WarRoom() {
                               },
                             })
                           }
-                          className="flex-1 bg-black/70 border border-white/20 p-5 outline-none resize-none text-sm leading-relaxed custom-scrollbar font-sans text-white/95 rounded-sm shadow-inner focus:border-[#FFB800]/50 transition-colors"
+                          className="flex-1 bg-black/70 border border-white/20 p-5 outline-none resize-none text-[15px] leading-7 custom-scrollbar font-sans text-white/95 rounded-md shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/50 transition-colors"
                           placeholder="ENTER INTELLIGENCE DATA..."
                         />
                       </div>
                     ) : (
-                      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gradient-to-b from-black/70 to-black/60 border border-white/20 rounded-sm space-y-8 shadow-inner">
+                      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gradient-to-b from-black/70 to-black/60 border border-white/20 rounded-md space-y-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                         {imageUrl && (
-                          <div className="relative aspect-video w-full rounded-sm overflow-hidden border border-white/20 shadow-2xl">
+                          <div className="relative aspect-video w-full rounded-md overflow-hidden border border-white/20 shadow-2xl">
                             <Image
                               src={imageUrl}
                               alt="Preview"
@@ -523,12 +548,12 @@ export default function WarRoom() {
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-white/25 p-12 bg-gradient-to-b from-black/40 to-black/60 border border-white/10 rounded-sm">
-                  <Activity size={72} className="mb-8 opacity-40 drop-shadow-lg" />
-                  <p className="uppercase font-black tracking-wider text-base text-center mb-3 text-white/30">
+                <div className="flex-1 flex flex-col items-center justify-center text-white/25 p-12 bg-gradient-to-b from-[#17100a]/55 via-black/45 to-black/70 border border-dashed border-[#FFB800]/30 rounded-md">
+                  <Activity size={72} className="mb-8 opacity-45 drop-shadow-[0_0_16px_rgba(255,184,0,0.18)]" />
+                  <p className="uppercase font-black tracking-[0.14em] text-base text-center mb-3 text-white/45">
                     Awaiting Intelligence Signal
                   </p>
-                  <p className="text-sm text-white/15 text-center font-medium max-w-xs">
+                  <p className="text-sm text-white/25 text-center font-medium max-w-xs leading-relaxed">
                     Select a news item from the radar to begin analysis
                   </p>
                 </div>
@@ -538,14 +563,14 @@ export default function WarRoom() {
         </div>
 
         {/* RIGHT: STATUS & NODES */}
-        <div className="col-span-3 flex flex-col gap-2 min-h-0 overflow-hidden">
+        <div className="col-span-3 flex flex-col gap-3 min-h-0 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-1">
           <CyberBox title="Neural Language Nodes" icon={Globe2} className="shrink-0">
             <div className="p-4 grid grid-cols-2 gap-2.5">
               {SUPPORTED_LANGS.map((l) => (
                 <button
                   key={l}
                   onClick={() => setActiveLang(l)}
-                  className={`py-2.5 border transition-all flex items-center justify-between px-3 rounded-sm shadow-md ${activeLang === l ? 'border-[#FFB800] bg-[#FFB800]/25 text-[#FFB800] shadow-[#FFB800]/20' : 'border-white/10 bg-white/[0.04] text-white/50 hover:text-white/80 hover:bg-white/[0.08] hover:border-white/20'}`}
+                  className={`py-2.5 border transition-all flex items-center justify-between px-3 rounded-md ${activeLang === l ? 'border-[#FFB800]/80 bg-gradient-to-r from-[#FFB800]/24 to-[#FFB800]/10 text-[#FFB800] shadow-[0_8px_16px_rgba(255,184,0,0.18)] ring-1 ring-[#FFB800]/30' : 'border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] text-white/50 hover:text-white/80 hover:from-white/[0.08] hover:to-white/[0.03] hover:border-white/25'}`}
                 >
                   <span className="uppercase font-black text-sm">{l}</span>
                   <div
@@ -558,7 +583,7 @@ export default function WarRoom() {
 
           <CyberBox title="Deploy Configuration" icon={Send} className="shrink-0">
             <div className="p-4 space-y-3">
-              <label className="flex items-center justify-between gap-2 bg-white/[0.08] border border-white/20 rounded-sm px-4 py-3 shadow-md">
+              <label className="flex items-center justify-between gap-2 bg-white/[0.08] border border-white/20 rounded-md px-4 py-3 shadow-[0_8px_18px_rgba(0,0,0,0.25)]">
                 <span className="text-sm font-medium uppercase text-white/60 tracking-wider">
                   Target Category
                 </span>
@@ -577,7 +602,7 @@ export default function WarRoom() {
               <button
                 onClick={() => handlePublish()}
                 disabled={!activeDraft.ready || isPublishing}
-                className="w-full py-5 bg-[#FFB800] text-black font-black uppercase text-sm tracking-wider hover:bg-[#FFB800]/90 transition-all flex items-center justify-center gap-3 rounded-sm disabled:opacity-20 shadow-xl shadow-[#FFB800]/30"
+                className="w-full py-5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-sm tracking-wider hover:from-[#FFC524] hover:to-[#FFD86D] transition-all flex items-center justify-center gap-3 rounded-md disabled:opacity-20 shadow-[0_14px_28px_rgba(255,184,0,0.28)] ring-1 ring-[#FFB800]/50"
               >
                 {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}{' '}
                 Deploy Hub
