@@ -32,6 +32,15 @@ export function middleware(request: NextRequest) {
 
   // Bypass locale prefixing for admin routes
   if (isAdminPath) {
+    // If admin path has locale prefix, redirect to canonical non-localized admin path
+    if (pathSegments.length > 1 && isLocaleSegment(pathSegments[0]) && pathSegments[1] === 'admin') {
+      const redirectUrl = request.nextUrl.clone()
+      // Remove locale prefix: /en/admin -> /admin, /tr/admin/login -> /admin/login
+      const adminPath = '/' + pathSegments.slice(1).join('/')
+      redirectUrl.pathname = adminPath
+      return NextResponse.redirect(redirectUrl, 308)
+    }
+
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-nonce', Buffer.from(crypto.randomUUID()).toString('base64'))
     requestHeaders.set('x-pathname', pathname)
