@@ -44,7 +44,18 @@ function createPrismaClient(): PrismaClient {
 
     // Lazy import to avoid native module loading during build
     const { PrismaLibSQL } = require('@prisma/adapter-libsql')
-    const { createClient } = require('@libsql/client')
+    
+    // Use web client to avoid native module issues on Windows/Vercel
+    let createClient
+    try {
+      // Try web client first (works everywhere, no native dependencies)
+      createClient = require('@libsql/client/web').createClient
+      console.log('[DATABASE] Using @libsql/client/web (platform-agnostic)')
+    } catch {
+      // Fallback to native client (local development on Unix-like systems)
+      createClient = require('@libsql/client').createClient
+      console.log('[DATABASE] Using @libsql/client (native)')
+    }
 
     const libsql = createClient({
       url: tursoUrl,
