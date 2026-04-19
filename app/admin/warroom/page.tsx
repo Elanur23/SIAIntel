@@ -205,9 +205,11 @@ export default function WarRoom() {
       const res = await fetch('/api/war-room/workspace')
       const data = await res.json()
       if (data.success && data.data) {
-        const ws = data.data
+        // Normalize workspace source: support both nested (articles[0]) and top-level structures
+        const ws = data.data.articles?.[0] || data.data
         const newVault = { ...vault }
 
+        let hydrationCount = 0
         SUPPORTED_LANGS.forEach((lang) => {
           if (ws[lang]) {
             newVault[lang] = {
@@ -215,17 +217,23 @@ export default function WarRoom() {
               desc: ws[lang].content || ws[lang].desc || '',
               ready: true,
             }
+            hydrationCount++
           }
         })
 
-        setVault(newVault)
-        // FORCE IMAGE SYNC
-        const img = ws.imageUrl || ws.en?.imageUrl || null
-        setImageUrl(img)
+        // Only proceed if at least one language was hydrated
+        if (hydrationCount > 0) {
+          setVault(newVault)
+          // FORCE IMAGE SYNC
+          const img = ws.imageUrl || ws.en?.imageUrl || null
+          setImageUrl(img)
 
-        if (!selectedNews)
-          setSelectedNews({ id: 'workspace_sync', title: ws.en?.title || 'AI Sync Node' })
-        alert('✅ SYSTEM SYNCED: All nodes and Visuals operational.')
+          if (!selectedNews)
+            setSelectedNews({ id: 'workspace_sync', title: ws.en?.title || 'AI Sync Node' })
+          alert('✅ SYSTEM SYNCED: All nodes and Visuals operational.')
+        } else {
+          alert('❌ SYNC_FAILED: No valid language data found in workspace')
+        }
       }
     } catch (e: any) {
       alert('❌ SYNC_FAILED: ' + e.message)
