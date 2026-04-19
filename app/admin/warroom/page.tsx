@@ -119,16 +119,16 @@ function CyberBox({
     <div
       className={`border border-white/10 bg-black/40 backdrop-blur-sm flex flex-col min-h-0 overflow-hidden ${className}`}
     >
-      <div className="border-b border-white/10 p-2 flex items-center justify-between bg-white/5 shrink-0">
+      <div className="border-b border-white/10 p-3 flex items-center justify-between bg-white/5 shrink-0">
         <div className="flex items-center gap-2">
-          {Icon && <Icon size={12} className="text-[#FFB800]" />}
-          <span className="text-[9px] font-black uppercase tracking-widest text-white/60">
+          {Icon && <Icon size={14} className="text-[#FFB800]" />}
+          <span className="text-xs font-black uppercase tracking-wider text-white/60">
             {title}
           </span>
         </div>
         <div className="flex gap-1">
-          <div className="w-1 h-1 rounded-full bg-white/10" />
-          <div className="w-1 h-1 rounded-full bg-white/10" />
+          <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+          <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
         </div>
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar">{children}</div>
@@ -356,14 +356,14 @@ export default function WarRoom() {
           <button
             onClick={syncFromAiWorkspace}
             disabled={isSyncingWorkspace}
-            className="ml-4 flex items-center gap-2 px-3 py-1 bg-blue-600/20 border border-blue-500/40 rounded-sm text-[8px] font-black text-blue-400 hover:bg-blue-600/30 transition-all"
+            className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600/20 border border-blue-500/40 rounded-sm text-xs font-black text-blue-400 hover:bg-blue-600/30 transition-all uppercase disabled:opacity-50"
           >
-            <Database size={10} /> {isSyncingWorkspace ? 'SYNCING...' : 'SYNC WORKSPACE'}
+            <Database size={12} /> {isSyncingWorkspace ? 'SYNCING...' : 'SYNC WORKSPACE'}
           </button>
         </div>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-[9px] text-white/40 uppercase tracking-widest">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse" />
+          <div className="flex items-center gap-2 text-xs text-white/40 uppercase tracking-wider font-medium">
+            <div className="w-2 h-2 rounded-full bg-[#00FF00] animate-pulse" />
             Terminal Active // 9 Nodes
           </div>
           <LiveClock />
@@ -378,14 +378,14 @@ export default function WarRoom() {
             icon={Radio}
             className="h-full"
           >
-            <div className="p-2 space-y-1">
+            <div className="p-4 space-y-2">
               <div className="flex items-center gap-2 bg-black/40 border border-white/5 rounded-sm p-2 mb-2">
-                <Search size={10} className="text-white/30" />
+                <Search size={12} className="text-white/30" />
                 <input
                   value={feedQuery}
                   onChange={(e) => setFeedQuery(e.target.value)}
                   placeholder="Search radar..."
-                  className="bg-transparent border-none outline-none text-[9px] w-full text-white/80 uppercase"
+                  className="bg-transparent border-none outline-none text-xs w-full text-white/80 uppercase"
                 />
               </div>
               {filteredFeed.map(({ item: news }) => (
@@ -394,7 +394,7 @@ export default function WarRoom() {
                   onClick={() => selectNews(news)}
                   className={`p-3 border transition-all cursor-pointer rounded-sm ${selectedNews?.id === news.id ? 'border-[#FFB800] bg-[#FFB800]/10' : 'border-white/5 bg-white/[0.02] hover:bg-white/5'}`}
                 >
-                  <p className="text-[10px] leading-relaxed line-clamp-2 uppercase tracking-tight">
+                  <p className="text-xs leading-relaxed line-clamp-2 uppercase tracking-tight">
                     {news.title}
                   </p>
                 </div>
@@ -409,17 +409,17 @@ export default function WarRoom() {
             <div className="h-full flex flex-col p-3">
               {selectedNews ? (
                 <>
-                  <div className="flex items-center justify-between mb-3 shrink-0 border-b border-white/5 pb-2">
+                    <div className="flex items-center justify-between mb-4 shrink-0 border-b border-white/5 pb-3">
                     <div className="flex bg-black/40 border border-white/10 rounded-sm overflow-hidden p-0.5">
                       <button
                         onClick={() => setViewMode('edit')}
-                        className={`px-4 py-1.5 text-[9px] font-black uppercase transition-all ${viewMode === 'edit' ? 'bg-[#FFB800] text-black' : 'text-white/40 hover:text-white/60'}`}
+                        className={`px-4 py-2 text-xs font-black uppercase transition-all ${viewMode === 'edit' ? 'bg-[#FFB800] text-black' : 'text-white/40 hover:text-white/60'}`}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => setViewMode('preview')}
-                        className={`px-4 py-1.5 text-[9px] font-black uppercase transition-all ${viewMode === 'preview' ? 'bg-[#FFB800] text-black' : 'text-white/40 hover:text-white/60'}`}
+                        className={`px-4 py-2 text-xs font-black uppercase transition-all ${viewMode === 'preview' ? 'bg-[#FFB800] text-black' : 'text-white/40 hover:text-white/60'}`}
                       >
                         Preview
                       </button>
@@ -428,21 +428,21 @@ export default function WarRoom() {
                       <button
                         onClick={() => handlePublish()}
                         disabled={isPublishing || !activeDraft.ready}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-emerald-600 text-white font-black uppercase text-[9px] rounded-sm hover:bg-emerald-500 disabled:opacity-20 shadow-lg shadow-emerald-900/20"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#FFB800] text-black font-black uppercase text-xs rounded-sm hover:bg-[#FFB800]/80 disabled:opacity-20 shadow-lg shadow-[#FFB800]/20 transition-all"
                       >
                         {isPublishing ? (
-                          <Loader2 size={10} className="animate-spin" />
+                          <Loader2 size={12} className="animate-spin" />
                         ) : (
-                          <Send size={10} />
+                          <Send size={12} />
                         )}{' '}
-                        Deploy_{activeLang.toUpperCase()}
+                        Deploy
                       </button>
                     </div>
                   </div>
 
                   <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     {viewMode === 'edit' ? (
-                      <div className="flex-1 flex flex-col gap-2 min-h-0">
+                    <div className="flex-1 flex flex-col gap-3 min-h-0">
                         <input
                           value={activeDraft.title}
                           onChange={(e) =>
@@ -451,13 +451,13 @@ export default function WarRoom() {
                               [activeLang]: { ...activeDraft, title: e.target.value },
                             })
                           }
-                          className="w-full bg-black/60 border border-white/10 p-3 text-sm font-bold text-[#FFB800] outline-none shrink-0"
+                          className="w-full bg-black/60 border border-white/10 p-4 text-sm font-bold text-[#FFB800] outline-none shrink-0"
                           placeholder="ENTER HEADLINE..."
                         />
 
                         {/* Edit Mode Mini Preview */}
                         {imageUrl && (
-                          <div className="relative h-20 w-full rounded-sm overflow-hidden border border-white/5 opacity-50 grayscale hover:opacity-100 transition-all cursor-help shrink-0">
+                          <div className="relative h-24 w-full rounded-sm overflow-hidden border border-white/5 opacity-50 grayscale hover:opacity-100 transition-all cursor-help shrink-0">
                             <Image
                               src={imageUrl}
                               alt="Haber Görseli"
@@ -465,7 +465,7 @@ export default function WarRoom() {
                               className="object-cover"
                               unoptimized
                             />
-                            <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white uppercase tracking-widest">
+                            <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white uppercase tracking-wider bg-black/40">
                               ACTIVE_VISUAL_LOCKED
                             </div>
                           </div>
@@ -483,7 +483,7 @@ export default function WarRoom() {
                               },
                             })
                           }
-                          className="flex-1 bg-black/60 border border-white/10 p-4 outline-none resize-none text-[13px] leading-relaxed custom-scrollbar font-sans text-white/90"
+                          className="flex-1 bg-black/60 border border-white/10 p-4 outline-none resize-none text-sm leading-relaxed custom-scrollbar font-sans text-white/90"
                           placeholder="ENTER INTELLIGENCE DATA..."
                         />
                       </div>
@@ -523,10 +523,13 @@ export default function WarRoom() {
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-white/10">
-                  <Activity size={48} className="mb-4 opacity-50" />
-                  <p className="uppercase font-black tracking-[0.4em] text-xs text-center">
-                    Awaiting Transmission Signal
+                <div className="flex-1 flex flex-col items-center justify-center text-white/20 p-8">
+                  <Activity size={64} className="mb-6 opacity-30" />
+                  <p className="uppercase font-black tracking-wider text-sm text-center mb-2">
+                    Awaiting Intelligence Signal
+                  </p>
+                  <p className="text-xs text-white/10 text-center font-medium">
+                    Select a news item from the radar to begin analysis
                   </p>
                 </div>
               )}
@@ -537,16 +540,16 @@ export default function WarRoom() {
         {/* RIGHT: STATUS & NODES */}
         <div className="col-span-3 flex flex-col gap-1 min-h-0 overflow-hidden">
           <CyberBox title="Neural Language Nodes" icon={Globe2} className="shrink-0">
-            <div className="p-3 grid grid-cols-2 gap-1.5">
+            <div className="p-4 grid grid-cols-2 gap-2">
               {SUPPORTED_LANGS.map((l) => (
                 <button
                   key={l}
                   onClick={() => setActiveLang(l)}
                   className={`py-2 border transition-all flex items-center justify-between px-3 rounded-sm ${activeLang === l ? 'border-[#FFB800] bg-[#FFB800]/20 text-[#FFB800]' : 'border-white/5 bg-white/[0.02] text-white/40 hover:text-white/60'}`}
                 >
-                  <span className="uppercase font-black text-[9px]">{l}</span>
+                  <span className="uppercase font-black text-xs">{l}</span>
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${vault[l].ready ? 'bg-[#00FF00] shadow-[0_0_6px_#00FF00]' : 'bg-white/10'}`}
+                    className={`w-2 h-2 rounded-full ${vault[l].ready ? 'bg-[#00FF00] shadow-[0_0_8px_#00FF00]' : 'bg-white/10'}`}
                   />
                 </button>
               ))}
@@ -554,15 +557,15 @@ export default function WarRoom() {
           </CyberBox>
 
           <CyberBox title="Deploy Configuration" icon={Send} className="shrink-0">
-            <div className="p-3 space-y-2">
+            <div className="p-4 space-y-2">
               <label className="flex items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-sm px-3 py-2">
-                <span className="text-[8px] font-black uppercase text-white/40 tracking-wider">
+                <span className="text-xs font-medium uppercase text-white/40 tracking-wider">
                   Target Category
                 </span>
                 <select
                   value={publishCategory}
                   onChange={(e) => setPublishCategory(e.target.value)}
-                  className="bg-transparent border-none text-white/80 text-[10px] font-black uppercase outline-none cursor-pointer"
+                  className="bg-transparent border-none text-white/80 text-xs font-black uppercase outline-none cursor-pointer"
                 >
                   {CATEGORY_OPTIONS.map((c) => (
                     <option key={c} value={c} className="bg-black">
@@ -574,33 +577,33 @@ export default function WarRoom() {
               <button
                 onClick={() => handlePublish()}
                 disabled={!activeDraft.ready || isPublishing}
-                className="w-full py-5 bg-[#FFB800] text-black font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#FFB800]/80 transition-all flex items-center justify-center gap-3 rounded-sm"
+                className="w-full py-4 bg-[#FFB800] text-black font-black uppercase text-xs tracking-wider hover:bg-[#FFB800]/80 transition-all flex items-center justify-center gap-3 rounded-sm disabled:opacity-20 shadow-lg shadow-[#FFB800]/20"
               >
-                {isPublishing ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}{' '}
+                {isPublishing ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}{' '}
                 Deploy Hub
               </button>
             </div>
           </CyberBox>
 
           <CyberBox title="Node Metrics" icon={Activity} className="flex-1">
-            <div className="p-4 space-y-3 text-[10px] uppercase font-black tracking-wider">
+            <div className="p-4 space-y-3 text-xs uppercase font-bold tracking-wider">
               <div className="flex justify-between border-b border-white/5 pb-2 text-white/40">
-                <span>Active Language:</span>{' '}
-                <span className="text-white">{LANGUAGE_LABELS[activeLang]}</span>
+                <span className="font-medium">Active Language:</span>{' '}
+                <span className="text-white font-black">{LANGUAGE_LABELS[activeLang]}</span>
               </div>
               <div className="flex justify-between border-b border-white/5 pb-2 text-white/40">
-                <span>Intelligence Load:</span>{' '}
-                <span className="text-[#FFB800]">{activeWordCount} Words</span>
+                <span className="font-medium">Intelligence Load:</span>{' '}
+                <span className="text-[#FFB800] font-black">{activeWordCount} Words</span>
               </div>
               <div className="flex justify-between border-b border-white/5 pb-2 text-white/40">
-                <span>Vault Status:</span>{' '}
-                <span className={activeDraft.ready ? 'text-[#00FF00]' : 'text-red-500'}>
+                <span className="font-medium">Vault Status:</span>{' '}
+                <span className={activeDraft.ready ? 'text-[#00FF00] font-black' : 'text-red-500 font-black'}>
                   {activeDraft.ready ? 'SYNCED' : 'AWAITING'}
                 </span>
               </div>
               <div className="flex justify-between text-white/40">
-                <span>Visual Locked:</span>{' '}
-                <span className={imageUrl ? 'text-emerald-500' : 'text-white/20'}>
+                <span className="font-medium">Visual Locked:</span>{' '}
+                <span className={imageUrl ? 'text-emerald-500 font-black' : 'text-white/20 font-medium'}>
                   {imageUrl ? 'YES' : 'NO'}
                 </span>
               </div>
@@ -611,18 +614,18 @@ export default function WarRoom() {
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 3px;
-          height: 3px;
+          width: 4px;
+          height: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 184, 0, 0.15);
+          background: rgba(255, 184, 0, 0.2);
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 184, 0, 0.3);
+          background: rgba(255, 184, 0, 0.4);
         }
       `}</style>
     </div>
