@@ -158,6 +158,43 @@ function isLikelyCuid(value: string): boolean {
   return /^c[a-z0-9]{24}$/i.test(value)
 }
 
+/**
+ * Validates that a raw slug parameter conforms to canonical news article slug format.
+ * Accepts:
+ * - Canonical format: {title-slug}--{articleId} (both parts non-empty)
+ * - Direct CUID: c[a-z0-9]{24}
+ * Rejects:
+ * - Empty slugs
+ * - Malformed slugs without -- separator (unless valid CUID)
+ * - Slugs where slug part or id part is empty
+ */
+function isCanonicalNewsSlug(rawSlug: string): boolean {
+  const slug = (rawSlug || '').trim()
+  
+  // Reject empty slugs
+  if (!slug) {
+    return false
+  }
+  
+  // Accept direct CUID format
+  if (isLikelyCuid(slug)) {
+    return true
+  }
+  
+  // Check for canonical format: {slug}--{id}
+  if (slug.includes('--')) {
+    const splitIndex = slug.lastIndexOf('--')
+    const slugPart = slug.slice(0, splitIndex).trim()
+    const idPart = slug.slice(splitIndex + 2).trim()
+    
+    // Both parts must be non-empty
+    return slugPart.length > 0 && idPart.length > 0
+  }
+  
+  // Reject slugs without -- separator that aren't valid CUIDs
+  return false
+}
+
 function parseRouteSlugParam(rawSlug: string): {
   idCandidates: string[]
   slugCandidates: string[]
@@ -618,6 +655,12 @@ async function getRelatedNodes(
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const routeLang = normalizePublicRouteLocale(params.lang)
+  
+  // Early canonical slug validation gate
+  if (!isCanonicalNewsSlug(params.slug)) {
+    notFound()
+  }
+  
   const detailArticle = await resolveDetailArticle(params.slug, routeLang)
   if (!detailArticle) {
     notFound()
@@ -708,6 +751,12 @@ import RevenueMaximizer from '@/components/RevenueMaximizer'
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const routeLang = normalizePublicRouteLocale(params.lang)
+  
+  // Early canonical slug validation gate
+  if (!isCanonicalNewsSlug(params.slug)) {
+    notFound()
+  }
+  
   const detailArticle = await resolveDetailArticle(params.slug, routeLang)
   
   // Defensive guard: if no article found, call notFound() immediately
