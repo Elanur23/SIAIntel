@@ -5,10 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
   Loader2,
-  Radio,
-  Zap,
   Terminal,
-  RefreshCw,
   Globe2,
   Eye,
   Edit3,
@@ -16,18 +13,7 @@ import {
   Activity,
   Image as ImageIcon,
   Send,
-  Lock,
-  ChevronRight,
   AlertCircle,
-  Search,
-  Copy,
-  Languages,
-  X,
-  Star,
-  Link2,
-  Waves,
-  Square,
-  Play,
   Database,
   Wand2,
 } from 'lucide-react'
@@ -36,20 +22,6 @@ import TechnicalChart from '@/components/TechnicalChart'
 import { transformRawToArticle, type FormattedArticle } from '@/lib/editorial/transform-raw-to-article'
 
 // Fallback implementations for missing dependencies
-type ScoredFeedItem = { item: any; score: number }
-
-function rankFeed(feed: any[], publishedTitles: string[]): ScoredFeedItem[] {
-  return feed.map((item) => ({ item, score: 10 }))
-}
-
-function transformHeadline(title: string): string {
-  return title
-}
-
-function cleanSystemArtifacts(text: string): string {
-  return text
-}
-
 function formatArticleBody(body: string, lang: string): string {
   return body.replace(/\n/g, '<br />')
 }
@@ -139,10 +111,8 @@ function CyberBox({
 }
 
 export default function WarRoom() {
-  const [newsFeed, setNewsFeed] = useState<any[]>([])
   const [selectedNews, setSelectedNews] = useState<any>(null)
   const [activeLang, setActiveLang] = useState<SupportedLang>('en')
-  const [feedQuery, setFeedQuery] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isSyncingWorkspace, setIsSyncingWorkspace] = useState(false)
@@ -150,10 +120,13 @@ export default function WarRoom() {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
   const lockRef = useRef<string | null>(null)
-  const [publishedTitles, setPublishedTitles] = useState<string[]>([])
   const [transformedArticle, setTransformedArticle] = useState<FormattedArticle | null>(null)
   const [isTransforming, setIsTransforming] = useState(false)
   const [transformError, setTransformError] = useState<string | null>(null)
+  
+  // Manual input state
+  const [manualTitle, setManualTitle] = useState('')
+  const [manualSummary, setManualSummary] = useState('')
 
   const [vault, setVault] = useState<
     Record<string, { title: string; desc: string; ready: boolean }>
@@ -176,32 +149,29 @@ export default function WarRoom() {
     return body ? body.split(/\s+/).filter(Boolean).length : 0
   }, [activeDraft.desc])
 
-  const scoredFeed: ScoredFeedItem[] = useMemo(
-    () => rankFeed(newsFeed, publishedTitles),
-    [newsFeed, publishedTitles]
-  )
-  const filteredFeed = useMemo(() => {
-    let items = scoredFeed
-    const query = feedQuery.trim().toLowerCase()
-    if (query)
-      items = items.filter(({ item }) =>
-        `${item.title} ${item.content}`.toLowerCase().includes(query)
-      )
-    return items
-  }, [scoredFeed, feedQuery])
-
-  const loadFeed = async () => {
-    try {
-      const base = typeof window !== 'undefined' ? window.location.origin : ''
-      const r = await fetch(`${base}/api/war-room/feed?lang=en`, { cache: 'no-store' })
-      const d = await r.json()
-      if (d.success) {
-        setNewsFeed(d.data)
-        if (d.publishedTitles) setPublishedTitles(d.publishedTitles)
+  const loadManualDraft = () => {
+    if (!manualTitle.trim() || !manualSummary.trim()) return
+    
+    setSelectedNews({ id: 'manual_input', title: manualTitle })
+    setImageUrl(null)
+    setTransformedArticle(null)
+    setTransformError(null)
+    
+    const resetVault: any = {}
+    SUPPORTED_LANGS.forEach((l) => {
+      resetVault[l] = {
+        title: manualTitle,
+        desc: manualSummary,
+        ready: true,
       }
-    } catch (feedErr) {
-      console.warn('[WARROOM] Feed load failed:', (feedErr as Error).message)
-    }
+    })
+    setVault(resetVault)
+    setActiveLang('en')
+  }
+
+  const clearManualInput = () => {
+    setManualTitle('')
+    setManualSummary('')
   }
 
   const syncFromAiWorkspace = async () => {
@@ -342,32 +312,12 @@ export default function WarRoom() {
 
       // Success
       alert(`🚀 GLOBAL DEPLOY SUCCESS: ${activeLang.toUpperCase()}`)
-      await loadFeed()
     } catch (publishErr) {
       console.error('[WARROOM] Publish failed:', (publishErr as Error).message)
       alert(`❌ PUBLISH FAILED: ${(publishErr as Error).message}`)
     } finally {
       setIsPublishing(false)
     }
-  }
-
-  const selectNews = (news: any) => {
-    setSelectedNews(news)
-    setImageUrl(null)
-    setTransformedArticle(null)
-    setTransformError(null)
-
-    // Fix: Populate vault with news content to enable center panel rendering
-    const resetVault: any = {}
-    SUPPORTED_LANGS.forEach((l) => {
-      resetVault[l] = {
-        title: news.titleEn || news.title || '',
-        desc: news.contentEn || news.content || '',
-        ready: !!(news.contentEn || news.content),
-      }
-    })
-    setVault(resetVault)
-    setActiveLang('en')
   }
 
   const handleTransform = async () => {
@@ -385,10 +335,6 @@ export default function WarRoom() {
       setIsTransforming(false)
     }
   }
-
-  useEffect(() => {
-    loadFeed()
-  }, [])
 
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#18181c] to-[#0a0a0f] text-white font-mono text-[13px] overflow-hidden">
@@ -417,34 +363,53 @@ export default function WarRoom() {
       </header>
 
       <main className="flex-1 grid grid-cols-12 gap-5 xl:gap-8 p-6 overflow-hidden min-h-0 bg-gradient-to-br from-[#18181c] via-[#23232a] to-[#18181c]">
-        {/* LEFT: RADAR */}
+        {/* LEFT: MANUAL INPUT WORKSPACE */}
         <div className="col-span-3 flex flex-col min-h-0 overflow-hidden rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
           <CyberBox
-            title={`Intelligence Radar (${newsFeed.length})`}
-            icon={Radio}
+            title="Manual Intelligence Input"
+            icon={Edit3}
             className="h-full"
           >
-            <div className="p-4 space-y-3">
-              <div className="flex items-center gap-2 bg-black/65 border border-white/15 rounded-md px-3 py-3 mb-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                <Search size={14} className="text-white/40" />
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-xs uppercase text-white/60 mb-2 block font-bold tracking-wider">
+                  Article Title
+                </label>
                 <input
-                  value={feedQuery}
-                  onChange={(e) => setFeedQuery(e.target.value)}
-                  placeholder="Search radar..."
-                  className="bg-transparent border-none outline-none text-sm w-full text-white/90 uppercase placeholder:text-white/30"
+                  value={manualTitle}
+                  onChange={(e) => setManualTitle(e.target.value)}
+                  placeholder="Enter article title..."
+                  className="w-full bg-black/65 border border-white/15 rounded-md px-3 py-3 text-sm text-white/90 outline-none focus:border-[#FFB800]/60 transition-colors placeholder:text-white/30"
                 />
               </div>
-              {filteredFeed.map(({ item: news }) => (
-                <div
-                  key={news.id}
-                  onClick={() => selectNews(news)}
-                  className={`p-4 border transition-all cursor-pointer rounded-md ${selectedNews?.id === news.id ? 'border-[#FFB800]/80 bg-gradient-to-r from-[#FFB800]/20 to-[#FFB800]/8 shadow-[0_10px_22px_rgba(255,184,0,0.18)]' : 'border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] hover:from-white/[0.09] hover:to-white/[0.04] hover:border-white/30'}`}
-                >
-                  <p className="text-[13px] font-semibold leading-relaxed line-clamp-2 uppercase tracking-tight text-white/92">
-                    {news.title}
-                  </p>
-                </div>
-              ))}
+              
+              <div className="flex-1 flex flex-col min-h-0">
+                <label className="text-xs uppercase text-white/60 mb-2 block font-bold tracking-wider">
+                  Raw Intelligence / Summary
+                </label>
+                <textarea
+                  value={manualSummary}
+                  onChange={(e) => setManualSummary(e.target.value)}
+                  placeholder="Enter raw report or summary..."
+                  rows={14}
+                  className="w-full bg-black/65 border border-white/15 rounded-md px-3 py-3 text-sm text-white/90 resize-none outline-none focus:border-[#FFB800]/60 transition-colors custom-scrollbar placeholder:text-white/30"
+                />
+              </div>
+              
+              <button
+                onClick={loadManualDraft}
+                disabled={!manualTitle.trim() || !manualSummary.trim()}
+                className="w-full py-3 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-sm rounded-md disabled:opacity-30 hover:from-[#FFC524] hover:to-[#FFD86D] transition-all shadow-[0_8px_18px_rgba(255,184,0,0.18)] ring-1 ring-[#FFB800]/40"
+              >
+                Load Manual Draft
+              </button>
+              
+              <button
+                onClick={clearManualInput}
+                className="w-full py-2 border border-white/20 text-white/60 text-xs uppercase rounded-md hover:border-white/40 hover:text-white/80 transition-all"
+              >
+                Clear Input
+              </button>
             </div>
           </CyberBox>
         </div>
@@ -655,7 +620,7 @@ export default function WarRoom() {
                     Awaiting Intelligence Signal
                   </p>
                   <p className="text-base text-white/30 text-center font-medium max-w-xs leading-relaxed">
-                    Select a news item from the radar to begin analysis
+                    Load a manual draft from the left panel to begin analysis
                   </p>
                 </div>
               )}
