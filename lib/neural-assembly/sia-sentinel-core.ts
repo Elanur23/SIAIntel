@@ -140,6 +140,40 @@ const FORBIDDEN_RESIDUE = [
   'Headline:', 'Article Title:', 'Subheadline:', 'Summary:'
 ];
 
+/**
+ * Robustly detects forbidden editorial residue with fuzzy/normalized matching
+ */
+export function detectForbiddenResidue(text: string): string | null {
+  if (!text) return null;
+
+  const normalize = (t: string) =>
+    t.toLowerCase()
+     .replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, ' ') // NBSP and variants
+     .replace(/['""'‘’“”]/g, '"') // Smart quotes
+     .replace(/[^a-z0-9]/g, ' ') // Non-alphanumeric to space
+     .replace(/\s+/g, ' ') // Collapse whitespace
+     .trim();
+
+  const normalizedText = normalize(text);
+
+  for (const residue of FORBIDDEN_RESIDUE) {
+    // 1. Check normalized alphanumeric sequence
+    const normalizedResidue = normalize(residue);
+    if (normalizedText.includes(normalizedResidue)) {
+      return residue;
+    }
+
+    // 2. Check exact phrase with punctuation support (case insensitive)
+    const escaped = residue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped.replace(/\s+/g, '\\s+'), 'i');
+    if (regex.test(text)) {
+      return residue;
+    }
+  }
+
+  return null;
+}
+
 // ============================================================================
 // HELPERS
 // ============================================================================
@@ -306,22 +340,24 @@ export function runDeepAudit(input: AuditInput): AuditResult {
   });
 
   // EDITORIAL RESIDUE CHECK (AI prompt leakage)
-  FORBIDDEN_RESIDUE.forEach(residue => {
-    const regex = new RegExp(`\\b${residue}\\b`, 'i');
-    if (regex.test(body) || regex.test(title || '')) {
-      addIssue(audit.cell_scores.body_cell, {
-        issue_type: 'EDITORIAL_RESIDUE',
-        severity: 'CRITICAL',
-        field: 'body',
-        message: `Forbidden editorial residue detected: "${residue}".`,
-        auto_fixable: false,
-        suggested_fix: "Remove AI prompt/planning residue from the article."
-      });
-    }
-  });
+  let residueDetected = false;
+  const residueMatch = detectForbiddenResidue(body) || detectForbiddenResidue(title || '');
+
+  if (residueMatch) {
+    residueDetected = true;
+    addIssue(audit.cell_scores.body_cell, {
+      issue_type: 'EDITORIAL_RESIDUE',
+      severity: 'CRITICAL',
+      field: 'body',
+      message: `Forbidden editorial residue detected: "${residueMatch}".`,
+      auto_fixable: false,
+      suggested_fix: "Remove AI prompt/planning residue from the article."
+    });
+  }
 
   // DUPLICATED MARKDOWN HEADINGS CHECK
   if (/##\s*🛡️\s*##\s*🛡️|###\s*###/.test(body)) {
+    residueDetected = true;
     addIssue(audit.cell_scores.body_cell, {
       issue_type: 'MALFORMED_FORMATTING',
       severity: 'CRITICAL',
@@ -481,6 +517,12 @@ export function runDeepAudit(input: AuditInput): AuditResult {
 
   const totalScore = cells.reduce((sum, cell) => sum + cell.score, 0);
   audit.overall_score = Math.round(totalScore / cells.length);
+
+  // HARD VETO: If critical residue or malformed footer exists, overall score is ZERO
+  if (residueDetected) {
+    audit.overall_score = 0;
+    audit.status = 'NEEDS_TREATMENT';
+  }
 
   // Status mapping
   if (audit.critical_issues.length > 0) audit.status = 'NEEDS_TREATMENT';

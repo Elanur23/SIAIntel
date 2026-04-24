@@ -259,9 +259,9 @@ export default function WarRoom() {
     }
   }
 
-  const handlePublish = async (forceOverride = false) => {
+  const handlePublish = async () => {
     // FAIL-CLOSED GATING ENFORCEMENT
-    if (isDeployBlocked && !forceOverride) {
+    if (isDeployBlocked) {
       console.error('[WARROOM] Publish blocked: Gating criteria not met.')
       alert('❌ PUBLISH BLOCKED: Content did not pass all required quality gates.')
       return
@@ -309,11 +309,6 @@ export default function WarRoom() {
         source: 'SIA_WAR_ROOM',
         category: publishCategory,
         status: 'published',
-      }
-
-      // Add forceSave flag if override requested
-      if (forceOverride) {
-        savePayload.forceSave = true
       }
 
       SUPPORTED_LANGS.forEach((lang) => {
@@ -375,13 +370,8 @@ export default function WarRoom() {
       if (saveRes.status === 409 && saveData.duplicate) {
         setIsPublishing(false)
         const matchedTitle = saveData.matchedTitle || 'Unknown article'
-        const confirmMsg = `⚠️ DUPLICATE DETECTED\n\nAn article with a similar title already exists:\n"${matchedTitle}"\n\nPublish anyway?`
-        
-        if (window.confirm(confirmMsg)) {
-          // Retry with forceSave flag
-          return handlePublish(true)
-        }
-        return // User cancelled
+        alert(`⚠️ DUPLICATE DETECTED\n\nAn article with a similar title already exists:\n"${matchedTitle}"\n\nPlease adjust the headline to proceed.`)
+        return
       }
 
       // Handle other errors
@@ -406,6 +396,8 @@ export default function WarRoom() {
     setIsTransforming(true)
     setTransformError(null)
     setAuditResult(null)
+    setTransformedArticle(null) // CLEAR STATE BEFORE NEW TRANSFORM
+
     try {
       const result = await transformRawToArticle(raw)
 
@@ -421,16 +413,32 @@ export default function WarRoom() {
       }
 
       // RUN DEEP AUDIT
+      // Concatenate all visible fields to ensure no residue hides in meta fields
+      const auditText = [
+        finalArticle.headline,
+        finalArticle.subheadline,
+        finalArticle.summary,
+        finalArticle.body,
+        finalArticle.riskNote,
+        ...finalArticle.keyInsights
+      ].join('\n\n');
+
       const audit = runDeepAudit({
         title: finalArticle.headline,
-        body: finalArticle.body,
+        body: auditText,
         summary: finalArticle.summary,
         language: activeLang,
         schema: { '@type': 'NewsArticle' }
       })
 
       setAuditResult(audit)
-      setTransformedArticle(finalArticle)
+
+      // ONLY SET ARTICLE IF AUDIT PASSED (OR SHOW AS BLOCKED)
+      if (audit.overall_score > 0) {
+        setTransformedArticle(finalArticle)
+      } else {
+        setTransformError('DETERMINISTIC_RESIDUE_BLOCK: Content failed mandatory audit gate.')
+      }
     } catch (err: any) {
       console.error('[WARROOM] Transform failed:', err)
       setTransformError(err?.message || 'Transform failed. Raw content preserved.')
@@ -556,7 +564,11 @@ export default function WarRoom() {
                       <button
                         onClick={() => handlePublish()}
                         disabled={isDeployBlocked}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-base rounded-lg hover:from-[#FFC524] hover:to-[#FFD86D] disabled:opacity-20 shadow-[0_8px_18px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40 transition-all focus:outline-none focus:ring-4 focus:ring-[#FFB800]/30"
+                        className={`flex items-center gap-2 px-6 py-2.5 font-black uppercase text-base rounded-lg transition-all focus:outline-none focus:ring-4 ${
+                          isDeployBlocked
+                            ? 'bg-neutral-800 text-neutral-500 border-2 border-neutral-700 cursor-not-allowed grayscale opacity-50'
+                            : 'bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black shadow-[0_8px_18px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40 hover:from-[#FFC524] hover:to-[#FFD86D] focus:ring-[#FFB800]/30'
+                        }`}
                       >
                         {isPublishing ? (
                           <Loader2 size={14} className="animate-spin" />
@@ -784,7 +796,11 @@ export default function WarRoom() {
               <button
                 onClick={() => handlePublish()}
                 disabled={isDeployBlocked}
-                className="w-full py-5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-sm tracking-wider hover:from-[#FFC524] hover:to-[#FFD86D] transition-all flex items-center justify-center gap-3 rounded-md disabled:opacity-20 shadow-[0_14px_28px_rgba(255,184,0,0.28)] ring-1 ring-[#FFB800]/50"
+                className={`w-full py-5 font-black uppercase text-sm tracking-wider transition-all flex items-center justify-center gap-3 rounded-md ${
+                  isDeployBlocked
+                    ? 'bg-neutral-800 text-neutral-500 border border-neutral-700 cursor-not-allowed grayscale opacity-50'
+                    : 'bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black shadow-[0_14px_28px_rgba(255,184,0,0.28)] ring-1 ring-[#FFB800]/50 hover:from-[#FFC524] hover:to-[#FFD86D]'
+                }`}
               >
                 {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}{' '}
                 {isDeployBlocked && !isPublishing ? 'GATING_RESTRICTED' : 'Deploy Hub'}

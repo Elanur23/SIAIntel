@@ -1,4 +1,5 @@
 import { callGeminiCentral } from '@/lib/neural-assembly/gemini-central-provider'
+import { detectForbiddenResidue } from '@/lib/neural-assembly/sia-sentinel-core'
 
 export interface FormattedArticle {
   headline: string
@@ -10,22 +11,34 @@ export interface FormattedArticle {
 }
 
 /**
- * Validates if an object is a valid FormattedArticle
+ * Validates if an object is a valid FormattedArticle and free of editorial residue
  */
-function isValidFormattedArticle(obj: any): obj is FormattedArticle {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.headline === 'string' &&
-    obj.headline.trim().length > 0 &&
-    typeof obj.subheadline === 'string' &&
-    typeof obj.summary === 'string' &&
-    typeof obj.body === 'string' &&
-    obj.body.trim().length > 0 &&
-    Array.isArray(obj.keyInsights) &&
-    obj.keyInsights.every((insight: any) => typeof insight === 'string') &&
-    typeof obj.riskNote === 'string'
-  )
+function validateArticle(obj: any): { valid: boolean; error?: string } {
+  if (!obj || typeof obj !== 'object') return { valid: false, error: 'Invalid response format' };
+
+  const required = ['headline', 'body', 'summary'];
+  for (const field of required) {
+    if (typeof obj[field] !== 'string' || obj[field].trim().length === 0) {
+      return { valid: false, error: `Missing required field: ${field}` };
+    }
+  }
+
+  // DETECT FORBIDDEN RESIDUE USING SHARED FUZZY DETECTOR
+  const allText = [
+    obj.headline,
+    obj.subheadline || '',
+    obj.summary,
+    obj.body,
+    obj.riskNote || '',
+    ...(Array.isArray(obj.keyInsights) ? obj.keyInsights : [])
+  ].join('\n\n');
+
+  const residueMatch = detectForbiddenResidue(allText);
+  if (residueMatch) {
+    return { valid: false, error: `Editorial residue detected: "${residueMatch}"` };
+  }
+
+  return { valid: true };
 }
 
 /**
@@ -48,6 +61,12 @@ function extractJsonFromResponse(text: string): string {
  * Creates a safe local fallback FormattedArticle from raw content
  */
 function createLocalFallback(raw: string): FormattedArticle {
+  // HARD BLOCK: If raw input already contains severe residue, do not attempt fallback
+  const residueMatch = detectForbiddenResidue(raw);
+  if (residueMatch) {
+    throw new Error(`Raw intelligence report contains forbidden residue ("${residueMatch}") and cannot be safely transformed.`);
+  }
+
   const lines = raw.split('\n').map(line => line.trim()).filter(Boolean)
   
   if (lines.length === 0) {
@@ -179,10 +198,11 @@ export async function transformRawToArticle(raw: string): Promise<FormattedArtic
       return createLocalFallback(trimmedRaw)
     }
 
-    // Validate AI response structure
-    if (!isValidFormattedArticle(parsed)) {
-      console.warn('[EDITORIAL] AI response validation failed, using local fallback. Response:', parsed)
-      return createLocalFallback(trimmedRaw)
+    // Validate AI response structure and residue
+    const validation = validateArticle(parsed);
+    if (!validation.valid) {
+      console.warn('[EDITORIAL] AI response validation failed, using local fallback. Error:', validation.error);
+      return createLocalFallback(trimmedRaw);
     }
 
     // AI response is valid, return it with defensive defaults
