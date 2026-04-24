@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Database,
   Wand2,
+  FileJson,
 } from 'lucide-react'
 import { applyLegalShield, LEGAL_CONFIG } from '@/lib/compliance/legal-enforcer'
 import TechnicalChart from '@/components/TechnicalChart'
@@ -23,6 +24,8 @@ import { transformRawToArticle, type FormattedArticle } from '@/lib/editorial/tr
 import { processSIAMasterProtocol } from '@/lib/content/sia-master-protocol-v4'
 import { runDeepAudit, type AuditResult } from '@/lib/neural-assembly/sia-sentinel-core'
 import { Language } from '@/lib/store/language-store'
+import PandaImport from './components/PandaImport'
+import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake-validator'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -130,6 +133,8 @@ export default function WarRoom() {
 
   const [manualTitle, setManualTitle] = useState('')
   const [manualSummary, setManualSummary] = useState('')
+  const [isPandaImportOpen, setIsPandaImportOpen] = useState(false)
+  const [lastImportInfo, setLastImportInfo] = useState<{ id: string; time: string } | null>(null)
 
   const [vault, setVault] = useState<
     Record<string, { title: string; desc: string; ready: boolean }>
@@ -214,6 +219,43 @@ export default function WarRoom() {
   const clearManualInput = () => {
     setManualTitle('')
     setManualSummary('')
+  }
+
+  const applyPandaPackageToVault = (pkg: PandaPackage) => {
+    const newVault = { ...vault }
+
+    PANDA_REQUIRED_LANGS.forEach((lang) => {
+      const node = pkg.languages[lang]
+
+      // Compose description from all available fields to preserve intelligence depth
+      const composedDesc = [
+        `[SUBHEADLINE]\n${node.subheadline}`,
+        `[SUMMARY]\n${node.summary}`,
+        `[BODY]\n${node.body}`,
+        `[KEY_INSIGHTS]\n${node.keyInsights.map(i => `• ${i}`).join('\n')}`,
+        `[RISK_NOTE]\n${node.riskNote}`,
+        `[SEO_TITLE]\n${node.seoTitle}`,
+        `[SEO_DESCRIPTION]\n${node.seoDescription}`,
+        `[PROVENANCE]\n${node.provenanceNotes}`
+      ].join('\n\n')
+
+      newVault[lang] = {
+        title: node.headline,
+        desc: composedDesc,
+        ready: true
+      }
+    })
+
+    setVault(newVault)
+    setTransformedArticle(null)
+    setTransformError(null)
+    setAuditResult(null)
+    setActiveLang('en')
+    setSelectedNews({ id: pkg.articleId, title: pkg.languages.en.headline })
+    setLastImportInfo({ id: pkg.articleId, time: new Date().toLocaleTimeString() })
+    setIsPandaImportOpen(false)
+
+    alert(`✅ PANDA_IMPORT_SUCCESS: ${pkg.articleId} // 9 Languages Loaded. Global audit required.`)
   }
 
   const syncFromAiWorkspace = async () => {
@@ -521,6 +563,22 @@ export default function WarRoom() {
               >
                 Clear Input
               </button>
+
+              <div className="pt-4 border-t border-white/5 space-y-3">
+                <button
+                  onClick={() => setIsPandaImportOpen(true)}
+                  className="w-full py-3 bg-gradient-to-r from-blue-700 to-blue-500 text-white font-black uppercase text-sm rounded-md hover:from-blue-600 hover:to-blue-400 transition-all shadow-lg shadow-blue-900/20 ring-1 ring-blue-400/40 flex items-center justify-center gap-2"
+                >
+                  <FileJson size={14} />
+                  Import Panda JSON
+                </button>
+                {lastImportInfo && (
+                  <div className="px-3 py-2 bg-black/40 border border-white/5 rounded text-[10px] font-mono text-white/30 flex justify-between">
+                    <span>ID: {lastImportInfo.id}</span>
+                    <span>{lastImportInfo.time}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </CyberBox>
         </div>
@@ -932,6 +990,12 @@ export default function WarRoom() {
           border-color: rgba(255, 184, 0, 0.3);
         }
       `}</style>
+
+      <PandaImport
+        isOpen={isPandaImportOpen}
+        onClose={() => setIsPandaImportOpen(false)}
+        onApply={applyPandaPackageToVault}
+      />
     </div>
   )
 }
