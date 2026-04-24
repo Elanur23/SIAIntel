@@ -845,9 +845,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
 
       <main className="relative z-10">
-        {/* --- 🚀 REFINED MEDIUM-SCALE ARTICLE HEADER --- */}
-        <section className="container mx-auto px-4 lg:px-12 py-12">
-          <div className="glass-panel machined-edge p-8 md:p-16 rounded-[2.5rem] relative overflow-hidden group shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+        {/* --- ARTICLE HEADER --- */}
+        <section className="container mx-auto px-4 lg:px-12 py-8">
+          <div className="glass-panel machined-edge p-6 md:p-12 relative overflow-hidden border border-white/5 shadow-2xl">
             {/* Background Decor - LCP optimized */}
             <div className="absolute inset-0 z-0 aspect-[16/9]">
               <Image
@@ -862,28 +862,28 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-[#020203] via-[#020203]/80 to-transparent" />
             </div>
 
-            <div className="relative z-10 space-y-8">
-              <nav className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+            <div className="relative z-10 space-y-6">
+              <nav className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest text-white/40">
                 <Link
                   href={`/${routeLang}`}
                   className="hover:text-blue-500 transition-colors flex items-center gap-2"
                 >
-                  <Terminal size={12} /> {ui.terminal}
+                  <Terminal size={11} /> {ui.terminal}
                 </Link>
-                <ChevronRight size={10} />
+                <ChevronRight size={9} />
                 <Link
                   href={`/${routeLang}/${getCategoryPageSlug(content.category)}`}
                   className="hover:text-blue-500 transition-colors"
                 >
                   {content.category}
                 </Link>
-                <ChevronRight size={10} />
+                <ChevronRight size={9} />
                 <span className="text-white/60 line-clamp-1">{content.title}</span>
               </nav>
 
-              <div className="max-w-5xl space-y-6">
-                <div className="flex items-center gap-4">
-                  <span className="px-3 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-[0.3em]">
+              <div className="max-w-5xl space-y-5">
+                <div className="flex items-center gap-3">
+                  <span className="px-2.5 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-widest">
                     INTEL_REPORT_#{detailArticle.id.slice(0, 8).toUpperCase()}
                   </span>
                   <GroundingVerificationBadge
@@ -891,7 +891,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     sources={['SIA_Scanner', 'Market_Pulse']}
                   />
                 </div>
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] uppercase italic tracking-tighter text-dynamic-glow">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.1] uppercase italic tracking-tighter">
                   {content.title}
                 </h1>
               </div>
@@ -903,53 +903,54 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             {/* --- 💎 MAIN ARTICLE BODY --- */}
             <article className="lg:col-span-8 space-y-16">
-              <div className="flex items-center justify-between border-b border-white/5 pb-10">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
-                    <User size={28} />
+              <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-600 flex items-center justify-center text-white shadow-lg">
+                    <User size={24} />
                   </div>
                   <div>
-                    <span className="block text-[10px] font-black text-blue-400 uppercase tracking-[0.3em]">
+                    <span className="block text-[10px] font-black text-blue-400 uppercase tracking-widest">
                       {content.role}
                     </span>
                     <Link
                       href={authorProfilePath}
-                      className="text-xl font-black text-white uppercase italic hover:text-blue-400 transition-colors"
+                      className="text-lg font-black text-white uppercase italic hover:text-blue-400 transition-colors"
                     >
                       {content.author}
                     </Link>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="block text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">
+                  <span className="block text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">
                     {ui.readTime}
                   </span>
-                  <div className="flex items-center gap-2 text-base font-black text-white italic">
-                    <Clock size={18} className="text-blue-500" />
+                  <div className="flex items-center gap-2 text-sm font-black text-white italic">
+                    <Clock size={16} className="text-blue-500" />
                     {readTime} {ui.minRead}
                   </div>
                 </div>
               </div>
 
-              <div className="-mt-6 flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40">
-                <span className="text-white/20">Trust:</span>
+              <div className="-mt-4 flex items-center space-x-0.5 py-2 px-0 border-l-4 border-blue-700/60 bg-white/[0.02] rounded-r-2xl shadow-sm">
+                <span className="pl-4 pr-2 text-xs font-semibold tracking-widest text-blue-300 uppercase select-none" style={{letterSpacing:'.13em'}}>Trust & Integrity</span>
+                <span className="mx-2 text-white/20 select-none">|</span>
                 <Link
                   href={`/${routeLang}/editorial-policy`}
-                  className="hover:text-blue-400 transition-colors"
+                  className="px-2 py-0.5 text-xs font-medium text-white/80 hover:text-blue-400 transition-colors underline underline-offset-4 decoration-blue-400/30"
                 >
                   Editorial Policy
                 </Link>
-                <span className="text-white/20">/</span>
+                <span className="mx-1 text-white/20 select-none">•</span>
                 <Link
                   href={`/${routeLang}/ai-transparency`}
-                  className="hover:text-blue-400 transition-colors"
+                  className="px-2 py-0.5 text-xs font-medium text-white/80 hover:text-blue-400 transition-colors underline underline-offset-4 decoration-blue-400/30"
                 >
                   AI Transparency
                 </Link>
-                <span className="text-white/20">/</span>
+                <span className="mx-1 text-white/20 select-none">•</span>
                 <Link
                   href={`/${routeLang}/contact`}
-                  className="hover:text-blue-400 transition-colors"
+                  className="px-2 py-0.5 text-xs font-medium text-white/80 hover:text-blue-400 transition-colors underline underline-offset-4 decoration-blue-400/30"
                 >
                   Contact Editorial
                 </Link>
@@ -958,9 +959,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {visibleSummary ? (
                 <div
                   id="article-visible-summary"
-                  className="article-summary relative p-10 bg-white/[0.03] backdrop-blur-md border-l-4 border-l-blue-600 rounded-r-[2.5rem] shadow-2xl"
+                  className="article-summary relative p-8 bg-white/[0.02] border-l-4 border-l-blue-600 shadow-lg"
                 >
-                  <p className="text-2xl md:text-3xl text-slate-300 font-light leading-relaxed italic">
+                  <p className="text-xl md:text-2xl text-slate-300 font-light leading-relaxed italic">
                     &quot;{visibleSummary}&quot;
                   </p>
                 </div>
@@ -969,7 +970,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {datasetSurface ? (
                 <section
                   id="article-visible-signal-dataset"
-                  className="p-8 bg-slate-900/40 border border-blue-500/20 rounded-[2rem] space-y-5"
+                  className="p-6 bg-slate-900/40 border border-blue-500/20 rounded-xl space-y-4"
                   aria-label="Visible signal dataset snapshot"
                 >
                   <div className="space-y-2">
@@ -980,11 +981,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       {datasetSurface.description}
                     </p>
                   </div>
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {datasetSurface.metrics.map((metric) => (
                       <div
                         key={metric.key}
-                        className="rounded-xl border border-white/10 bg-black/30 p-4"
+                        className="rounded-lg border border-white/10 bg-black/30 p-3"
                       >
                         <dt className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                           {metric.label}
@@ -998,7 +999,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </section>
               ) : null}
 
-              <div className="relative aspect-video rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl bg-black">
+              <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10 shadow-lg bg-black">
                 <SiaRadarVisual
                   category={content.category}
                   confidence={content.confidence}
@@ -1017,7 +1018,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <RevenueMaximizer category={content.category} lang={routeLang} />
 
               {/* Action Toolbar */}
-              <div className="flex flex-wrap items-center gap-6 pt-12 border-t border-white/5">
+              <div className="flex flex-wrap items-center gap-4 pt-8 border-t border-white/10">
                 <PdfExportButton
                   articleId={detailArticle.id}
                   title={content.title}
@@ -1039,7 +1040,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <SiaAdUnit slotType="SIDEBAR" />
 
               {/* Sovereign Insight Card */}
-              <div className="p-8 glass-panel machined-edge rounded-[2.5rem] space-y-6 relative overflow-hidden group">
+              <div className="p-6 glass-panel machined-edge rounded-xl space-y-5 relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity">
                   <Zap size={80} className="text-blue-500" />
                 </div>
@@ -1055,7 +1056,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </div>
 
               {/* Risk Shield Node */}
-              <div className="p-8 bg-red-600/5 border border-red-600/20 rounded-[2.5rem] space-y-6">
+              <div className="p-6 bg-red-600/5 border border-red-600/20 rounded-xl space-y-5">
                 <div className="flex items-center gap-3 text-red-500">
                   <AlertTriangle size={20} />
                   <span className="text-[10px] font-black uppercase tracking-[0.3em]">
