@@ -29,9 +29,11 @@ import {
   Square,
   Play,
   Database,
+  Wand2,
 } from 'lucide-react'
 import { applyLegalShield, LEGAL_CONFIG } from '@/lib/compliance/legal-enforcer'
 import TechnicalChart from '@/components/TechnicalChart'
+import { transformRawToArticle, type FormattedArticle } from '@/lib/editorial/transform-raw-to-article'
 
 // Fallback implementations for missing dependencies
 type ScoredFeedItem = { item: any; score: number }
@@ -149,6 +151,9 @@ export default function WarRoom() {
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
   const lockRef = useRef<string | null>(null)
   const [publishedTitles, setPublishedTitles] = useState<string[]>([])
+  const [transformedArticle, setTransformedArticle] = useState<FormattedArticle | null>(null)
+  const [isTransforming, setIsTransforming] = useState(false)
+  const [transformError, setTransformError] = useState<string | null>(null)
 
   const [vault, setVault] = useState<
     Record<string, { title: string; desc: string; ready: boolean }>
@@ -246,7 +251,22 @@ export default function WarRoom() {
     if (!selectedNews || !vault[activeLang].ready) return
     setIsPublishing(true)
 
-    const finalContent = applyLegalShield(vault[activeLang].desc, activeLang)
+    // Use transformed article body if available, otherwise fall back to raw vault content
+    const deployTitle = transformedArticle ? transformedArticle.headline : vault[activeLang].title
+    const deployBody = transformedArticle
+      ? [
+          transformedArticle.summary,
+          transformedArticle.body,
+          transformedArticle.keyInsights.length
+            ? '**Key Insights:**\n' + transformedArticle.keyInsights.map((i) => `• ${i}`).join('\n')
+            : '',
+          transformedArticle.riskNote ? `*${transformedArticle.riskNote}*` : '',
+        ]
+          .filter(Boolean)
+          .join('\n\n')
+      : vault[activeLang].desc
+
+    const finalContent = applyLegalShield(deployBody, activeLang)
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
     try {
@@ -256,7 +276,7 @@ export default function WarRoom() {
         body: JSON.stringify({
           action: 'add',
           article: {
-            headline: vault[activeLang].title,
+            headline: deployTitle,
             fullContent: finalContent,
             imageUrl: imageUrl ?? undefined,
             language_code: activeLang,
@@ -281,8 +301,15 @@ export default function WarRoom() {
       SUPPORTED_LANGS.forEach((lang) => {
         if (vault[lang].ready) {
           const suffix = getLangFieldSuffix(lang)
-          savePayload[`title${suffix}`] = vault[lang].title
-          savePayload[`content${suffix}`] = vault[lang].desc
+          // For the active language, use transformed title if available
+          const titleToSave = (lang === activeLang && transformedArticle)
+            ? transformedArticle.headline
+            : vault[lang].title
+          const contentToSave = (lang === activeLang && transformedArticle)
+            ? finalContent
+            : vault[lang].desc
+          savePayload[`title${suffix}`] = titleToSave
+          savePayload[`content${suffix}`] = contentToSave
         }
       })
 
@@ -327,6 +354,8 @@ export default function WarRoom() {
   const selectNews = (news: any) => {
     setSelectedNews(news)
     setImageUrl(null)
+    setTransformedArticle(null)
+    setTransformError(null)
 
     // Fix: Populate vault with news content to enable center panel rendering
     const resetVault: any = {}
@@ -339,6 +368,22 @@ export default function WarRoom() {
     })
     setVault(resetVault)
     setActiveLang('en')
+  }
+
+  const handleTransform = async () => {
+    const raw = activeDraft.desc || ''
+    if (!raw.trim()) return
+    setIsTransforming(true)
+    setTransformError(null)
+    try {
+      const result = await transformRawToArticle(raw)
+      setTransformedArticle(result)
+    } catch (err: any) {
+      console.error('[WARROOM] Transform failed:', err)
+      setTransformError(err?.message || 'Transform failed. Raw content preserved.')
+    } finally {
+      setIsTransforming(false)
+    }
   }
 
   useEffect(() => {
@@ -427,6 +472,20 @@ export default function WarRoom() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
+                        onClick={handleTransform}
+                        disabled={isTransforming || !activeDraft.desc}
+                        title="Transform raw report into a formatted article using AI"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-700/80 to-purple-500/70 border-2 border-purple-400/60 rounded-lg text-sm font-black text-purple-100 hover:from-purple-600/90 hover:to-purple-400/80 hover:border-purple-200/80 transition-all uppercase disabled:opacity-40 shadow-[0_8px_18px_rgba(147,51,234,0.22)] ring-2 ring-purple-300/20 focus:outline-none focus:ring-4 focus:ring-purple-400/30"
+                        style={{ letterSpacing: '0.08em' }}
+                      >
+                        {isTransforming ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Wand2 size={14} />
+                        )}
+                        {isTransforming ? 'Transforming...' : transformedArticle ? 'Re-Transform' : 'Transform to Article'}
+                      </button>
+                      <button
                         onClick={() => handlePublish()}
                         disabled={isPublishing || !activeDraft.ready}
                         className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-base rounded-lg hover:from-[#FFC524] hover:to-[#FFD86D] disabled:opacity-20 shadow-[0_8px_18px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40 transition-all focus:outline-none focus:ring-4 focus:ring-[#FFB800]/30"
@@ -502,23 +561,89 @@ export default function WarRoom() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                           </div>
                         )}
-                        <h1 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-4">
-                          {activeDraft.title}
-                        </h1>
 
-                        {/* 🔥 DYNAMIC CHART PREVIEW */}
-                        <TechnicalChart
-                          articleBody={activeDraft.desc}
-                          category={publishCategory}
-                          lang={activeLang}
-                        />
+                        {/* Transform error banner */}
+                        {transformError && (
+                          <div className="flex items-center gap-3 px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg text-red-300 text-sm font-medium">
+                            <AlertCircle size={14} className="shrink-0" />
+                            <span>{transformError} — showing raw content.</span>
+                          </div>
+                        )}
 
-                        <div
-                          className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: formatArticleBody(activeDraft.desc, activeLang),
-                          }}
-                        />
+                        {transformedArticle ? (
+                          /* ── FORMATTED ARTICLE PREVIEW ── */
+                          <>
+                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 opacity-80">
+                              <Wand2 size={12} /> Transformed Article
+                            </div>
+                            <h1 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-2">
+                              {transformedArticle.headline}
+                            </h1>
+                            {transformedArticle.subheadline && (
+                              <p className="text-lg text-white/70 font-semibold leading-snug">
+                                {transformedArticle.subheadline}
+                              </p>
+                            )}
+                            {transformedArticle.summary && (
+                              <p className="text-base text-white/60 italic border-l-2 border-purple-500/50 pl-4">
+                                {transformedArticle.summary}
+                              </p>
+                            )}
+
+                            {/* 🔥 DYNAMIC CHART PREVIEW */}
+                            <TechnicalChart
+                              articleBody={transformedArticle.body}
+                              category={publishCategory}
+                              lang={activeLang}
+                            />
+
+                            <div
+                              className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
+                              dangerouslySetInnerHTML={{
+                                __html: formatArticleBody(transformedArticle.body, activeLang),
+                              }}
+                            />
+                            {transformedArticle.keyInsights.length > 0 && (
+                              <div className="border border-purple-500/30 bg-purple-900/10 rounded-lg p-5 space-y-2">
+                                <p className="text-xs font-black uppercase tracking-widest text-purple-400">Key Insights</p>
+                                <ul className="space-y-1.5">
+                                  {transformedArticle.keyInsights.map((insight, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-white/80">
+                                      <span className="text-purple-400 mt-0.5 shrink-0">•</span>
+                                      {insight}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {transformedArticle.riskNote && (
+                              <p className="text-xs text-white/40 italic border-t border-white/10 pt-4">
+                                {transformedArticle.riskNote}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          /* ── RAW REPORT FALLBACK PREVIEW ── */
+                          <>
+                            <h1 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-4">
+                              {activeDraft.title}
+                            </h1>
+
+                            {/* 🔥 DYNAMIC CHART PREVIEW */}
+                            <TechnicalChart
+                              articleBody={activeDraft.desc}
+                              category={publishCategory}
+                              lang={activeLang}
+                            />
+
+                            <div
+                              className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
+                              dangerouslySetInnerHTML={{
+                                __html: formatArticleBody(activeDraft.desc, activeLang),
+                              }}
+                            />
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -606,6 +731,12 @@ export default function WarRoom() {
                 <span className="font-medium">Visual Locked:</span>{' '}
                 <span className={imageUrl ? 'text-emerald-400 font-black' : 'text-white/25 font-medium'}>
                   {imageUrl ? 'YES' : 'NO'}
+                </span>
+              </div>
+              <div className="flex justify-between text-white/50">
+                <span className="font-medium">Article Transform:</span>{' '}
+                <span className={transformedArticle ? 'text-purple-400 font-black' : 'text-white/25 font-medium'}>
+                  {isTransforming ? 'PROCESSING' : transformedArticle ? 'READY' : 'RAW'}
                 </span>
               </div>
             </div>
