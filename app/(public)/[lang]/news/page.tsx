@@ -203,12 +203,12 @@ export default async function NewsIndexPage({ params }: { params: { lang: string
           </Link>
         </div>
 
-        <section className="mb-14 rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 md:p-12">
-          <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-blue-500/30 bg-blue-600/10 px-4 py-2 text-[9px] font-black uppercase tracking-[0.3em] text-blue-400">
+        <section className="mb-12 rounded-xl border border-white/10 bg-white/[0.02] p-6 md:p-10">
+          <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-blue-500/30 bg-blue-600/10 px-3.5 py-1.5 text-[9px] font-black uppercase tracking-[0.3em] text-blue-400">
             <Newspaper size={14} />
             SIGNAL_DIRECTORY
           </div>
-          <h1 className="mb-4 text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
+          <h1 className="mb-3 text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
             {dict.home.latest.title}
           </h1>
           <p className="max-w-3xl border-l-2 border-blue-600/50 pl-6 text-lg text-slate-400">
