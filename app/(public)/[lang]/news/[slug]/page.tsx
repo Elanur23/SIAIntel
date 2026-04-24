@@ -707,7 +707,11 @@ import RevenueMaximizer from '@/components/RevenueMaximizer'
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const routeLang = normalizePublicRouteLocale(params.lang)
   const detailArticle = await resolveDetailArticle(params.slug, routeLang)
-  if (!detailArticle) notFound()
+  
+  // Defensive guard: if no article found, call notFound() immediately
+  if (!detailArticle) {
+    notFound()
+  }
 
   const lang = normalizeArticleLanguage(routeLang)
   const dict = getDictionary(lang as any)
@@ -738,21 +742,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const matchedExpert = getAllExperts().find(
-    (expert) => normalizePersonName(expert.name) === normalizePersonName(content.author)
+    (expert) => normalizePersonName(expert.name) === normalizePersonName(content.author || '')
   )
   const authorProfilePath = matchedExpert
     ? `/${routeLang}/experts/${matchedExpert.id}`
     : `/${routeLang}/experts`
 
-  const readTime = calculateReadTime(content.body)
+  const readTime = calculateReadTime(content.body || '')
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://siaintel.com'
   const canonicalRouteLocale = detailArticle.canonicalRouteLocale
   const canonicalSlug =
     detailArticle.getSlugForLocale(canonicalRouteLocale) || detailArticle.canonicalSlug
   const articleUrl = `${baseUrl}/${canonicalRouteLocale}/news/${canonicalSlug}`
   const visibleSummary = buildVisibleSummaryWithIntroFallback({
-    summary: content.summary,
-    content: content.body,
+    summary: content.summary || '',
+    content: content.body || '',
     maxLength: 220,
   })
   const speakable = buildSpeakableForVisibleSummary({
@@ -776,9 +780,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const authorSchema: Record<string, unknown> = {
     '@type': 'Person',
-    name: content.author,
-    jobTitle: content.role,
-    knowsAbout: [content.category, 'Financial Markets'],
+    name: content.author || 'SIA Intelligence Unit',
+    jobTitle: content.role || 'Senior Analyst',
+    knowsAbout: [content.category || 'MARKET', 'Financial Markets'],
   }
   if (matchedExpert) {
     authorSchema.url = `${baseUrl}/${routeLang}/experts/${matchedExpert.id}`
@@ -788,16 +792,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': ['NewsArticle', 'AnalysisNewsArticle'],
-    headline: content.title,
-    description: content.summary,
+    headline: content.title || 'SIA Intelligence Report',
+    description: content.summary || 'Intelligence analysis from SIA',
     image: {
       '@type': 'ImageObject',
-      url: content.image,
+      url: content.image || `${baseUrl}/og-image.png`,
       width: 1200,
       height: 630,
     },
-    datePublished: content.isoDate,
-    dateModified: content.isoDate,
+    datePublished: content.isoDate || new Date().toISOString(),
+    dateModified: content.isoDate || new Date().toISOString(),
     author: [authorSchema],
     publisher: {
       '@type': 'Organization',
@@ -814,7 +818,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       '@id': articleUrl,
     },
     isAccessibleForFree: true,
-    articleSection: content.category,
+    articleSection: content.category || 'MARKET',
     ...(speakable ? { speakable } : {}),
   }
 
@@ -827,10 +831,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {
         '@type': 'ListItem',
         position: 2,
-        name: content.category,
+        name: content.category || 'MARKET',
         item: `${baseUrl}/${routeLang}/${getCategoryPageSlug(content.category)}`,
       },
-      { '@type': 'ListItem', position: 3, name: content.title, item: articleUrl },
+      { '@type': 'ListItem', position: 3, name: content.title || 'Intelligence Report', item: articleUrl },
     ],
   }
 
