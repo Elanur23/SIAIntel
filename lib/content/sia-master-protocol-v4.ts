@@ -5,6 +5,7 @@
 
 import { Language } from '@/lib/store/language-store'
 import crypto from 'crypto'
+import { protocolStrings, ProtocolLanguage } from '@/lib/i18n/protocol-dictionaries'
 
 /**
  * HIGH-TICKET FINANCE TERMS - Never translate, always bold Latin
@@ -140,15 +141,23 @@ export function enforceScarcityTone(content: string): {
 
 /**
  * 3. FINANCIAL GRAVITY: Inject fiat instrument references
+ * GUARD: Only injects if the target language matches the instrument template (currently EN only)
  */
 export function injectFinancialGravity(
   content: string,
+  lang: Language,
   targetInstrument: keyof typeof FIAT_INSTRUMENTS = 'USD'
 ): {
   processed: string
   injectionPoint: number
   fiatReference: string
 } {
+  // SAFETY GUARD: Financial gravity templates are currently English-only.
+  // We skip injection for non-English locales to avoid mixed-language content.
+  if (lang !== 'en') {
+    return { processed: content, injectionPoint: -1, fiatReference: '' }
+  }
+
   const instrument = FIAT_INSTRUMENTS[targetInstrument]
   
   // Find first paragraph end (after first period followed by space or newline)
@@ -187,6 +196,7 @@ export function injectFinancialGravity(
  */
 export function generateVerificationFooter(
   content: string,
+  lang: Language,
   confidenceScore: number = 98.4,
   dataSources?: string[]
 ): {
@@ -194,6 +204,8 @@ export function generateVerificationFooter(
   hash: string
   timestamp: string
 } {
+  const dict = protocolStrings[lang as ProtocolLanguage] || protocolStrings.en;
+
   // Generate SHA-256 hash (full 64-character for integrity)
   const timestamp = new Date().toISOString()
   const hashInput = `${content}${timestamp}${confidenceScore}`
@@ -212,20 +224,20 @@ export function generateVerificationFooter(
 
 ---
 
-## 🛡️ SIA-V4-EEAT-SOURCE-VERIFICATION
+## 🛡️ ${dict.verification_title}
 
-### Data Sources & Methodology
+### ${dict.methodology_title}
 ${sources.map((source, idx) => `${idx + 1}. **${source}**`).join('\n')}
 
-### Verification Metadata
-- **Confidence Score**: ${confidenceScore.toFixed(1)}% (Statistical Probability)
-- **SHA-256 Hash**: \`${hash}\`
-- **Timestamp**: ${timestamp}
-- **Protocol Version**: SIA Master Protocol v4.0
-- **Authority**: Council of Five Intelligence Network
-- **E-E-A-T Compliance**: ✅ Verified
+### ${dict.metadata_title}
+- **${dict.confidence_score}**: ${confidenceScore.toFixed(1)}% (${dict.statistical_probability})
+- **${dict.hash}**: \`${hash}\`
+- **${dict.timestamp}**: ${timestamp}
+- **${dict.protocol_version}**: SIA Master Protocol v4.0
+- **${dict.authority}**: Council of Five Intelligence Network
+- **${dict.compliance}**: ✅ ${dict.verified}
 
-### Intelligence Validation
+### ${dict.intelligence_validation_title}
 *This analysis has been processed through SIA's multi-node validation system. The Confidence Score represents statistical probability based on:*
 - On-chain transaction data and wallet movement patterns
 - Exchange liquidity depth and order book analysis
@@ -233,12 +245,12 @@ ${sources.map((source, idx) => `${idx + 1}. **${source}**`).join('\n')}
 - Macroeconomic correlation matrices and central bank policy signals
 - Historical pattern recognition with 72-hour rolling validation
 
-### Risk Disclaimer
-**IMPORTANT**: This intelligence report is provided for informational and educational purposes only. It does not constitute financial, investment, or trading advice. Cryptocurrency and financial markets are highly volatile and carry substantial risk of loss. Past performance does not guarantee future results. Market conditions can change rapidly and unpredictably.
+### ${dict.risk_disclaimer_title}
+**${dict.important}**: This intelligence report is provided for informational and educational purposes only. It does not constitute financial, investment, or trading advice. Cryptocurrency and financial markets are highly volatile and carry substantial risk of loss. Past performance does not guarantee future results. Market conditions can change rapidly and unpredictably.
 
-**Action Required**: Always conduct independent research, verify information through multiple sources, and consult qualified financial advisors before making investment decisions. SIA Intelligence Terminal assumes no liability for decisions made based on this analysis.
+**${dict.action_required}**: Always conduct independent research, verify information through multiple sources, and consult qualified financial advisors before making investment decisions. SIA Intelligence Terminal assumes no liability for decisions made based on this analysis.
 
-**Regulatory Notice**: This content complies with Google AdSense policies and E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) standards. All analysis is based on publicly available data (OSINT) and proprietary analytical models.
+**${dict.regulatory_notice}**: This content complies with Google AdSense policies and E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) standards. All analysis is based on publicly available data (OSINT) and proprietary analytical models.
   `.trim()
 
   return { footer, hash, timestamp }
@@ -281,9 +293,9 @@ export function processSIAMasterProtocol(
 
   // Step 3: Inject financial gravity
   if (enableFinancialGravity) {
-    const result = injectFinancialGravity(processed, 'USD')
+    const result = injectFinancialGravity(processed, lang, 'USD')
     processed = result.processed
-    fiatReferencesCount = 1
+    fiatReferencesCount = result.injectionPoint !== -1 ? 1 : 0
   }
 
   // Step 4: Add verification footer with data sources
@@ -296,7 +308,7 @@ export function processSIAMasterProtocol(
       'Macroeconomic Indicators (Central Bank Data)',
       'SIA_SENTINEL Proprietary Intelligence Network',
     ]
-    const result = generateVerificationFooter(processed, confidenceScore, dataSources)
+    const result = generateVerificationFooter(processed, lang, confidenceScore, dataSources)
     processed = processed + '\n\n' + result.footer
     verificationHash = result.hash
   }

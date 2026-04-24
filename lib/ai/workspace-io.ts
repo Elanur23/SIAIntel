@@ -104,7 +104,9 @@ export interface WorkspaceLangNode {
   risk?:    string
 }
 
-export type Workspace = Record<LangKey, WorkspaceLangNode> & {
+/** Individual article structure inside the workspace */
+export type WorkspaceArticle = Record<LangKey, WorkspaceLangNode> & {
+  id?: string
   imageUrl?: string
   category?: string
   status?: string
@@ -114,6 +116,25 @@ export type Workspace = Record<LangKey, WorkspaceLangNode> & {
   manifest?: string
   deployment_timestamp?: string
   live_urls?: string[]
+  verification?: {
+    sources: string[]
+    confidenceScore: number
+    lastVerified: string
+  }
+  [key: string]: unknown
+}
+
+/** Legacy alias for compatibility with older code (e.g. speed-cell.ts) */
+export type Workspace = WorkspaceArticle
+
+/** Container for the entire ai_workspace.json */
+export interface WorkspaceContainer {
+  status?: string
+  mode?: string
+  last_cleaned?: string
+  message?: string
+  articles: WorkspaceArticle[]
+  ingestion_config?: Record<string, unknown>
   [key: string]: unknown
 }
 
@@ -121,34 +142,60 @@ const EMPTY_NODE: WorkspaceLangNode = {
   title: '', summary: '', content: '', imageUrl: ''
 }
 
-/** Read ai_workspace.json — strips BOM, ensures all 9 lang keys exist */
-export async function readWorkspace(): Promise<Workspace> {
+/** Read the entire ai_workspace.json container */
+export async function readWorkspaceContainer(): Promise<WorkspaceContainer> {
   let raw: string
   try {
     raw = await fs.readFile(WORKSPACE_PATH, 'utf8')
   } catch {
-    throw new Error('ai_workspace.json not found or not readable')
+    return { articles: [] }
   }
 
-  // Strip UTF-8 BOM if present (PowerShell adds this)
   if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1)
 
-  let ws: Record<string, unknown>
+  let ws: any
   try {
     ws = JSON.parse(raw)
   } catch (e: any) {
     throw new Error(`ai_workspace.json is invalid JSON: ${e.message}`)
   }
 
-  // Auto-fix Windows-1252 Mojibake in all string fields
-  ws = fixMojibakeDeep(ws) as Record<string, unknown>
+  ws = fixMojibakeDeep(ws)
+
+  if (!ws.articles && ws.en) {
+    const article: any = {}
+    for (const key of Object.keys(ws)) {
+      article[key] = ws[key]
+    }
+    ws = { articles: [article] }
+  }
+
+  if (!ws || typeof ws !== 'object') ws = { articles: [] }
+  if (!Array.isArray(ws.articles)) ws.articles = []
+
+  return ws as WorkspaceContainer
+}
+
+/** Read ai_workspace.json — hydrates from articles[0] (active draft) by default */
+export async function readWorkspace(): Promise<WorkspaceArticle> {
+  const container = await readWorkspaceContainer()
+
+  if (container.articles.length === 0) {
+    const emptyDraft: WorkspaceArticle = { ...({} as any) }
+    for (const lang of ALL_LANGS) {
+      emptyDraft[lang] = { ...EMPTY_NODE }
+    }
+    return emptyDraft
+  }
+
+  const activeDraft = container.articles[0]
 
   // Ensure all 9 language keys exist
   for (const lang of ALL_LANGS) {
-    if (!ws[lang] || typeof ws[lang] !== 'object') {
-      ws[lang] = { ...EMPTY_NODE }
+    if (!activeDraft[lang] || typeof activeDraft[lang] !== 'object') {
+      (activeDraft as any)[lang] = { ...EMPTY_NODE }
     } else {
-      const node = ws[lang] as Record<string, unknown>
+      const node = activeDraft[lang] as any
       if (typeof node.title   !== 'string') node.title   = ''
       if (typeof node.summary !== 'string') node.summary = ''
       if (typeof node.content !== 'string') node.content = ''
@@ -156,18 +203,32 @@ export async function readWorkspace(): Promise<Workspace> {
     }
   }
 
-  return ws as Workspace
+  return activeDraft
 }
 
-/** Write ai_workspace.json — always UTF-8, no BOM, pretty-printed */
-export async function writeWorkspace(ws: Record<string, unknown>): Promise<void> {
-  const json = JSON.stringify(ws, null, 2)
-  // fs.writeFile with 'utf8' never adds BOM
+/** Write to ai_workspace.json — handles both full containers and single article updates */
+export async function writeWorkspace(data: WorkspaceContainer | WorkspaceArticle): Promise<void> {
+  let container: WorkspaceContainer
+
+  if ('articles' in data && Array.isArray((data as any).articles)) {
+    container = data as WorkspaceContainer
+  } else {
+    // Single article update. Read container to preserve other articles.
+    const current = await readWorkspaceContainer()
+    if (current.articles.length > 0) {
+      current.articles[0] = data as WorkspaceArticle
+    } else {
+      current.articles = [data as WorkspaceArticle]
+    }
+    container = current
+  }
+
+  const json = JSON.stringify(container, null, 2)
   await fs.writeFile(WORKSPACE_PATH, json, 'utf8')
 }
 
-/** Returns list of language keys that have no content (empty or missing) */
-export function getMissingLangs(ws: Workspace): LangKey[] {
+/** Returns list of language keys that have no content (empty or missing) in the provided article */
+export function getMissingLangs(ws: WorkspaceArticle): LangKey[] {
   return ALL_LANGS.filter(lang => {
     const content = ws[lang]?.content ?? ''
     return content.trim().length === 0

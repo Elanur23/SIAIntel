@@ -20,6 +20,9 @@ import {
 import { applyLegalShield, LEGAL_CONFIG } from '@/lib/compliance/legal-enforcer'
 import TechnicalChart from '@/components/TechnicalChart'
 import { transformRawToArticle, type FormattedArticle } from '@/lib/editorial/transform-raw-to-article'
+import { processSIAMasterProtocol } from '@/lib/content/sia-master-protocol-v4'
+import { runDeepAudit, type AuditResult } from '@/lib/neural-assembly/sia-sentinel-core'
+import { Language } from '@/lib/store/language-store'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -123,8 +126,8 @@ export default function WarRoom() {
   const [transformedArticle, setTransformedArticle] = useState<FormattedArticle | null>(null)
   const [isTransforming, setIsTransforming] = useState(false)
   const [transformError, setTransformError] = useState<string | null>(null)
-  
-  // Manual input state
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
+
   const [manualTitle, setManualTitle] = useState('')
   const [manualSummary, setManualSummary] = useState('')
 
@@ -141,6 +144,45 @@ export default function WarRoom() {
     jp: { title: '', desc: '', ready: false },
     zh: { title: '', desc: '', ready: false },
   })
+
+  // Protocol configuration
+  const [protocolConfig, setProtocolConfig] = useState({
+    enableScarcityTone: false,
+    enableGlobalLexicon: true,
+    enableFinancialGravity: true,
+    enableVerificationFooter: true
+  })
+
+  // Fail-closed gate logic
+  const isDeployBlocked = useMemo(() => {
+    // Basic connectivity and ready checks
+    if (!selectedNews || !vault[activeLang].ready || isPublishing || isTransforming || transformError) {
+      return true
+    }
+    // Must have a transformed article and audit result
+    if (!transformedArticle || !auditResult) {
+      return true
+    }
+    // Strict audit score threshold
+    if (auditResult.overall_score < 70) {
+      return true
+    }
+    // Scarcity Tone requires Sovereign-level validation (85+)
+    if (protocolConfig.enableScarcityTone && auditResult.overall_score < 85) {
+      return true
+    }
+    return false
+  }, [
+    selectedNews,
+    vault,
+    activeLang,
+    isPublishing,
+    isTransforming,
+    transformError,
+    transformedArticle,
+    auditResult,
+    protocolConfig.enableScarcityTone
+  ])
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
 
@@ -218,10 +260,16 @@ export default function WarRoom() {
   }
 
   const handlePublish = async (forceOverride = false) => {
-    if (!selectedNews || !vault[activeLang].ready) return
+    // FAIL-CLOSED GATING ENFORCEMENT
+    if (isDeployBlocked && !forceOverride) {
+      console.error('[WARROOM] Publish blocked: Gating criteria not met.')
+      alert('❌ PUBLISH BLOCKED: Content did not pass all required quality gates.')
+      return
+    }
+
     setIsPublishing(true)
 
-    // Use transformed article body if available, otherwise fall back to raw vault content
+    // ... (existing body construction)
     const deployTitle = transformedArticle ? transformedArticle.headline : vault[activeLang].title
     const deployBody = transformedArticle
       ? [
@@ -283,6 +331,38 @@ export default function WarRoom() {
         }
       })
 
+      // SYNC TO AI_WORKSPACE.JSON (Mandatory Pre-Publish Gate)
+      try {
+        const workspaceArticle = {
+          id: selectedNews.id,
+          created_at: new Date().toISOString(),
+          imageUrl: imageUrl ?? undefined,
+          category: publishCategory,
+          status: 'published',
+          [activeLang]: {
+            title: deployTitle,
+            summary: transformedArticle?.summary || '',
+            content: finalContent,
+            imageUrl: imageUrl ?? ''
+          }
+        }
+        const wsRes = await fetch(`/api/war-room/workspace`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(workspaceArticle),
+        })
+
+        if (!wsRes.ok) {
+          const errorData = await wsRes.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Workspace staging failed')
+        }
+      } catch (wsErr) {
+        console.error('[WARROOM] Workspace sync blocked deploy:', wsErr)
+        alert(`❌ DEPLOY BLOCKED: Staging layer failure. ${ (wsErr as Error).message }`)
+        setIsPublishing(false)
+        return // TERMINAL BLOCK: Do not proceed to database save
+      }
+
       const saveRes = await fetch(`/api/war-room/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -325,9 +405,32 @@ export default function WarRoom() {
     if (!raw.trim()) return
     setIsTransforming(true)
     setTransformError(null)
+    setAuditResult(null)
     try {
       const result = await transformRawToArticle(raw)
-      setTransformedArticle(result)
+
+      // APPLY SIA PROTOCOL
+      const processed = processSIAMasterProtocol(result.body, activeLang as Language, {
+        ...protocolConfig,
+        confidenceScore: 98.4
+      })
+
+      const finalArticle = {
+        ...result,
+        body: processed.content
+      }
+
+      // RUN DEEP AUDIT
+      const audit = runDeepAudit({
+        title: finalArticle.headline,
+        body: finalArticle.body,
+        summary: finalArticle.summary,
+        language: activeLang,
+        schema: { '@type': 'NewsArticle' }
+      })
+
+      setAuditResult(audit)
+      setTransformedArticle(finalArticle)
     } catch (err: any) {
       console.error('[WARROOM] Transform failed:', err)
       setTransformError(err?.message || 'Transform failed. Raw content preserved.')
@@ -452,7 +555,7 @@ export default function WarRoom() {
                       </button>
                       <button
                         onClick={() => handlePublish()}
-                        disabled={isPublishing || !activeDraft.ready}
+                        disabled={isDeployBlocked}
                         className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-base rounded-lg hover:from-[#FFC524] hover:to-[#FFD86D] disabled:opacity-20 shadow-[0_8px_18px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40 transition-all focus:outline-none focus:ring-4 focus:ring-[#FFB800]/30"
                       >
                         {isPublishing ? (
@@ -460,10 +563,23 @@ export default function WarRoom() {
                         ) : (
                           <Send size={14} />
                         )}{' '}
-                        Deploy
+                        {isDeployBlocked && !isPublishing ? 'Locked' : 'Deploy'}
                       </button>
                     </div>
                   </div>
+
+                  {isDeployBlocked && transformedArticle && (
+                    <div className="mx-8 mb-4 flex items-center justify-between px-4 py-2 bg-red-900/20 border border-red-500/40 rounded-lg">
+                      <div className="flex items-center gap-2 text-[11px] text-red-400 font-black uppercase tracking-tighter animate-pulse">
+                        <AlertCircle size={14} /> Critical Gating Restriction Active
+                      </div>
+                      <div className="text-[10px] text-white/40 font-bold uppercase italic">
+                        {auditResult && auditResult.overall_score < 70 ? 'Audit Threshold Failed (<70)' :
+                         protocolConfig.enableScarcityTone && auditResult && auditResult.overall_score < 85 ? 'Sovereign Validation Required (>=85)' :
+                         'Draft Integrity Pending'}
+                      </div>
+                    </div>
+                  )}
 
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     {viewMode === 'edit' ? (
@@ -667,12 +783,76 @@ export default function WarRoom() {
               </label>
               <button
                 onClick={() => handlePublish()}
-                disabled={!activeDraft.ready || isPublishing}
+                disabled={isDeployBlocked}
                 className="w-full py-5 bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black font-black uppercase text-sm tracking-wider hover:from-[#FFC524] hover:to-[#FFD86D] transition-all flex items-center justify-center gap-3 rounded-md disabled:opacity-20 shadow-[0_14px_28px_rgba(255,184,0,0.28)] ring-1 ring-[#FFB800]/50"
               >
                 {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}{' '}
-                Deploy Hub
+                {isDeployBlocked && !isPublishing ? 'GATING_RESTRICTED' : 'Deploy Hub'}
               </button>
+            </div>
+          </CyberBox>
+
+          <CyberBox title="SIA Protocol Controls" icon={Wand2} className="shrink-0">
+            <div className="p-4 space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-4 h-4 rounded border ${protocolConfig.enableScarcityTone ? 'bg-[#FFB800] border-[#FFB800]' : 'border-white/20'} flex items-center justify-center transition-colors`}>
+                  {protocolConfig.enableScarcityTone && <div className="w-2 h-2 bg-black rounded-sm" />}
+                </div>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={protocolConfig.enableScarcityTone}
+                  onChange={(e) => setProtocolConfig({ ...protocolConfig, enableScarcityTone: e.target.checked })}
+                />
+                <span className="text-xs uppercase font-bold text-white/70 group-hover:text-white transition-colors">
+                  Enable Scarcity Tone
+                </span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-4 h-4 rounded border ${protocolConfig.enableGlobalLexicon ? 'bg-[#FFB800] border-[#FFB800]' : 'border-white/20'} flex items-center justify-center transition-colors`}>
+                  {protocolConfig.enableGlobalLexicon && <div className="w-2 h-2 bg-black rounded-sm" />}
+                </div>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={protocolConfig.enableGlobalLexicon}
+                  onChange={(e) => setProtocolConfig({ ...protocolConfig, enableGlobalLexicon: e.target.checked })}
+                />
+                <span className="text-xs uppercase font-bold text-white/70 group-hover:text-white transition-colors">
+                  Protect Finance Terms
+                </span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-4 h-4 rounded border ${protocolConfig.enableFinancialGravity ? 'bg-[#FFB800] border-[#FFB800]' : 'border-white/20'} flex items-center justify-center transition-colors`}>
+                  {protocolConfig.enableFinancialGravity && <div className="w-2 h-2 bg-black rounded-sm" />}
+                </div>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={protocolConfig.enableFinancialGravity}
+                  onChange={(e) => setProtocolConfig({ ...protocolConfig, enableFinancialGravity: e.target.checked })}
+                />
+                <span className="text-xs uppercase font-bold text-white/70 group-hover:text-white transition-colors">
+                  Financial Gravity
+                </span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-4 h-4 rounded border ${protocolConfig.enableVerificationFooter ? 'bg-[#FFB800] border-[#FFB800]' : 'border-white/20'} flex items-center justify-center transition-colors`}>
+                  {protocolConfig.enableVerificationFooter && <div className="w-2 h-2 bg-black rounded-sm" />}
+                </div>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={protocolConfig.enableVerificationFooter}
+                  onChange={(e) => setProtocolConfig({ ...protocolConfig, enableVerificationFooter: e.target.checked })}
+                />
+                <span className="text-xs uppercase font-bold text-white/70 group-hover:text-white transition-colors">
+                  Verification Footer
+                </span>
+              </label>
             </div>
           </CyberBox>
 
@@ -686,6 +866,14 @@ export default function WarRoom() {
                 <span className="font-medium">Intelligence Load:</span>{' '}
                 <span className="text-[#FFB800] font-black">{activeWordCount} Words</span>
               </div>
+              {auditResult && (
+                <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
+                  <span className="font-medium">Audit Score:</span>{' '}
+                  <span className={`font-black ${auditResult.overall_score >= 85 ? 'text-[#00FF00]' : auditResult.overall_score >= 70 ? 'text-[#FFB800]' : 'text-red-500'}`}>
+                    {auditResult.overall_score}/100
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
                 <span className="font-medium">Vault Status:</span>{' '}
                 <span className={activeDraft.ready ? 'text-[#00FF00] font-black drop-shadow-[0_0_4px_#00FF00]' : 'text-red-400 font-black'}>
