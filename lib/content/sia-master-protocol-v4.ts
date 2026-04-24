@@ -238,12 +238,7 @@ ${sources.map((source, idx) => `${idx + 1}. **${source}**`).join('\n')}
 - **${dict.compliance}**: ✅ ${dict.verified}
 
 ### ${dict.intelligence_validation_title}
-*This analysis has been processed through SIA's multi-node validation system. The Confidence Score represents statistical probability based on:*
-- On-chain transaction data and wallet movement patterns
-- Exchange liquidity depth and order book analysis
-- Institutional capital flow tracking across global markets
-- Macroeconomic correlation matrices and central bank policy signals
-- Historical pattern recognition with 72-hour rolling validation
+*This analysis has been processed through SIA's multi-node validation system. The Confidence Score represents statistical probability based on current data point density and cross-node source verification.*
 
 ### ${dict.risk_disclaimer_title}
 **${dict.important}**: This intelligence report is provided for informational and educational purposes only. It does not constitute financial, investment, or trading advice. Cryptocurrency and financial markets are highly volatile and carry substantial risk of loss. Past performance does not guarantee future results. Market conditions can change rapidly and unpredictably.
@@ -301,16 +296,27 @@ export function processSIAMasterProtocol(
   // Step 4: Add verification footer with data sources
   let verificationHash = ''
   if (enableVerificationFooter) {
-    const dataSources = [
-      'On-Chain Analytics (Blockchain Explorers)',
-      'Exchange Liquidity Data (CEX/DEX APIs)',
-      'Institutional Flow Tracking (Dark Pool Monitors)',
-      'Macroeconomic Indicators (Central Bank Data)',
-      'SIA_SENTINEL Proprietary Intelligence Network',
-    ]
-    const result = generateVerificationFooter(processed, lang, confidenceScore, dataSources)
-    processed = processed + '\n\n' + result.footer
-    verificationHash = result.hash
+    // IDEMPOTENCY CHECK: Don't append a second footer if one already exists
+    const footerMarkers = ['SIA-V4-EEAT-SOURCE-VERIFICATION', 'SIA Master Protocol v4.0', 'Verification Metadata'];
+    const hasFooter = footerMarkers.some(marker => processed.includes(marker));
+
+    if (hasFooter) {
+      console.warn('[PROTOCOL] SIA footer already present, skipping duplicate generation.');
+      // Extract hash if possible for return object
+      const hashMatch = processed.match(/SHA-256 Hash\*\*: `([A-F0-9]{64})`/i);
+      verificationHash = hashMatch ? hashMatch[1] : '';
+    } else {
+      const dataSources = [
+        'On-Chain Analytics (Blockchain Explorers)',
+        'Exchange Liquidity Data (CEX/DEX APIs)',
+        'Institutional Flow Tracking (Dark Pool Monitors)',
+        'Macroeconomic Indicators (Central Bank Data)',
+        'SIA_SENTINEL Proprietary Intelligence Network',
+      ]
+      const result = generateVerificationFooter(processed, lang, confidenceScore, dataSources)
+      processed = processed + '\n\n' + result.footer
+      verificationHash = result.hash
+    }
   }
 
   return {

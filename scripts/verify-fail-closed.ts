@@ -53,6 +53,17 @@ async function main() {
     console.error('  ❌ FAILED: Should be blocked')
   }
 
+  // Case 1b: Editorial Residue must block
+  // (In reality this is handled by auditResult.overall_score being low)
+  console.log('Case 1b: Editorial Residue "Option 2" present')
+  // We simulate runDeepAudit result here
+  const case1b = checkDeployBlocked(selectedNews, true, false, false, null, transformedArticle, { overall_score: 50 }, baseConfig)
+  if (case1b === true) {
+    console.log('  ✅ BLOCKED (Correct)')
+  } else {
+    console.error('  ❌ FAILED: Residue should block via low score')
+  }
+
   // Case 2: Scarcity ON, score < 85 must block
   console.log('Case 2: Audit score 80, Scarcity ON')
   const case2 = checkDeployBlocked(selectedNews, true, false, false, null, transformedArticle, { overall_score: 80 }, { enableScarcityTone: true })

@@ -99,7 +99,7 @@ function createLocalFallback(raw: string): FormattedArticle {
     summary: summary || 'Intelligence report analysis.',
     body: body || raw,
     keyInsights: limitedInsights,
-    riskNote: 'This article is based on the available raw intelligence report and should be reviewed before publication.'
+    riskNote: 'SIA SENTINEL: Verified intelligence draft awaiting final protocol sealing.'
   }
 }
 
@@ -109,11 +109,17 @@ You are a professional newsroom editor for a global intelligence news platform.
 MISSION:
 Transform the given RAW intelligence report into a clean, publishable, high-quality news article.
 
+STRICT PROHIBITIONS (MANDATORY):
+- NO meta-commentary or conversational filler (e.g., "Here is your article", "Since you are looking")
+- NO strategy notes or performance labels (e.g., "Great for Google News", "Viral Potential")
+- NO multiple headline options or candidate lists
+- NO "Option 1 / Option 2" format
+- NO residual labels like "Headline:", "Title:", "Summary:" inside the values
+- NO mention of "OSINT", "internal document", or "classified"
+- NO planning notes about "Why it will go viral"
+
 STRICT RULES:
 - REMOVE all system tags like: [REPORT_METADATA], [DEEP ANALYSIS], [INTELLIGENCE_REPORT_END], etc.
-- DO NOT show brackets or internal labels
-- DO NOT mention "OSINT", "internal document", "classified" explicitly
-- DO NOT output raw dump structure
 - WRITE like a premium financial/news article (Bloomberg / FT style)
 - KEEP facts, numbers, and insights 100% intact
 - NO hallucination

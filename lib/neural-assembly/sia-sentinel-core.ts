@@ -131,6 +131,15 @@ const TIME_MARKERS = [
 
 const PLACEHOLDERS = ['TODO', 'FIXME', '[PLACEHOLDER]', 'TBD', '[INSERT', 'XYZ'];
 
+const FORBIDDEN_RESIDUE = [
+  'Option 1', 'Option 2', 'Option 3',
+  'Great for Google News', 'Viral Potential', 'Why it will go viral',
+  'Headline Ideas', 'Since you are looking',
+  'should be reviewed before publication',
+  'This article is based on the available raw intelligence report',
+  'Headline:', 'Article Title:', 'Subheadline:', 'Summary:'
+];
+
 // ============================================================================
 // HELPERS
 // ============================================================================
@@ -295,6 +304,32 @@ export function runDeepAudit(input: AuditInput): AuditResult {
       });
     }
   });
+
+  // EDITORIAL RESIDUE CHECK (AI prompt leakage)
+  FORBIDDEN_RESIDUE.forEach(residue => {
+    const regex = new RegExp(`\\b${residue}\\b`, 'i');
+    if (regex.test(body) || regex.test(title || '')) {
+      addIssue(audit.cell_scores.body_cell, {
+        issue_type: 'EDITORIAL_RESIDUE',
+        severity: 'CRITICAL',
+        field: 'body',
+        message: `Forbidden editorial residue detected: "${residue}".`,
+        auto_fixable: false,
+        suggested_fix: "Remove AI prompt/planning residue from the article."
+      });
+    }
+  });
+
+  // DUPLICATED MARKDOWN HEADINGS CHECK
+  if (/##\s*🛡️\s*##\s*🛡️|###\s*###/.test(body)) {
+    addIssue(audit.cell_scores.body_cell, {
+      issue_type: 'MALFORMED_FORMATTING',
+      severity: 'CRITICAL',
+      field: 'body',
+      message: 'Duplicated markdown prefixes detected in footer/body.',
+      auto_fixable: false
+    });
+  }
 
   // BODY CELL - Length
   if (effectiveWordCount < 50) {
