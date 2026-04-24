@@ -619,7 +619,9 @@ async function getRelatedNodes(
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const routeLang = normalizePublicRouteLocale(params.lang)
   const detailArticle = await resolveDetailArticle(params.slug, routeLang)
-  if (!detailArticle) return { title: 'Intelligence Not Found' }
+  if (!detailArticle) {
+    notFound()
+  }
 
   const title = detailArticle.title || 'SIA Intelligence Report'
   const description = buildVisibleSummaryWithIntroFallback({
