@@ -847,7 +847,7 @@ export default function WarRoom() {
         </div>
 
         {/* RIGHT: STATUS & NODES */}
-        <div className="col-span-3 flex flex-col gap-5 min-h-0 overflow-hidden rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
+        <div className="col-span-3 flex flex-col gap-5 min-h-0 overflow-y-auto custom-scrollbar rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
           <CyberBox title="Neural Language Nodes" icon={Globe2} className="shrink-0">
             <div className="p-4 grid grid-cols-2 gap-2.5">
               {SUPPORTED_LANGS.map((l) => (
@@ -981,46 +981,72 @@ export default function WarRoom() {
                 </div>
               )}
               
-              {/* GLOBAL HEALTH BOARD - PHASE 1 */}
+              {/* GLOBAL HEALTH BOARD - PHASE 1 READABILITY */}
               {globalAudit ? (
                 <>
-                  <div className="mt-4 pt-4 border-t-2 border-[#FFB800]/20">
-                    <div className="text-[10px] font-black text-[#FFB800]/60 mb-3 tracking-wider">
+                  <div className="mt-4 pt-4 border-t-2 border-[#FFB800]/20 space-y-4">
+                    <div className="text-xs font-black text-[#FFB800]/70 mb-3 tracking-wider">
                       GLOBAL HEALTH BOARD
                     </div>
                     
-                    <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
-                      <span className="font-medium">Global Health:</span>{' '}
-                      <span className={`font-black ${globalAudit.status === 'PASS' ? 'text-[#00FF00]' : globalAudit.status === 'NEEDS_REVIEW' ? 'text-[#FFB800]' : 'text-red-500'}`}>
-                        {globalAudit.globalScore}/100
-                      </span>
+                    {/* Top-Level Health Indicators */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="px-3 py-3 bg-emerald-900/20 border-2 border-emerald-500/40 rounded-lg text-center">
+                        <div className="text-2xl font-black text-emerald-400">{globalAudit.globalScore}</div>
+                        <div className="text-[10px] uppercase text-emerald-300/60 font-bold">Global Health</div>
+                      </div>
+                      <div className={`px-3 py-3 rounded-lg text-center border-2 ${
+                        isDeployBlocked 
+                          ? 'bg-red-900/20 border-red-500/40' 
+                          : 'bg-emerald-900/20 border-emerald-500/40'
+                      }`}>
+                        <div className={`text-xs font-black ${isDeployBlocked ? 'text-red-400' : 'text-emerald-400'}`}>
+                          {isDeployBlocked ? 'LOCKED' : 'READY'}
+                        </div>
+                        <div className={`text-[10px] uppercase font-bold ${isDeployBlocked ? 'text-red-300/60' : 'text-emerald-300/60'}`}>
+                          Deploy Gate
+                        </div>
+                      </div>
                     </div>
                     
+                    {/* Clarification Banner - Prominent when audit passes but deploy locked */}
+                    {globalAudit.publishable && isDeployBlocked && (
+                      <div className="px-4 py-3 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg">
+                        <div className="flex items-center gap-2 text-xs font-black text-yellow-400 uppercase mb-1">
+                          <AlertCircle size={14} />
+                          Global Audit PASS ≠ Deploy READY
+                        </div>
+                        <div className="text-[11px] text-yellow-300/80 leading-relaxed">
+                          All gates must pass: Global Audit + Transform + Active Node Audit
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
-                      <span className="font-medium">Audit Status:</span>{' '}
-                      <span className={`font-black text-[10px] ${globalAudit.status === 'PASS' ? 'text-[#00FF00]' : globalAudit.status === 'NEEDS_REVIEW' ? 'text-[#FFB800]' : 'text-red-500'}`}>
+                      <span className="font-medium text-xs">Audit Status:</span>{' '}
+                      <span className={`font-black text-xs ${globalAudit.status === 'PASS' ? 'text-[#00FF00]' : globalAudit.status === 'NEEDS_REVIEW' ? 'text-[#FFB800]' : 'text-red-500'}`}>
                         {globalAudit.status}
                       </span>
                     </div>
                     
                     <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
-                      <span className="font-medium">Gating Status:</span>{' '}
-                      <span className={`font-black text-[10px] ${globalAudit.gatingStatus === 'READY_FOR_GLOBAL_DEPLOY' ? 'text-[#00FF00]' : 'text-red-500'}`}>
+                      <span className="font-medium text-xs">Gating Status:</span>{' '}
+                      <span className={`font-black text-xs ${globalAudit.gatingStatus === 'READY_FOR_GLOBAL_DEPLOY' ? 'text-[#00FF00]' : 'text-red-500'}`}>
                         {globalAudit.gatingStatus === 'READY_FOR_GLOBAL_DEPLOY' ? 'READY' : 'RESTRICTED'}
                       </span>
                     </div>
                     
                     <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
-                      <span className="font-medium">Publishable:</span>{' '}
-                      <span className={`font-black ${globalAudit.publishable ? 'text-[#00FF00]' : 'text-red-500'}`}>
+                      <span className="font-medium text-xs">Publishable:</span>{' '}
+                      <span className={`font-black text-sm ${globalAudit.publishable ? 'text-[#00FF00]' : 'text-red-500'}`}>
                         {globalAudit.publishable ? 'YES' : 'NO'}
                       </span>
                     </div>
                     
                     {/* Language Health Grid */}
                     <div className="mt-3 mb-2">
-                      <div className="text-[9px] font-bold text-white/40 mb-2">LANGUAGE HEALTH (9 NODES)</div>
-                      <div className="grid grid-cols-3 gap-1">
+                      <div className="text-[11px] font-bold text-white/50 mb-2 uppercase">Language Health (9 Nodes)</div>
+                      <div className="grid grid-cols-3 gap-2">
                         {PANDA_REQUIRED_LANGS.map((l) => {
                           const langStatus = globalAudit.languages[l as SupportedLang]
                           const score = langStatus?.score || 0
@@ -1028,7 +1054,7 @@ export default function WarRoom() {
                           return (
                             <div
                               key={l}
-                              className={`px-2 py-1.5 rounded text-[9px] font-black uppercase text-center ${
+                              className={`px-2 py-2 rounded text-[10px] font-black uppercase text-center ${
                                 status === 'PASS'
                                   ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/30'
                                   : status === 'NEEDS_REVIEW'
@@ -1038,34 +1064,43 @@ export default function WarRoom() {
                               title={`${l.toUpperCase()}: ${score}/100 - ${status}`}
                             >
                               <div>{l}</div>
-                              <div className="text-[8px] opacity-70">{score}</div>
+                              <div className="text-[9px] opacity-70">{score}</div>
                             </div>
                           )
                         })}
                       </div>
                     </div>
                     
-                    {/* Failed Languages Alert */}
+                    {/* Failed Languages Alert - More Prominent */}
                     {globalAudit.failedLanguages.length > 0 && (
-                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded text-[10px] text-red-400 font-bold uppercase mt-2">
-                        ⚠ Failed: {globalAudit.failedLanguages.join(', ')}
+                      <div className="px-4 py-3 bg-red-900/30 border-2 border-red-500/50 rounded-lg">
+                        <div className="text-xs font-black text-red-400 uppercase mb-2">
+                          ⚠ FAILED LANGUAGES
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {globalAudit.failedLanguages.map(lang => (
+                            <span key={lang} className="px-2 py-1 bg-red-500/20 text-red-300 text-[11px] font-bold uppercase rounded">
+                              {lang}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                     
                     {/* Warning Languages */}
                     {globalAudit.warningLanguages.length > 0 && (
-                      <div className="px-3 py-2 bg-yellow-900/20 border border-yellow-500/30 rounded text-[10px] text-yellow-400 font-bold uppercase mt-2">
+                      <div className="px-3 py-2 bg-yellow-900/20 border border-yellow-500/30 rounded text-[11px] text-yellow-400 font-bold uppercase">
                         ⚠ Warnings: {globalAudit.warningLanguages.length} language(s)
                       </div>
                     )}
                     
-                    {/* Top Global Findings */}
+                    {/* Top Global Findings - More Readable */}
                     {globalAudit.globalFindings && globalAudit.globalFindings.length > 0 && (
-                      <div className="mt-3 px-3 py-2 bg-white/5 border border-white/10 rounded">
-                        <div className="text-[9px] font-bold text-white/40 mb-1">TOP FINDINGS</div>
-                        <div className="space-y-1">
-                          {globalAudit.globalFindings.slice(0, 5).map((finding, idx) => (
-                            <div key={idx} className="text-[9px] text-white/60">
+                      <div className="mt-3 px-3 py-3 bg-white/5 border border-white/10 rounded">
+                        <div className="text-[11px] font-bold text-white/50 mb-2 uppercase">Top Findings</div>
+                        <div className="space-y-2">
+                          {globalAudit.globalFindings.slice(0, 3).map((finding, idx) => (
+                            <div key={idx} className="text-[11px] text-white/70 leading-relaxed">
                               • {finding}
                             </div>
                           ))}
@@ -1076,40 +1111,91 @@ export default function WarRoom() {
                 </>
               ) : selectedNews ? (
                 <div className="mt-4 pt-4 border-t-2 border-red-500/30">
-                  <div className="px-3 py-3 bg-red-900/20 border border-red-500/30 rounded">
-                    <div className="text-[10px] font-black text-red-400 uppercase mb-2">
+                  <div className="px-4 py-3 bg-red-900/20 border border-red-500/30 rounded">
+                    <div className="text-xs font-black text-red-400 uppercase mb-2">
                       ⚠ GLOBAL 9-NODE AUDIT REQUIRED
                     </div>
-                    <div className="text-[9px] text-red-300/70 leading-relaxed">
+                    <div className="text-[11px] text-red-300/70 leading-relaxed">
                       Run Global Audit after import/edit before publish can be considered.
                     </div>
                   </div>
                 </div>
               ) : null}
               
-              {/* Deploy Lock Reasons */}
+              {/* Deploy Lock Reasons - Readable Cards */}
               {isDeployBlocked && selectedNews && (
-                <div className="mt-4 pt-4 border-t-2 border-red-500/30">
-                  <div className="px-3 py-3 bg-red-900/20 border border-red-500/30 rounded">
-                    <div className="text-[10px] font-black text-red-400 uppercase mb-2">
-                      🔒 DEPLOY LOCKED - REASONS
-                    </div>
-                    <div className="space-y-1 text-[9px] text-red-300/80">
-                      {!selectedNews && <div>• No article/source loaded</div>}
-                      {!vault[activeLang].ready && <div>• Active language vault not ready</div>}
-                      {isPublishing && <div>• Publishing in progress</div>}
-                      {isTransforming && <div>• Transforming in progress</div>}
-                      {transformError && <div>• Transform error present</div>}
-                      {!globalAudit && <div>• Global 9-Node Audit required</div>}
-                      {globalAudit && !globalAudit.publishable && <div>• Global Audit failed (not publishable)</div>}
-                      {!transformedArticle && <div>• Article transform required</div>}
-                      {!auditResult && <div>• Active language audit required</div>}
-                      {auditResult && auditResult.overall_score < 70 && <div>• Active node score below threshold (&lt;70)</div>}
-                      {protocolConfig.enableScarcityTone && auditResult && auditResult.overall_score < 85 && <div>• Scarcity Tone requires Sovereign validation (≥85)</div>}
-                    </div>
-                    <div className="mt-2 text-[8px] text-red-300/50 italic">
-                      Note: Global Audit READY ≠ Deploy READY. All gates must pass.
-                    </div>
+                <div className="mt-4 pt-4 border-t-2 border-red-500/30 space-y-3">
+                  <div className="text-xs font-black text-red-400 uppercase flex items-center gap-2">
+                    <AlertCircle size={14} />
+                    🔒 DEPLOY LOCKED - REASONS
+                  </div>
+                  <div className="space-y-2">
+                    {!selectedNews && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">No article/source loaded</span>
+                      </div>
+                    )}
+                    {!vault[activeLang].ready && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Active language vault not ready</span>
+                      </div>
+                    )}
+                    {isPublishing && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Publishing in progress</span>
+                      </div>
+                    )}
+                    {isTransforming && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Transforming in progress</span>
+                      </div>
+                    )}
+                    {transformError && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Transform error present</span>
+                      </div>
+                    )}
+                    {!globalAudit && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Global 9-Node Audit required</span>
+                      </div>
+                    )}
+                    {globalAudit && !globalAudit.publishable && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Global Audit failed (not publishable)</span>
+                      </div>
+                    )}
+                    {!transformedArticle && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Article transform required</span>
+                      </div>
+                    )}
+                    {!auditResult && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Active language audit required</span>
+                      </div>
+                    )}
+                    {auditResult && auditResult.overall_score < 70 && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Active node score below threshold (&lt;70)</span>
+                      </div>
+                    )}
+                    {protocolConfig.enableScarcityTone && auditResult && auditResult.overall_score < 85 && (
+                      <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span className="text-[11px] text-red-300/90">Scarcity Tone requires Sovereign validation (≥85)</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
