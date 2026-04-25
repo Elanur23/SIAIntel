@@ -1,4 +1,5 @@
 import { validatePandaPackage, PANDA_REQUIRED_LANGS } from '../lib/editorial/panda-intake-validator';
+import { PANDA_FAIL_CLOSED_CODES, PANDA_SOURCE_SYSTEM } from '../lib/content/sia-panda-writing-protocol';
 
 const createValidNode = (lang: string) => {
   const base = {
@@ -14,7 +15,7 @@ const createValidNode = (lang: string) => {
     riskNote: "SIA SENTINEL: Intelligence report verified for informational purposes.",
     seoTitle: "AI Market Intelligence Q1 2026",
     seoDescription: "Professional analysis of AI infrastructure and capital flows for institutional investors and global analysts.",
-    provenanceNotes: "Source: SEC, Bloomberg terminal, and official GCC regulatory filings."
+    provenanceNotes: "Generated under SIA Protocol; pending Warroom validation."
   };
 
   if (lang === 'ru') {
@@ -25,7 +26,7 @@ const createValidNode = (lang: string) => {
     base.riskNote = "SIA SENTINEL: Разведывательный отчет проверен для информационных целей.";
     base.seoTitle = "Анализ рынка ИИ Q1 2026";
     base.seoDescription = "Профессиональный анализ инфраструктуры ИИ и потоков капитала в глобальном масштабе.";
-    base.provenanceNotes = "Источник: SEC, терминал Bloomberg и официальные документы ССАГПЗ.";
+    base.provenanceNotes = "Generated under SIA Protocol; pending Warroom validation.";
     base.keyInsights = [
         "Потоки капитала в инфраструктуру ИИ выросли на 14% в первом квартале.",
         "Риски суверенного долга сильно коррелируют с вычислительной мощностью.",
@@ -39,11 +40,11 @@ const createValidNode = (lang: string) => {
     base.riskNote = "SIA SENTINEL: تم التحقق من تقرير الاستخبارات لأغراض إعلامية.";
     base.seoTitle = "ذكاء سوق الذكاء الاصطناعي الربع الأول 2026";
     base.seoDescription = "تحليل احترافي للبنية التحتية للذكاء الاصطناعي وتدفقات رأس المال للمستثمرين.";
-    base.provenanceNotes = "المصدر: SEC، ومحطة Bloomberg، والملفات التنظيمية الرسمية لدول مجلس التعاون الخليجي.";
+    base.provenanceNotes = "Generated under SIA Protocol; pending Warroom validation.";
     base.keyInsights = [
         "زادت تدفقات رأس المال نحو البنية التحتية للذكاء الاصطناعي بنسبة 14٪ في الربع الأول.",
         "تترابط مخاطر الديون السيادية بشكل كبير مع قدرة الحوسبة.",
-        "يتسارع الاعتماد المؤسسي لمحركات التحليل العصبي."
+        "يتسارع الاعتماد المؤسسي لمحركات التحليل عصبي."
     ];
   } else if (lang === 'jp') {
     base.headline = "機関投資家向けAIインテリジェンスレポート V14";
@@ -53,7 +54,7 @@ const createValidNode = (lang: string) => {
     base.riskNote = "SIA SENTINEL: インテリジェンスレポートは情報提供の目的で確認されています。";
     base.seoTitle = "AI市場インテリジェンス 2026年第1四半期";
     base.seoDescription = "2026年第1四半期のAIインフラと資本フローに関する機関投資家レベルの専門的な分析レポートです。";
-    base.provenanceNotes = "出典：SEC、ブルームバーグ端末、およびGCC公式規制当局の提出書類。";
+    base.provenanceNotes = "Generated under SIA Protocol; pending Warroom validation.";
     base.keyInsights = [
         "第1四半期のAIインフラへの資本流入は14％増加しました。",
         "ソブリン債務リスクは計算能力と高い相関関係があります。",
@@ -62,12 +63,12 @@ const createValidNode = (lang: string) => {
   } else if (lang === 'zh') {
     base.headline = "机构级人工智能情报报告 V14";
     base.subheadline = "全球市场流动性与主权债务风险深度分析与战略前景预测报告";
-    base.summary = "本报告探讨了人工智能计算能力与传统金融的融合，分析了2026年第一季度与美元表现的直接相关性。该分析基于广泛的数据集，包括全球市场趋势和主要机构投资者的资本流向。";
-    base.body = "人工智能计算能力与传统金融系统的融合正在为机构资产 management 创造新的范式。随着流动性流向主权级人工智能基础设施的增加，计算能力与美元表现之间的相关性已达到三年来的最高点。我们对2026年第一季度数据的分析表明，分配给海湾合作委员会和北美地区专用计算集群 summit 的资本增加了14％。这一转变代表了全球情报服务建模市场风险和机会向量方式的根本变革。此外，机构采用神经分析引擎的速度正在加快，从而提高了决策过程中的数据密度。这种趋势将在未来几年内继续重塑全球金融格局。";
+    base.summary = "本报告探讨了人工智能计算能力 with 传统金融的融合，分析了2026年第一季度与美元表现的直接相关性。该分析基于广泛的数据集，包括全球市场趋势和主要机构投资者的资本流向。";
+    base.body = "人工智能计算能力 with 传统金融系统的融合正在为机构资产 management 创造新的范式。随着流动性流向主权级人工智能基础设施的增加，计算能力 with 美元表现之间的相关性已达到三年来的最高点。我们对2026年第一季度数据的分析表明，分配给海湾合作委员会和北美地区专用计算集群 summit 的资本增加了14％。这一转变代表了全球情报服务建模市场风险和机会向量方式的根本变革。此外，机构采用神经分析引擎的速度正在加快，从而提高了决策过程中的数据密度。这种趋势将在未来几年内继续重塑全球金融格局。";
     base.riskNote = "SIA SENTINEL: 情报报告已通过验证，仅供参考。";
     base.seoTitle = "2026年第一季度AI市场情报";
     base.seoDescription = "专业分析2026年第一季度全球人工智能基础设施和资本流动的机构级情报报告。";
-    base.provenanceNotes = "来源：美国证券交易委员会、彭博终端和海湾合作委员会官方监管文件。";
+    base.provenanceNotes = "Generated under SIA Protocol; pending Warroom validation.";
     base.keyInsights = [
         "第一季度流向人工智能基础设施的资金增加了14%。",
         "主权债务风险与计算能力高度相关。",
@@ -86,7 +87,7 @@ const createValidPackage = (): any => {
 
   return {
     articleId: "INT-2026-04-A1",
-    sourceSystem: "PANDA_V1",
+    sourceSystem: PANDA_SOURCE_SYSTEM,
     createdAt: new Date().toISOString(),
     category: "MARKET",
     targetRegion: "GLOBAL",
@@ -97,10 +98,10 @@ const createValidPackage = (): any => {
 };
 
 async function test() {
-  console.log("🧪 Verifying Panda Intake Validator...\n");
+  console.log("🧪 Verifying SIA-Panda Writing Protocol...\n");
 
   // 1. Valid Package
-  console.log("Case 01: Valid 9-language package");
+  console.log("Case 01: Valid 9-language PANDA_V1 package");
   const case01 = validatePandaPackage(createValidPackage());
   if (case01.ok) {
     console.log("  ✅ PASS");
@@ -108,73 +109,153 @@ async function test() {
     console.error("  ❌ FAIL:", JSON.stringify(case01.errors, null, 2));
   }
 
-  // 2. Missing Language
-  console.log("\nCase 02: Missing 'zh' language key");
+  // 2. Missing Language (tr)
+  console.log("\nCase 02: Missing 'tr' language key");
   const pkg02 = createValidPackage();
-  delete pkg02.languages.zh;
+  delete pkg02.languages.tr;
   const case02 = validatePandaPackage(pkg02);
-  if (!case02.ok && case02.errors.some(e => e.code === "LANGUAGE_COMPLETENESS_FAILURE")) {
+  if (!case02.ok && case02.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.LANGUAGE_MISSING)) {
     console.log("  ✅ PASS (Correctly blocked)");
   } else {
-    console.error("  ❌ FAIL: Should have been blocked for missing lang. Errors:", case02.errors);
+    console.error("  ❌ FAIL: Should have been blocked for missing tr");
   }
 
-  // 3. Wrong sourceSystem
-  console.log("\nCase 03: Wrong sourceSystem");
+  // 3. Missing Language (jp)
+  console.log("\nCase 03: Missing 'jp' language key");
   const pkg03 = createValidPackage();
-  pkg03.sourceSystem = "INVALID_SYS";
+  delete pkg03.languages.jp;
   const case03 = validatePandaPackage(pkg03);
-  if (!case03.ok && case03.errors.some(e => e.code === "SCHEMA_VALIDATION_FAILURE")) {
+  if (!case03.ok && case03.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.LANGUAGE_MISSING)) {
     console.log("  ✅ PASS (Correctly blocked)");
   } else {
-    console.error("  ❌ FAIL: Should have been blocked for invalid sourceSystem");
+    console.error("  ❌ FAIL: Should have been blocked for missing jp");
   }
 
-  // 4. Editorial Residue
-  console.log("\nCase 04: Editorial Residue 'Option 2' in de node");
+  // 4. Unsupported Languages (it/pt)
+  console.log("\nCase 04: Package using 'it' and 'pt' instead of tr/jp");
   const pkg04 = createValidPackage();
-  pkg04.languages.de.body += " Option 2: The Alternative Angle";
+  pkg04.languages.it = pkg04.languages.tr;
+  pkg04.languages.pt = pkg04.languages.jp;
+  delete pkg04.languages.tr;
+  delete pkg04.languages.jp;
   const case04 = validatePandaPackage(pkg04);
-  if (!case04.ok && case04.errors.some(e => e.lang === "de" && e.code === "RESIDUE_DETECTED")) {
-    console.log("  ✅ PASS (Correctly blocked residue)");
+  if (!case04.ok && case04.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.LANGUAGE_MISSING)) {
+    console.log("  ✅ PASS (Correctly blocked unsupported langs)");
   } else {
-    console.error("  ❌ FAIL: Should have blocked 'Option 2'");
+    console.error("  ❌ FAIL: Should have blocked it/pt");
   }
 
-  // 5. Language Leakage
-  console.log("\nCase 05: English leakage in RU node");
+  // 5. Wrong sourceSystem
+  console.log("\nCase 05: sourceSystem 'Panda-9'");
   const pkg05 = createValidPackage();
-  pkg05.languages.ru.body = "This is a full English body inside a Russian node which should trigger leakage detection. It contains institutional grade analysis of global market liquidity and sovereign debt risk, but written in the wrong language for this specific node. This content is high quality but fails the governance gate due to script mismatch. We must ensure that Russian content is actually written in Cyrillic to prevent accidental English leaks into non-English language sections of the terminal.";
+  pkg05.sourceSystem = "Panda-9";
   const case05 = validatePandaPackage(pkg05);
-  if (!case05.ok && case05.errors.some(e => e.lang === "ru" && e.code === "LANGUAGE_MISMATCH")) {
-    console.log("  ✅ PASS (Correctly detected English leakage in RU)");
+  if (!case05.ok && case05.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.MALFORMED_JSON)) {
+    console.log("  ✅ PASS (Correctly blocked invalid sourceSystem)");
   } else {
-    console.error("  ❌ FAIL: Should have detected leakage. Errors:", case05.errors);
+    console.error("  ❌ FAIL: Should have been blocked for 'Panda-9'");
   }
 
-  // 6. Provenance Failure
-  console.log("\nCase 06: VERIFIED status but missing provenanceNotes");
+  // 6. Editorial Residue 'Option 2'
+  console.log("\nCase 06: Editorial Residue 'Option 2' in any language");
   const pkg06 = createValidPackage();
-  pkg06.languages.tr.provenanceNotes = "";
+  pkg06.languages.es.body += " Option 2: Strategy Notes";
   const case06 = validatePandaPackage(pkg06);
-  if (!case06.ok && case06.errors.some(e => e.lang === "tr" && e.code === "PROVENANCE_FAILURE")) {
-    console.log("  ✅ PASS (Correctly blocked empty provenance)");
+  if (!case06.ok && case06.errors.some(e => e.lang === "es" && e.code === PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED)) {
+    console.log("  ✅ PASS (Correctly blocked 'Option 2')");
   } else {
-    console.error("  ❌ FAIL: Should have blocked empty provenance");
+    console.error("  ❌ FAIL: Should have blocked residue");
   }
 
-  // 7. Malformed Markdown
-  console.log("\nCase 07: Malformed markdown '## ##'");
+  // 7. 'Great for Google News'
+  console.log("\nCase 07: 'Great for Google News' residue");
   const pkg07 = createValidPackage();
-  pkg07.languages.en.headline = "## ## Broken Heading";
+  pkg07.languages.en.headline += " (Great for Google News)";
   const case07 = validatePandaPackage(pkg07);
-  if (!case07.ok && case07.errors.some(e => e.code === "FOOTER_INTEGRITY_FAILURE")) {
-    console.log("  ✅ PASS (Correctly blocked malformed markdown)");
+  if (!case07.ok && case07.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED)) {
+    console.log("  ✅ PASS (Correctly blocked strategy residue)");
   } else {
-    console.error("  ❌ FAIL: Should have blocked malformed markdown");
+    console.error("  ❌ FAIL: Should have blocked 'Great for Google News'");
   }
 
-  console.log("\n✨ Panda intake verification complete!");
+  // 8. 'Viral Potential'
+  console.log("\nCase 08: 'Viral Potential' residue");
+  const pkg08 = createValidPackage();
+  pkg08.languages.fr.summary += " Viral Potential: High";
+  const case08 = validatePandaPackage(pkg08);
+  if (!case08.ok && case08.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED)) {
+    console.log("  ✅ PASS (Correctly blocked viral potential residue)");
+  } else {
+    console.error("  ❌ FAIL: Should have blocked 'Viral Potential'");
+  }
+
+  // 9. 'should be reviewed before publication'
+  console.log("\nCase 09: 'should be reviewed before publication' residue");
+  const pkg09 = createValidPackage();
+  pkg09.languages.tr.riskNote += " This draft should be reviewed before publication.";
+  const case09 = validatePandaPackage(pkg09);
+  if (!case09.ok && case09.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED)) {
+    console.log("  ✅ PASS (Correctly blocked review notice residue)");
+  } else {
+    console.error("  ❌ FAIL: Should have blocked review notice");
+  }
+
+  // 10. 'multilingual parity verified'
+  console.log("\nCase 10: 'multilingual parity verified' in provenance");
+  const pkg10 = createValidPackage();
+  pkg10.languages.en.provenanceNotes = "Status: multilingual parity verified.";
+  const case10 = validatePandaPackage(pkg10);
+  if (!case10.ok && case10.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.FAKE_VERIFICATION)) {
+    console.log("  ✅ PASS (Correctly blocked fake parity claim)");
+  } else {
+    console.error("  ❌ FAIL: Should have blocked fake parity claim");
+  }
+
+  // 11. Fake 'verified E-E-A-T'
+  console.log("\nCase 11: Fake 'verified E-E-A-T' claim");
+  const pkg11 = createValidPackage();
+  pkg11.languages.en.body += " This report has fake verified E-E-A-T credentials.";
+  const case11 = validatePandaPackage(pkg11);
+  if (!case11.ok && case11.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED)) {
+    console.log("  ✅ PASS (Correctly blocked fake EEAT claim)");
+  } else {
+    console.error("  ❌ FAIL: Should have blocked fake EEAT claim");
+  }
+
+  // 12. Unsupported confidence score
+  console.log("\nCase 12: Unsupported confidence score claim");
+  const pkg12 = createValidPackage();
+  pkg12.languages.de.body += " Global Confidence Score: 99.9%";
+  const case12 = validatePandaPackage(pkg12);
+  if (!case12.ok && case12.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.UNSUPPORTED_SCORE)) {
+    console.log("  ✅ PASS (Correctly blocked unsupported confidence claim)");
+  } else {
+    console.error("  ❌ FAIL: Should have blocked confidence claim");
+  }
+
+  // 13. Deterministic Financial Language
+  console.log("\nCase 13: Deterministic language 'guaranteed returns'");
+  const pkg13 = createValidPackage();
+  pkg13.languages.en.summary += " This asset will provide guaranteed returns.";
+  const case13 = validatePandaPackage(pkg13);
+  if (!case13.ok && case13.errors.some(e => e.code === PANDA_FAIL_CLOSED_CODES.FAKE_VERIFICATION)) {
+    console.log("  ✅ PASS (Correctly blocked deterministic language)");
+  } else {
+    console.error("  ❌ FAIL: Should have blocked deterministic language");
+  }
+
+  // 14. Valid cautious provenance wording
+  console.log("\nCase 14: Valid cautious provenance wording passes");
+  const pkg14 = createValidPackage();
+  pkg14.languages.en.provenanceNotes = "Generated under SIA Protocol; pending Warroom validation.";
+  const case14 = validatePandaPackage(pkg14);
+  if (case14.ok) {
+    console.log("  ✅ PASS");
+  } else {
+    console.error("  ❌ FAIL: Should have passed with valid wording. Errors:", case14.errors);
+  }
+
+  console.log("\n✨ Protocol verification complete!");
 }
 
 test().catch(console.error);

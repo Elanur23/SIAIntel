@@ -1,9 +1,16 @@
 import { z } from 'zod';
 import { detectForbiddenResidue } from '@/lib/neural-assembly/sia-sentinel-core';
+import {
+  PANDA_REQUIRED_LANGS,
+  PandaLanguage,
+  PANDA_SOURCE_SYSTEM,
+  PANDA_FORBIDDEN_RESIDUE,
+  PANDA_FAIL_CLOSED_CODES,
+  PANDA_WRITING_RULES
+} from '@/lib/content/sia-panda-writing-protocol';
 
-export const PANDA_REQUIRED_LANGS = ['en', 'tr', 'de', 'fr', 'es', 'ru', 'ar', 'jp', 'zh'] as const;
-
-export type PandaLanguage = (typeof PANDA_REQUIRED_LANGS)[number];
+export { PANDA_REQUIRED_LANGS };
+export type { PandaLanguage };
 
 export interface PandaLanguageNode {
   headline: string;
@@ -25,6 +32,7 @@ export interface PandaPackage {
   targetRegion: string;
   languageCompleteness: 9;
   provenanceStatus?: string;
+  globalRiskLevel?: string;
   languages: Record<PandaLanguage, PandaLanguageNode>;
 }
 
@@ -40,12 +48,12 @@ export type PandaValidationResult =
   | { ok: false; errors: PandaValidationError[] };
 
 const PandaLanguageNodeSchema = z.object({
-  headline: z.string().min(10, "Headline too short"),
-  subheadline: z.string().min(20, "Subheadline too short"),
-  summary: z.string().min(50, "Summary too short").max(300, "Summary too long"),
-  body: z.string().min(200, "Body too short"),
-  keyInsights: z.array(z.string()).min(3, "Need at least 3 key insights"),
-  riskNote: z.string().min(10, "Risk note too short"),
+  headline: z.string().min(PANDA_WRITING_RULES.HEADLINE.minChars, "Headline too short"),
+  subheadline: z.string().min(PANDA_WRITING_RULES.SUBHEADLINE.minChars, "Subheadline too short"),
+  summary: z.string().min(PANDA_WRITING_RULES.SUMMARY.minChars, "Summary too short").max(PANDA_WRITING_RULES.SUMMARY.maxChars, "Summary too long"),
+  body: z.string().min(PANDA_WRITING_RULES.BODY.minChars, "Body too short"),
+  keyInsights: z.array(z.string()).min(PANDA_WRITING_RULES.KEY_INSIGHTS.minItems, `Need at least ${PANDA_WRITING_RULES.KEY_INSIGHTS.minItems} key insights`),
+  riskNote: z.string().min(PANDA_WRITING_RULES.RISK_NOTE.minChars, "Risk note too short"),
   seoTitle: z.string().min(10, "SEO title too short"),
   seoDescription: z.string().min(30, "SEO description too short"),
   provenanceNotes: z.string(),
@@ -53,12 +61,13 @@ const PandaLanguageNodeSchema = z.object({
 
 const PandaPackageSchema = z.object({
   articleId: z.string().min(1, "articleId missing"),
-  sourceSystem: z.literal("PANDA_V1"),
+  sourceSystem: z.literal(PANDA_SOURCE_SYSTEM),
   createdAt: z.string().min(1, "createdAt missing"),
   category: z.string().min(1, "category missing"),
   targetRegion: z.string().min(1, "targetRegion missing"),
   languageCompleteness: z.literal(9),
   provenanceStatus: z.string().optional(),
+  globalRiskLevel: z.string().optional(),
   languages: z.record(z.string(), PandaLanguageNodeSchema),
 });
 
@@ -96,7 +105,7 @@ export function validatePandaPackage(input: unknown): PandaValidationResult {
     zodResult.error.errors.forEach((err) => {
       errors.push({
         field: err.path.join('.'),
-        code: "SCHEMA_VALIDATION_FAILURE",
+        code: PANDA_FAIL_CLOSED_CODES.MALFORMED_JSON,
         message: err.message,
       });
     });
@@ -112,7 +121,7 @@ export function validatePandaPackage(input: unknown): PandaValidationResult {
 
   if (missingLangs.length > 0 || extraLangs.length > 0 || pkg.languageCompleteness !== 9 || langKeys.length !== 9) {
     errors.push({
-      code: "LANGUAGE_COMPLETENESS_FAILURE",
+      code: PANDA_FAIL_CLOSED_CODES.LANGUAGE_MISSING,
       message: `Expected exactly 9 languages (${PANDA_REQUIRED_LANGS.join(', ')}). Missing: ${missingLangs.join(', ')}. Extra: ${extraLangs.join(', ')}.`,
     });
     return { ok: false, errors };
@@ -138,15 +147,28 @@ export function validatePandaPackage(input: unknown): PandaValidationResult {
     Object.entries(fieldMap).forEach(([field, value]) => {
       const textToAudit = Array.isArray(value) ? value.join(' ') : value;
 
-      // RESIDUE DETECTION
+      // RESIDUE DETECTION (Combined List)
       const residueMatch = detectForbiddenResidue(textToAudit);
       if (residueMatch) {
         errors.push({
           lang,
           field,
-          code: "RESIDUE_DETECTED",
+          code: PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED,
           message: `Forbidden residue "${residueMatch}" found in ${field}.`,
         });
+      }
+
+      // Protocol Pack Expanded Residue Check (Direct String Match)
+      for (const res of PANDA_FORBIDDEN_RESIDUE) {
+        if (textToAudit.toLowerCase().includes(res.toLowerCase())) {
+          errors.push({
+            lang,
+            field,
+            code: PANDA_FAIL_CLOSED_CODES.RESIDUE_DETECTED,
+            message: `Forbidden protocol residue "${res}" detected in ${field}.`,
+          });
+          break;
+        }
       }
 
       // FOOTER INTEGRITY
@@ -154,7 +176,7 @@ export function validatePandaPackage(input: unknown): PandaValidationResult {
         errors.push({
           lang,
           field,
-          code: "FOOTER_INTEGRITY_FAILURE",
+          code: PANDA_FAIL_CLOSED_CODES.FOOTER_INTEGRITY_FAILURE,
           message: `Malformed markdown prefixes ("## ##") found in ${field}.`,
         });
       }
@@ -166,21 +188,44 @@ export function validatePandaPackage(input: unknown): PandaValidationResult {
           errors.push({
             lang,
             field,
-            code: "FOOTER_INTEGRITY_FAILURE",
+            code: PANDA_FAIL_CLOSED_CODES.FOOTER_INTEGRITY_FAILURE,
             message: `Duplicated marker "${marker}" found in ${field}.`,
           });
         }
       });
 
       // LANGUAGE LEAKAGE (for non-latin script langs)
-      const leakageError = checkLanguageLeakage(lang, textToAudit);
-      if (leakageError) {
-        errors.push({
-          lang,
-          field,
-          code: "LANGUAGE_MISMATCH",
-          message: leakageError,
-        });
+      // EXEMPT: provenanceNotes are allowed to be English protocol disclaimers
+      if (field !== "provenanceNotes") {
+        const leakageError = checkLanguageLeakage(lang, textToAudit);
+        if (leakageError) {
+          errors.push({
+            lang,
+            field,
+            code: PANDA_FAIL_CLOSED_CODES.LANGUAGE_MISMATCH,
+            message: leakageError,
+          });
+        }
+      }
+
+      // DETERMINISTIC LANGUAGE CHECK (Financial)
+      if (textToAudit.toLowerCase().includes("guaranteed returns") || textToAudit.toLowerCase().includes("will rise")) {
+          errors.push({
+            lang,
+            field,
+            code: PANDA_FAIL_CLOSED_CODES.FAKE_VERIFICATION,
+            message: `Unsupported deterministic financial language found in ${field}.`,
+          });
+      }
+
+      // CONFIDENCE SCORE CHECK
+      if (textToAudit.toLowerCase().includes("confidence score")) {
+          errors.push({
+            lang,
+            field,
+            code: PANDA_FAIL_CLOSED_CODES.UNSUPPORTED_SCORE,
+            message: `Unsupported confidence score claim found in ${field}.`,
+          });
       }
     });
 
@@ -189,9 +234,19 @@ export function validatePandaPackage(input: unknown): PandaValidationResult {
       errors.push({
         lang,
         field: "provenanceNotes",
-        code: "PROVENANCE_FAILURE",
+        code: PANDA_FAIL_CLOSED_CODES.PROVENANCE_FAILURE,
         message: "Provenance status is VERIFIED but provenanceNotes are missing.",
       });
+    }
+
+    // Fake parity check
+    if (node.provenanceNotes.toLowerCase().includes("multilingual parity verified")) {
+        errors.push({
+            lang,
+            field: "provenanceNotes",
+            code: PANDA_FAIL_CLOSED_CODES.FAKE_VERIFICATION,
+            message: "Unsupported 'multilingual parity verified' claim in provenance notes.",
+        });
     }
   });
 
