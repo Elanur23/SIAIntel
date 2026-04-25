@@ -26,6 +26,7 @@ import { runDeepAudit, type AuditResult } from '@/lib/neural-assembly/sia-sentin
 import { Language } from '@/lib/store/language-store'
 import PandaImport from './components/PandaImport'
 import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake-validator'
+import { runGlobalGovernanceAudit, type GlobalAuditResult } from '@/lib/editorial/global-governance-audit'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -128,8 +129,10 @@ export default function WarRoom() {
   const lockRef = useRef<string | null>(null)
   const [transformedArticle, setTransformedArticle] = useState<FormattedArticle | null>(null)
   const [isTransforming, setIsTransforming] = useState(false)
+  const [isAuditing, setIsAuditing] = useState(false)
   const [transformError, setTransformError] = useState<string | null>(null)
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
+  const [globalAudit, setGlobalAudit] = useState<GlobalAuditResult | null>(null)
 
   const [manualTitle, setManualTitle] = useState('')
   const [manualSummary, setManualSummary] = useState('')
@@ -164,7 +167,11 @@ export default function WarRoom() {
     if (!selectedNews || !vault[activeLang].ready || isPublishing || isTransforming || transformError) {
       return true
     }
-    // Must have a transformed article and audit result
+    // MUST have a global audit pass
+    if (!globalAudit || !globalAudit.publishable) {
+      return true
+    }
+    // Must have a transformed article and audit result for active language
     if (!transformedArticle || !auditResult) {
       return true
     }
@@ -186,6 +193,7 @@ export default function WarRoom() {
     transformError,
     transformedArticle,
     auditResult,
+    globalAudit,
     protocolConfig.enableScarcityTone
   ])
 
@@ -203,6 +211,8 @@ export default function WarRoom() {
     setImageUrl(null)
     setTransformedArticle(null)
     setTransformError(null)
+    setAuditResult(null)
+    setGlobalAudit(null) // Clear stale global audit
     
     const resetVault: any = {}
     SUPPORTED_LANGS.forEach((l) => {
@@ -250,6 +260,7 @@ export default function WarRoom() {
     setTransformedArticle(null)
     setTransformError(null)
     setAuditResult(null)
+    setGlobalAudit(null)
     setActiveLang('en')
     setSelectedNews({ id: pkg.articleId, title: pkg.languages.en.headline })
     setLastImportInfo({ id: pkg.articleId, time: new Date().toLocaleTimeString() })
@@ -438,6 +449,7 @@ export default function WarRoom() {
     setIsTransforming(true)
     setTransformError(null)
     setAuditResult(null)
+    setGlobalAudit(null)
     setTransformedArticle(null) // CLEAR STATE BEFORE NEW TRANSFORM
 
     try {
@@ -486,6 +498,24 @@ export default function WarRoom() {
       setTransformError(err?.message || 'Transform failed. Raw content preserved.')
     } finally {
       setIsTransforming(false)
+    }
+  }
+
+  const handleGlobalAudit = async () => {
+    if (!selectedNews) return
+    setIsAuditing(true)
+    try {
+      const result = await runGlobalGovernanceAudit(selectedNews.id, vault)
+      setGlobalAudit(result)
+      if (result.status === 'FAIL') {
+        alert(`❌ GLOBAL AUDIT FAILED: ${result.failedLanguages.length} languages blocked deploy.`)
+      } else {
+        alert('✅ GLOBAL AUDIT SUCCESS: All 9 nodes validated.')
+      }
+    } catch (e: any) {
+      alert('❌ AUDIT_ENGINE_ERROR: ' + e.message)
+    } finally {
+      setIsAuditing(false)
     }
   }
 
@@ -684,7 +714,7 @@ export default function WarRoom() {
 
                         <textarea
                           value={activeDraft.desc}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setVault({
                               ...vault,
                               [activeLang]: {
@@ -693,7 +723,9 @@ export default function WarRoom() {
                                 ready: !!e.target.value,
                               },
                             })
-                          }
+                            // Clear stale global audit on manual edit
+                            setGlobalAudit(null)
+                          }}
                           className="flex-1 bg-[#18181c]/90 border-2 border-[#FFB800]/20 p-6 outline-none resize-none text-[16px] leading-7 custom-scrollbar font-sans text-white/95 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/40 transition-colors"
                           placeholder="ENTER INTELLIGENCE DATA..."
                         />
@@ -942,11 +974,50 @@ export default function WarRoom() {
               </div>
               {auditResult && (
                 <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
-                  <span className="font-medium">Audit Score:</span>{' '}
+                  <span className="font-medium">Active Node:</span>{' '}
                   <span className={`font-black ${auditResult.overall_score >= 85 ? 'text-[#00FF00]' : auditResult.overall_score >= 70 ? 'text-[#FFB800]' : 'text-red-500'}`}>
                     {auditResult.overall_score}/100
                   </span>
                 </div>
+              )}
+              {globalAudit && (
+                <>
+                  <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
+                    <span className="font-medium">Global Health:</span>{' '}
+                    <span className={`font-black ${globalAudit.status === 'PASS' ? 'text-[#00FF00]' : globalAudit.status === 'NEEDS_REVIEW' ? 'text-[#FFB800]' : 'text-red-500'}`}>
+                      {globalAudit.globalScore}/100
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
+                    <span className="font-medium">Gating Status:</span>{' '}
+                    <span className={`font-black text-[10px] ${globalAudit.gatingStatus === 'READY_FOR_GLOBAL_DEPLOY' ? 'text-[#00FF00]' : 'text-red-500'}`}>
+                      {globalAudit.gatingStatus === 'READY_FOR_GLOBAL_DEPLOY' ? 'READY' : 'RESTRICTED'}
+                    </span>
+                  </div>
+                  {globalAudit.failedLanguages.length > 0 && (
+                    <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded text-[10px] text-red-400 font-bold uppercase">
+                      Failed: {globalAudit.failedLanguages.join(', ')}
+                    </div>
+                  )}
+                  {globalAudit.status === 'PASS' && (
+                    <div className="grid grid-cols-3 gap-1 mt-2">
+                      {PANDA_REQUIRED_LANGS.map((l) => (
+                        <div
+                          key={l}
+                          className={`px-2 py-1 rounded text-[9px] font-black uppercase text-center ${
+                            globalAudit.languages[l as SupportedLang]?.status === 'PASS'
+                              ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/30'
+                              : globalAudit.languages[l as SupportedLang]?.status === 'NEEDS_REVIEW'
+                              ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-500/30'
+                              : 'bg-red-900/30 text-red-400 border border-red-500/30'
+                          }`}
+                        >
+                          {l}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
               <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
                 <span className="font-medium">Vault Status:</span>{' '}
@@ -960,12 +1031,20 @@ export default function WarRoom() {
                   {imageUrl ? 'YES' : 'NO'}
                 </span>
               </div>
-              <div className="flex justify-between text-white/50">
+              <div className="flex justify-between text-white/50 pb-3">
                 <span className="font-medium">Article Transform:</span>{' '}
                 <span className={transformedArticle ? 'text-purple-400 font-black' : 'text-white/25 font-medium'}>
                   {isTransforming ? 'PROCESSING' : transformedArticle ? 'READY' : 'RAW'}
                 </span>
               </div>
+              <button
+                onClick={handleGlobalAudit}
+                disabled={isAuditing || !selectedNews}
+                className="w-full py-3 mt-2 bg-gradient-to-r from-emerald-700/80 to-emerald-500/70 border-2 border-emerald-400/60 rounded-lg text-[11px] font-black text-emerald-100 hover:from-emerald-600/90 hover:to-emerald-400/80 transition-all uppercase disabled:opacity-40 shadow-[0_8px_18px_rgba(16,185,129,0.22)] flex items-center justify-center gap-2"
+              >
+                {isAuditing ? <Loader2 size={12} className="animate-spin" /> : <Shield size={12} />}
+                {isAuditing ? 'AUDITING ALL NODES...' : 'Run Global 9-Node Audit'}
+              </button>
             </div>
           </CyberBox>
         </div>
