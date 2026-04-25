@@ -96,6 +96,18 @@ const MIN_SCORE_THRESHOLD = 70;
 // ============================================================================
 
 /**
+ * Strip Warroom structural labels from composed vault text before residue detection.
+ * These labels are added by applyPandaPackageToVault() and should not trigger residue detection.
+ * 
+ * Allowed structural labels:
+ * - [SUBHEADLINE], [SUMMARY], [BODY], [KEY_INSIGHTS]
+ * - [RISK_NOTE], [SEO_TITLE], [SEO_DESCRIPTION], [PROVENANCE]
+ */
+function stripWarroomStructuralLabels(text: string): string {
+  return text.replace(/\[(SUBHEADLINE|SUMMARY|BODY|KEY_INSIGHTS|RISK_NOTE|SEO_TITLE|SEO_DESCRIPTION|PROVENANCE)\]/gi, '');
+}
+
+/**
  * Extract numbers from text for parity checking
  */
 function extractNumbers(text: string): number[] {
@@ -220,7 +232,10 @@ function auditLanguageNode(
   }
   
   // RESIDUE DETECTION
-  const residueMatch = detectForbiddenResidue(fullText);
+  // Strip Warroom structural labels before residue scan to avoid false positives
+  // Labels like [SUBHEADLINE], [SUMMARY] are legitimate vault structure markers
+  const residueScanText = stripWarroomStructuralLabels(fullText);
+  const residueMatch = detectForbiddenResidue(residueScanText);
   if (residueMatch) {
     result.residueDetected = true;
     result.residueFindings.push(`Forbidden residue detected: "${residueMatch}"`);

@@ -359,6 +359,255 @@ try {
 }
 
 // ============================================================================
+// VAULT LABEL FALSE POSITIVE TESTS (CRITICAL)
+// ============================================================================
+
+// TEST 13: PANDA-import-style composed vault with structural labels passes
+console.log('\n[TEST 13] PANDA-import-style composed vault with structural labels passes');
+try {
+  const vault: TestVault = {};
+  
+  PANDA_REQUIRED_LANGS.forEach((lang) => {
+    // Simulate the exact format from applyPandaPackageToVault()
+    const composedDesc = [
+      `[SUBHEADLINE]`,
+      `Analysis of recent market trends in ${lang.toUpperCase()}`,
+      ``,
+      `[SUMMARY]`,
+      `This article provides comprehensive market analysis with data-driven insights. Trading volume reached $1.5 billion with 25% growth rate.`,
+      ``,
+      `[BODY]`,
+      `Detailed market analysis shows strong performance across multiple sectors. Key indicators suggest continued growth momentum. Financial experts note the importance of diversification.`,
+      ``,
+      `[KEY_INSIGHTS]`,
+      `• Market cap increased by 15%`,
+      `• Trading volume at $1.5 billion`,
+      `• Growth rate of 25% year-over-year`,
+      ``,
+      `[RISK_NOTE]`,
+      `This article is not investment advice. Markets are volatile and past performance does not guarantee future results.`,
+      ``,
+      `[SEO_TITLE]`,
+      `Market Analysis ${lang.toUpperCase()} - Latest Trends`,
+      ``,
+      `[SEO_DESCRIPTION]`,
+      `Comprehensive market analysis for ${lang.toUpperCase()} with data-driven insights`,
+      ``,
+      `[PROVENANCE]`,
+      `Generated under SIA Protocol; pending Warroom validation. Source attribution limited to provided input. No independent verification claimed.`
+    ].join('\n');
+    
+    vault[lang] = {
+      title: `Market Update ${lang.toUpperCase()}`,
+      desc: composedDesc,
+      ready: true
+    };
+  });
+  
+  const result = runGlobalGovernanceAudit('test-panda-001', vault);
+  
+  const passed = result.publishable === true && 
+                 result.status === 'PASS' && 
+                 result.gatingStatus === 'READY_FOR_GLOBAL_DEPLOY' &&
+                 result.failedLanguages.length === 0 &&
+                 result.globalScore >= 70;
+  
+  logTestResult('PANDA-style composed vault with labels passes', passed, 
+    `Labels [SUBHEADLINE], [SUMMARY], [BODY], [KEY_INSIGHTS], [RISK_NOTE], [SEO_TITLE], [SEO_DESCRIPTION], [PROVENANCE] should NOT trigger residue detection`);
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('PANDA-style composed vault with labels passes', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 14: Safe provenance wording passes
+console.log('\n[TEST 14] Safe provenance wording passes');
+try {
+  const vault = createValidVault();
+  vault['en'].desc += '\n\nGenerated under SIA Protocol; pending Warroom validation. This article does not claim independent verification.';
+  
+  const result = runGlobalGovernanceAudit('test-provenance-001', vault);
+  
+  const passed = result.languages['en'].residueDetected === false &&
+                 result.languages['en'].provenanceFindings.length === 0 &&
+                 result.languages['en'].score > 0;
+  
+  logTestResult('Safe provenance wording passes', passed, 
+    'Phrases like "does not claim independent verification" and "pending Warroom validation" should be allowed');
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Safe provenance wording passes', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 15: Actual residue "Option 2" still fails
+console.log('\n[TEST 15] Actual residue "Option 2" still fails');
+try {
+  const vault = createValidVault();
+  vault['fr'].desc = 'Option 2: This is a test article with actual forbidden residue that should fail.';
+  
+  const result = runGlobalGovernanceAudit('test-residue-001', vault);
+  
+  const passed = result.publishable === false && 
+                 result.status === 'FAIL' && 
+                 result.languages['fr'].residueDetected === true &&
+                 result.languages['fr'].score === 0;
+  
+  logTestResult('Actual residue "Option 2" still fails', passed);
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Actual residue "Option 2" still fails', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 16: Actual residue "Great for Google News" still fails
+console.log('\n[TEST 16] Actual residue "Great for Google News" still fails');
+try {
+  const vault = createValidVault();
+  vault['ru'].desc = 'This article is Great for Google News and will go viral.';
+  
+  const result = runGlobalGovernanceAudit('test-residue-002', vault);
+  
+  const passed = result.publishable === false && 
+                 result.status === 'FAIL' && 
+                 result.languages['ru'].residueDetected === true &&
+                 result.languages['ru'].score === 0;
+  
+  logTestResult('Actual residue "Great for Google News" still fails', passed);
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Actual residue "Great for Google News" still fails', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 17: Fake verification "verified E-E-A-T" still fails
+console.log('\n[TEST 17] Fake verification "verified E-E-A-T" still fails');
+try {
+  const vault = createValidVault();
+  vault['ar'].desc += ' This content has been E-E-A-T verified by our editorial team.';
+  
+  const result = runGlobalGovernanceAudit('test-fake-verification-001', vault);
+  
+  const passed = result.publishable === false && 
+                 result.status === 'FAIL' && 
+                 result.languages['ar'].provenanceFindings.length > 0 &&
+                 result.languages['ar'].score === 0;
+  
+  logTestResult('Fake verification "verified E-E-A-T" still fails', passed);
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Fake verification "verified E-E-A-T" still fails', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 18: Unsupported score "confidence score: 95%" still fails
+console.log('\n[TEST 18] Unsupported score "confidence score: 95%" still fails');
+try {
+  const vault = createValidVault();
+  vault['jp'].desc += ' Our confidence score for this prediction is 95%.';
+  
+  const result = runGlobalGovernanceAudit('test-unsupported-score-001', vault);
+  
+  const passed = result.publishable === false && 
+                 result.status === 'FAIL' && 
+                 result.languages['jp'].provenanceFindings.length > 0 &&
+                 result.languages['jp'].score === 0;
+  
+  logTestResult('Unsupported score "confidence score: 95%" still fails', passed);
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Unsupported score "confidence score: 95%" still fails', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 19: Deterministic finance "will rise" still fails
+console.log('\n[TEST 19] Deterministic finance "will rise" still fails');
+try {
+  const vault = createValidVault();
+  vault['zh'].desc += ' The stock price will rise to $500 by next quarter.';
+  
+  const result = runGlobalGovernanceAudit('test-deterministic-001', vault);
+  
+  const passed = result.publishable === false && 
+                 result.status === 'FAIL' && 
+                 result.languages['zh'].criticalIssues.some(i => i.includes('Deterministic')) &&
+                 result.languages['zh'].score === 0;
+  
+  logTestResult('Deterministic finance "will rise" still fails', passed);
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Deterministic finance "will rise" still fails', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// TEST 20: Single non-active language with residue blocks global publish
+console.log('\n[TEST 20] Single non-active language with residue blocks global publish');
+try {
+  const vault: TestVault = {};
+  
+  PANDA_REQUIRED_LANGS.forEach((lang) => {
+    const composedDesc = [
+      `[SUBHEADLINE]`,
+      `Market analysis for ${lang.toUpperCase()}`,
+      `[SUMMARY]`,
+      `Comprehensive market data with $1.5 billion volume.`,
+      `[BODY]`,
+      `Detailed analysis of market trends and performance indicators.`,
+      `[RISK_NOTE]`,
+      `This is not investment advice.`
+    ].join('\n');
+    
+    vault[lang] = {
+      title: `Market Update ${lang.toUpperCase()}`,
+      desc: composedDesc,
+      ready: true
+    };
+  });
+  
+  // Inject residue into DE (non-active language)
+  vault['de'].desc += '\n\nOption 3: This is forbidden residue in German node.';
+  
+  const result = runGlobalGovernanceAudit('test-global-block-001', vault);
+  
+  const passed = result.publishable === false && 
+                 result.status === 'FAIL' && 
+                 result.gatingStatus === 'GATING_RESTRICTED' &&
+                 result.languages['de'].residueDetected === true &&
+                 result.failedLanguages.includes('de');
+  
+  logTestResult('Single non-active language with residue blocks global publish', passed, 
+    'Even if active language (EN) is clean, residue in any other language must block deploy');
+  logAuditSummary(result);
+  
+  if (passed) passCount++;
+  else failCount++;
+} catch (e: any) {
+  logTestResult('Single non-active language with residue blocks global publish', false, `Error: ${e.message}`);
+  failCount++;
+}
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
