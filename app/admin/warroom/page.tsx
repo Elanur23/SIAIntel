@@ -521,8 +521,8 @@ export default function WarRoom() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#18181c] to-[#0a0a0f] text-white font-mono text-[13px] overflow-hidden">
-      <header className="h-14 border-b border-[#23232a] bg-gradient-to-r from-[#18181c]/95 to-[#23232a]/90 backdrop-blur-md flex items-center justify-between px-8 shrink-0 z-50 shadow-lg shadow-black/60">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-gradient-to-br from-[#0a0a0f] via-[#18181c] to-[#0a0a0f] text-[13px] text-white font-mono">
+      <header className="h-14 border-b border-[#23232a] bg-gradient-to-r from-[#18181c]/95 to-[#23232a]/90 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-50 shadow-lg shadow-black/60">
         <div className="flex items-center gap-6">
           <Shield className="w-5 h-5 text-[#FFB800] drop-shadow-[0_0_6px_rgba(255,184,0,0.6)]" />
           <h1 className="text-2xl font-black italic tracking-tight text-[#FFB800] drop-shadow-[0_0_8px_rgba(255,184,0,0.4)]">
@@ -546,9 +546,10 @@ export default function WarRoom() {
         </div>
       </header>
 
-      <main className="flex-1 grid grid-cols-12 gap-5 xl:gap-8 p-6 overflow-hidden min-h-0 bg-gradient-to-br from-[#18181c] via-[#23232a] to-[#18181c]">
+      <main className="flex-1 min-h-0 overflow-y-auto bg-gradient-to-br from-[#18181c] via-[#23232a] to-[#18181c]">
+        <div className="mx-auto grid min-h-full w-full max-w-[1920px] grid-cols-1 gap-3 p-3 sm:gap-4 sm:p-4 lg:grid-cols-12 lg:gap-5 lg:p-5 xl:gap-6 xl:p-6 2xl:gap-8">
         {/* LEFT: MANUAL INPUT WORKSPACE */}
-        <div className="col-span-3 flex flex-col min-h-0 overflow-hidden rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
+        <div className="flex flex-col min-h-[420px] lg:min-h-0 lg:col-span-4 xl:col-span-3 overflow-hidden rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
           <CyberBox
             title="Manual Intelligence Input"
             icon={Edit3}
@@ -615,32 +616,32 @@ export default function WarRoom() {
         </div>
 
         {/* MIDDLE: EDITOR & PREVIEW */}
-        <div className="col-span-6 flex flex-col min-h-0 overflow-hidden rounded-2xl border-4 border-[#FFB800]/40 bg-gradient-to-b from-[#23232a]/98 via-[#18181c]/95 to-[#23232a]/98 p-2 shadow-[0_8px_48px_0_rgba(255,184,0,0.10)] ring-2 ring-[#FFB800]/10">
+        <div className="flex flex-col min-h-[640px] lg:min-h-0 lg:col-span-8 xl:col-span-6 overflow-hidden rounded-2xl border-4 border-[#FFB800]/40 bg-gradient-to-b from-[#23232a]/98 via-[#18181c]/95 to-[#23232a]/98 p-2 shadow-[0_8px_48px_0_rgba(255,184,0,0.10)] ring-2 ring-[#FFB800]/10">
           <CyberBox title="Analysis Command Center" icon={Terminal} className="h-full border-[#FFB800]/30 ring-[#FFB800]/10">
-            <div className="h-full flex flex-col p-8">
+            <div className="h-full flex flex-col p-4 sm:p-6 xl:p-8">
               {selectedNews ? (
                 <>
-                    <div className="flex items-center justify-between mb-6 shrink-0 border-2 border-[#23232a] rounded-lg bg-gradient-to-r from-[#23232a]/90 to-[#18181c]/90 px-4 py-4 shadow-[0_4px_18px_rgba(255,184,0,0.10)]">
-                    <div className="flex bg-[#18181c]/90 border-2 border-[#23232a] rounded-md overflow-hidden p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                    <div className="mb-4 flex shrink-0 flex-col gap-4 border-2 border-[#23232a] rounded-lg bg-gradient-to-r from-[#23232a]/90 to-[#18181c]/90 px-3 py-3 shadow-[0_4px_18px_rgba(255,184,0,0.10)] sm:px-4 sm:py-4 lg:mb-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex w-full bg-[#18181c]/90 border-2 border-[#23232a] rounded-md overflow-hidden p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] lg:w-auto">
                       <button
                         onClick={() => setViewMode('edit')}
-                        className={`px-6 py-2.5 text-base font-black uppercase rounded-md transition-all tracking-wide ${viewMode === 'edit' ? 'bg-[#FFB800] text-black shadow-[0_8px_16px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40' : 'text-white/60 hover:text-white/90'}`}
+                        className={`flex-1 px-4 py-2 text-sm font-black uppercase rounded-md transition-all tracking-wide sm:px-6 sm:py-2.5 sm:text-base ${viewMode === 'edit' ? 'bg-[#FFB800] text-black shadow-[0_8px_16px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40' : 'text-white/60 hover:text-white/90'}`}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => setViewMode('preview')}
-                        className={`px-6 py-2.5 text-base font-black uppercase rounded-md transition-all tracking-wide ${viewMode === 'preview' ? 'bg-[#FFB800] text-black shadow-[0_8px_16px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40' : 'text-white/60 hover:text-white/90'}`}
+                        className={`flex-1 px-4 py-2 text-sm font-black uppercase rounded-md transition-all tracking-wide sm:px-6 sm:py-2.5 sm:text-base ${viewMode === 'preview' ? 'bg-[#FFB800] text-black shadow-[0_8px_16px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40' : 'text-white/60 hover:text-white/90'}`}
                       >
                         Preview
                       </button>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
                       <button
                         onClick={handleTransform}
                         disabled={isTransforming || !activeDraft.desc}
                         title="Transform raw report into a formatted article using AI"
-                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-700/80 to-purple-500/70 border-2 border-purple-400/60 rounded-lg text-sm font-black text-purple-100 hover:from-purple-600/90 hover:to-purple-400/80 hover:border-purple-200/80 transition-all uppercase disabled:opacity-40 shadow-[0_8px_18px_rgba(147,51,234,0.22)] ring-2 ring-purple-300/20 focus:outline-none focus:ring-4 focus:ring-purple-400/30"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-700/80 to-purple-500/70 border-2 border-purple-400/60 rounded-lg text-sm font-black text-purple-100 hover:from-purple-600/90 hover:to-purple-400/80 hover:border-purple-200/80 transition-all uppercase disabled:opacity-40 shadow-[0_8px_18px_rgba(147,51,234,0.22)] ring-2 ring-purple-300/20 focus:outline-none focus:ring-4 focus:ring-purple-400/30 sm:px-5"
                         style={{ letterSpacing: '0.08em' }}
                       >
                         {isTransforming ? (
@@ -653,7 +654,7 @@ export default function WarRoom() {
                       <button
                         onClick={() => handlePublish()}
                         disabled={isDeployBlocked}
-                        className={`flex items-center gap-2 px-6 py-2.5 font-black uppercase text-base rounded-lg transition-all focus:outline-none focus:ring-4 ${
+                        className={`flex items-center justify-center gap-2 px-4 py-2.5 font-black uppercase text-sm sm:text-base rounded-lg transition-all focus:outline-none focus:ring-4 sm:px-6 ${
                           isDeployBlocked
                             ? 'bg-neutral-800 text-neutral-500 border-2 border-neutral-700 cursor-not-allowed grayscale opacity-50'
                             : 'bg-gradient-to-r from-[#FFB800] to-[#FFD35A] text-black shadow-[0_8px_18px_rgba(255,184,0,0.18)] ring-2 ring-[#FFB800]/40 hover:from-[#FFC524] hover:to-[#FFD86D] focus:ring-[#FFB800]/30'
@@ -670,7 +671,7 @@ export default function WarRoom() {
                   </div>
 
                   {isDeployBlocked && transformedArticle && (
-                    <div className="mx-8 mb-4 flex items-center justify-between px-4 py-2 bg-red-900/20 border border-red-500/40 rounded-lg">
+                    <div className="mx-0 mb-4 flex flex-col items-start gap-2 px-4 py-2 bg-red-900/20 border border-red-500/40 rounded-lg sm:mx-2 lg:mx-8 lg:flex-row lg:items-center lg:justify-between">
                       <div className="flex items-center gap-2 text-[11px] text-red-400 font-black uppercase tracking-tighter animate-pulse">
                         <AlertCircle size={14} /> Critical Gating Restriction Active
                       </div>
@@ -684,7 +685,7 @@ export default function WarRoom() {
 
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     {viewMode === 'edit' ? (
-                    <div className="flex-1 flex flex-col gap-6 min-h-0">
+                    <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-h-0">
                         <input
                           value={activeDraft.title}
                           onChange={(e) =>
@@ -693,7 +694,7 @@ export default function WarRoom() {
                               [activeLang]: { ...activeDraft, title: e.target.value },
                             })
                           }
-                          className="w-full bg-[#23232a]/90 border-2 border-[#FFB800]/30 p-5 text-2xl font-black text-[#FFB800] outline-none shrink-0 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/60 transition-colors tracking-tight"
+                          className="w-full bg-[#23232a]/90 border-2 border-[#FFB800]/30 p-4 sm:p-5 text-xl sm:text-2xl font-black text-[#FFB800] outline-none shrink-0 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/60 transition-colors tracking-tight"
                           placeholder="ENTER HEADLINE..."
                         />
 
@@ -727,12 +728,12 @@ export default function WarRoom() {
                             // Clear stale global audit on manual edit
                             setGlobalAudit(null)
                           }}
-                          className="flex-1 bg-[#18181c]/90 border-2 border-[#FFB800]/20 p-6 outline-none resize-none text-[16px] leading-7 custom-scrollbar font-sans text-white/95 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/40 transition-colors"
+                          className="flex-1 bg-[#18181c]/90 border-2 border-[#FFB800]/20 p-4 sm:p-6 outline-none resize-none text-sm sm:text-base leading-6 sm:leading-7 custom-scrollbar font-sans text-white/95 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/40 transition-colors"
                           placeholder="ENTER INTELLIGENCE DATA..."
                         />
                       </div>
                     ) : (
-                      <div className="flex-1 overflow-y-auto custom-scrollbar p-10 bg-gradient-to-b from-[#18181c]/95 to-[#23232a]/90 border-2 border-[#FFB800]/20 rounded-lg space-y-10 shadow-[0_2px_24px_rgba(255,184,0,0.08)]">
+                      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-[#18181c]/95 to-[#23232a]/90 border-2 border-[#FFB800]/20 rounded-lg space-y-6 sm:space-y-8 shadow-[0_2px_24px_rgba(255,184,0,0.08)]">
                         {imageUrl && (
                           <div className="relative aspect-video w-full rounded-md overflow-hidden border border-white/20 shadow-2xl">
                             <Image
@@ -760,7 +761,7 @@ export default function WarRoom() {
                             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 opacity-80">
                               <Wand2 size={12} /> Transformed Article
                             </div>
-                            <h1 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-2">
+                            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-2">
                               {transformedArticle.headline}
                             </h1>
                             {transformedArticle.subheadline && (
@@ -809,7 +810,7 @@ export default function WarRoom() {
                         ) : (
                           /* ── RAW REPORT FALLBACK PREVIEW ── */
                           <>
-                            <h1 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-4">
+                            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-4">
                               {activeDraft.title}
                             </h1>
 
@@ -848,7 +849,7 @@ export default function WarRoom() {
         </div>
 
         {/* RIGHT: STATUS & NODES */}
-        <div className="col-span-3 flex flex-col gap-5 min-h-0 overflow-y-auto custom-scrollbar rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
+        <div className="flex flex-col gap-4 sm:gap-5 min-h-[520px] lg:min-h-0 lg:col-span-12 xl:col-span-3 rounded-2xl border-2 border-[#23232a] bg-gradient-to-b from-[#18181c]/95 via-[#23232a]/90 to-[#18181c]/95 p-2 shadow-[0_4px_32px_0_rgba(0,0,0,0.18)]">
           <CyberBox title="Neural Language Nodes" icon={Globe2} className="shrink-0">
             <div className="p-4 grid grid-cols-2 gap-2.5">
               {SUPPORTED_LANGS.map((l) => (
@@ -963,7 +964,7 @@ export default function WarRoom() {
             </div>
           </CyberBox>
 
-          <CyberBox title="Node Metrics" icon={Activity} className="flex-1">
+          <CyberBox title="Node Metrics" icon={Activity} className="flex-1 min-h-[360px] xl:min-h-0">
             <div className="p-5 space-y-4 text-sm uppercase font-bold tracking-wider">
               <div className="flex justify-between border-b border-white/10 pb-3 text-white/50">
                 <span className="font-medium">Active Language:</span>{' '}
@@ -1239,6 +1240,7 @@ export default function WarRoom() {
               </button>
             </div>
           </CyberBox>
+        </div>
         </div>
       </main>
 

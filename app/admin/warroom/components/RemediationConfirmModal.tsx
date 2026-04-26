@@ -117,9 +117,9 @@ export default function RemediationConfirmModal({
       />
       
       {/* Modal content */}
-      <div className="relative bg-gray-900 border border-white/20 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-gray-900 border border-white/20 rounded-lg max-w-4xl w-full mx-3 sm:mx-4 max-h-[92vh] overflow-y-auto">
         {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b border-white/10 sticky top-0 bg-gray-900 z-10">
+        <header className="flex items-center justify-between p-3 sm:p-4 border-b border-white/10 sticky top-0 bg-gray-900 z-10">
           <h2 id="modal-title" className="text-lg font-bold text-white">
             Review Suggestion
           </h2>
@@ -137,7 +137,7 @@ export default function RemediationConfirmModal({
         </div>
 
         {/* Body */}
-        <div className="p-4 space-y-4">
+        <div className="p-3 sm:p-4 space-y-4">
           {/* MANDATORY WARNING BANNER */}
           <div className="p-4 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
@@ -189,7 +189,7 @@ export default function RemediationConfirmModal({
             <div className="text-xs font-bold text-white/80 uppercase tracking-wider">
               Before / After Preview
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {/* Left Column: Original Text */}
               <div className="space-y-2">
                 <h3 className="text-sm font-bold text-white/80">Current Text</h3>
