@@ -17,7 +17,7 @@ import { PANDA_REQUIRED_LANGS, type PandaLanguage } from '@/lib/content/sia-pand
 // ============================================================================
 
 export type SupportedLang = 'en' | 'tr' | 'de' | 'fr' | 'es' | 'ru' | 'ar' | 'jp' | 'zh';
-export type GlobalAuditStatus = 'PASS' | 'FAIL' | 'NEEDS_REVIEW';
+export type GlobalAuditStatus = 'PASS' | 'FAIL' | 'NEEDS_REVIEW' | 'STALE';
 export type GatingStatus = 'READY_FOR_GLOBAL_DEPLOY' | 'GATING_RESTRICTED';
 
 export interface GlobalLanguageAuditResult {
@@ -43,6 +43,10 @@ export interface GlobalAuditResult {
   failedLanguages: SupportedLang[];
   warningLanguages: SupportedLang[];
   globalFindings: string[];
+  auditInvalidated?: boolean;
+  reAuditRequired?: boolean;
+  invalidationReason?: string;
+  invalidatedAt?: string;
   consistency: {
     numberParityPass: boolean;
     entityParityPass: boolean;

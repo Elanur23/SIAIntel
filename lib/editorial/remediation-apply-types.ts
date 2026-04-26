@@ -36,6 +36,7 @@ export enum AuditInvalidationReason {
  */
 export enum RemediationApplyStatus {
   APPROVED_FOR_DRAFT_CHANGE = 'APPROVED_FOR_DRAFT_CHANGE',
+  BLOCKED_CATEGORY_NOT_TIER1 = 'BLOCKED_CATEGORY_NOT_TIER1',
   BLOCKED_HUMAN_ONLY = 'BLOCKED_HUMAN_ONLY',
   BLOCKED_FORBIDDEN_TO_AUTOFIX = 'BLOCKED_FORBIDDEN_TO_AUTOFIX',
   BLOCKED_MISSING_SUGGESTED_TEXT = 'BLOCKED_MISSING_SUGGESTED_TEXT',
@@ -128,6 +129,17 @@ export type RemediationApplyResult =
       reAuditRequired: false;
     };
 
+/**
+ * Minimal state required to enforce audit invalidation safety gates.
+ * This is protocol scaffolding only and does not mutate draft/vault content.
+ */
+export interface AuditInvalidationState {
+  auditInvalidated: boolean;
+  reAuditRequired: boolean;
+  invalidationReason?: AuditInvalidationReason;
+  invalidatedAt?: string;
+}
+
 // ============================================================================
 // HUMAN APPROVAL CONSTANTS
 // ============================================================================
@@ -175,11 +187,21 @@ export function isApplyEligibleSuggestion(suggestion: RemediationSuggestion): bo
  * Pure helper to identify the reason a suggestion is blocked from draft application.
  */
 export function getApplyBlockReason(suggestion: RemediationSuggestion): RemediationApplyStatus | null {
-  // Check for high-risk categories
-  if (suggestion.category === RemediationCategory.SOURCE_REVIEW) return RemediationApplyStatus.BLOCKED_SOURCE_REVIEW;
-  if (suggestion.category === RemediationCategory.PROVENANCE_REVIEW) return RemediationApplyStatus.BLOCKED_PROVENANCE_REVIEW;
-  if (suggestion.category === RemediationCategory.PARITY_REVIEW) return RemediationApplyStatus.BLOCKED_PARITY_REVIEW;
-  if (suggestion.category === RemediationCategory.HUMAN_REVIEW_REQUIRED) return RemediationApplyStatus.BLOCKED_HUMAN_ONLY;
+  // Tier-1 scaffold: only FORMAT_REPAIR can be considered for future apply flow.
+  switch (suggestion.category) {
+    case RemediationCategory.FORMAT_REPAIR:
+      break;
+    case RemediationCategory.SOURCE_REVIEW:
+      return RemediationApplyStatus.BLOCKED_SOURCE_REVIEW;
+    case RemediationCategory.PROVENANCE_REVIEW:
+      return RemediationApplyStatus.BLOCKED_PROVENANCE_REVIEW;
+    case RemediationCategory.PARITY_REVIEW:
+      return RemediationApplyStatus.BLOCKED_PARITY_REVIEW;
+    case RemediationCategory.HUMAN_REVIEW_REQUIRED:
+      return RemediationApplyStatus.BLOCKED_HUMAN_ONLY;
+    default:
+      return RemediationApplyStatus.BLOCKED_CATEGORY_NOT_TIER1;
+  }
 
   // Check safety levels
   if (suggestion.safetyLevel === RemediationSafetyLevel.HUMAN_ONLY) return RemediationApplyStatus.BLOCKED_HUMAN_ONLY;
@@ -204,6 +226,48 @@ export function assertApplyProtocolSafe(suggestion: RemediationSuggestion): void
   if (blockReason !== null) {
     throw new Error(`Remediation apply protocol violation: ${blockReason}`);
   }
+}
+
+/**
+ * Pure helper that produces an invalidated audit state snapshot.
+ * Never mutates application state; callers decide how/where to store it.
+ */
+export function markAuditInvalidated(
+  reason: AuditInvalidationReason,
+  invalidatedAt: string = new Date().toISOString()
+): AuditInvalidationState {
+  return {
+    auditInvalidated: true,
+    reAuditRequired: true,
+    invalidationReason: reason,
+    invalidatedAt
+  };
+}
+
+/**
+ * Re-audit is mandatory once auditInvalidated or reAuditRequired is true.
+ */
+export function requiresReAudit(state: AuditInvalidationState): boolean {
+  return state.auditInvalidated || state.reAuditRequired;
+}
+
+/**
+ * Deploy must remain blocked when audit state is invalidated/re-audit is required.
+ */
+export function isDeployBlockedByInvalidatedAudit(state: AuditInvalidationState): boolean {
+  return requiresReAudit(state);
+}
+
+/**
+ * Strict phase-3C protocol assertion. Throws if any safety precondition is violated.
+ */
+export function assertRemediationApplySafety(suggestion: RemediationSuggestion): void {
+  const blockReason = getApplyBlockReason(suggestion);
+  if (blockReason) {
+    throw new Error(`Remediation apply protocol violation: ${blockReason}`);
+  }
+
+  assertApplyProtocolSafe(suggestion);
 }
 
 /**
