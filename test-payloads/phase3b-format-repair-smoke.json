@@ -1,0 +1,142 @@
+{
+  "packageId": "phase3b-smoke-format-repair-v1",
+  "articleId": "test-format-repair-001",
+  "languages": {
+    "en": {
+      "headline": "Phase 3B Format Repair Test Article",
+      "subheadline": "Testing malformed markdown detection for remediation suggestions",
+      "summary": "This test article contains intentional malformed markdown to trigger FORMAT_REPAIR remediation suggestions in the Warroom Suggested Fixes Preview panel.",
+      "body": "This is a test article body with malformed markdown.\n\n## ##\n\nThe above line contains malformed markdown prefixes (double hash with space) that should trigger the Global Governance Audit to detect a FORMAT_REPAIR issue. This will generate a remediation suggestion with REQUIRES_HUMAN_APPROVAL safety level, making it eligible for the Phase 3B Review Suggestion modal.\n\nThis test validates the complete Phase 3B smoke path:\n1. Panda JSON import\n2. Vault sync\n3. Global 9-Node Audit\n4. Remediation suggestion generation\n5. FORMAT_REPAIR suggestion display\n6. Review Suggestion button visibility\n7. Phase 3B confirmation modal opening",
+      "keyInsights": [
+        "Malformed markdown (## ##) triggers FORMAT_REPAIR category",
+        "FORMAT_REPAIR has REQUIRES_HUMAN_APPROVAL safety level",
+        "Eligible suggestions show Review Suggestion button",
+        "Phase 3B modal is UI prototype only (no real apply)"
+      ],
+      "riskNote": "This is a test article for Phase 3B smoke testing. Not for production use.",
+      "seoTitle": "Phase 3B Format Repair Test | Remediation Smoke Test",
+      "seoDescription": "Test article for Phase 3B remediation modal with malformed markdown to trigger FORMAT_REPAIR suggestions.",
+      "provenanceNotes": "Test payload created for Phase 3B smoke testing. Source: Manual test creation."
+    },
+    "tr": {
+      "headline": "Phase 3B Format Onarımı Test Makalesi",
+      "subheadline": "Düzeltme önerileri için hatalı markdown tespiti testi",
+      "summary": "Bu test makalesi, Warroom Önerilen Düzeltmeler Önizleme panelinde FORMAT_REPAIR düzeltme önerilerini tetiklemek için kasıtlı olarak hatalı markdown içerir.",
+      "body": "Bu, hatalı markdown içeren bir test makalesi gövdesidir.\n\n## ##\n\nYukarıdaki satır, Global Yönetişim Denetiminin bir FORMAT_REPAIR sorunu tespit etmesini tetiklemesi gereken hatalı markdown önekleri (boşluklu çift hash) içerir.",
+      "keyInsights": [
+        "Hatalı markdown (## ##) FORMAT_REPAIR kategorisini tetikler",
+        "FORMAT_REPAIR, REQUIRES_HUMAN_APPROVAL güvenlik seviyesine sahiptir",
+        "Uygun öneriler Öneriyi İncele düğmesini gösterir"
+      ],
+      "riskNote": "Bu, Phase 3B duman testi için bir test makalesidir. Üretim kullanımı için değildir.",
+      "seoTitle": "Phase 3B Format Onarımı Testi | Düzeltme Duman Testi",
+      "seoDescription": "FORMAT_REPAIR önerilerini tetiklemek için hatalı markdown içeren Phase 3B düzeltme modali için test makalesi.",
+      "provenanceNotes": "Phase 3B duman testi için oluşturulan test yükü. Kaynak: Manuel test oluşturma."
+    },
+    "de": {
+      "headline": "Phase 3B Format-Reparatur-Testartikel",
+      "subheadline": "Test der fehlerhaften Markdown-Erkennung für Korrekturvorschläge",
+      "summary": "Dieser Testartikel enthält absichtlich fehlerhaftes Markdown, um FORMAT_REPAIR-Korrekturvorschläge im Warroom-Vorschlagspanel auszulösen.",
+      "body": "Dies ist ein Testartikeltext mit fehlerhaftem Markdown.\n\n## ##\n\nDie obige Zeile enthält fehlerhafte Markdown-Präfixe (Doppel-Hash mit Leerzeichen), die das Global Governance Audit auslösen sollten, um ein FORMAT_REPAIR-Problem zu erkennen.",
+      "keyInsights": [
+        "Fehlerhaftes Markdown (## ##) löst FORMAT_REPAIR-Kategorie aus",
+        "FORMAT_REPAIR hat REQUIRES_HUMAN_APPROVAL-Sicherheitsstufe",
+        "Geeignete Vorschläge zeigen Vorschlag prüfen-Schaltfläche"
+      ],
+      "riskNote": "Dies ist ein Testartikel für Phase 3B-Rauchtest. Nicht für den Produktionseinsatz.",
+      "seoTitle": "Phase 3B Format-Reparatur-Test | Korrektur-Rauchtest",
+      "seoDescription": "Testartikel für Phase 3B-Korrekturmodal mit fehlerhaftem Markdown zur Auslösung von FORMAT_REPAIR-Vorschlägen.",
+      "provenanceNotes": "Test-Payload für Phase 3B-Rauchtest erstellt. Quelle: Manuelle Testerstellung."
+    },
+    "fr": {
+      "headline": "Article de test de réparation de format Phase 3B",
+      "subheadline": "Test de détection de markdown mal formé pour les suggestions de correction",
+      "summary": "Cet article de test contient intentionnellement du markdown mal formé pour déclencher des suggestions de correction FORMAT_REPAIR dans le panneau d'aperçu des correctifs suggérés de Warroom.",
+      "body": "Ceci est un corps d'article de test avec du markdown mal formé.\n\n## ##\n\nLa ligne ci-dessus contient des préfixes markdown mal formés (double dièse avec espace) qui devraient déclencher l'audit de gouvernance globale pour détecter un problème FORMAT_REPAIR.",
+      "keyInsights": [
+        "Le markdown mal formé (## ##) déclenche la catégorie FORMAT_REPAIR",
+        "FORMAT_REPAIR a le niveau de sécurité REQUIRES_HUMAN_APPROVAL",
+        "Les suggestions éligibles affichent le bouton Examiner la suggestion"
+      ],
+      "riskNote": "Ceci est un article de test pour le test de fumée Phase 3B. Pas pour une utilisation en production.",
+      "seoTitle": "Test de réparation de format Phase 3B | Test de fumée de correction",
+      "seoDescription": "Article de test pour le modal de correction Phase 3B avec markdown mal formé pour déclencher des suggestions FORMAT_REPAIR.",
+      "provenanceNotes": "Charge utile de test créée pour le test de fumée Phase 3B. Source : Création de test manuel."
+    },
+    "es": {
+      "headline": "Artículo de prueba de reparación de formato Phase 3B",
+      "subheadline": "Prueba de detección de markdown mal formado para sugerencias de corrección",
+      "summary": "Este artículo de prueba contiene intencionalmente markdown mal formado para activar sugerencias de corrección FORMAT_REPAIR en el panel de vista previa de correcciones sugeridas de Warroom.",
+      "body": "Este es un cuerpo de artículo de prueba con markdown mal formado.\n\n## ##\n\nLa línea anterior contiene prefijos markdown mal formados (doble almohadilla con espacio) que deberían activar la auditoría de gobernanza global para detectar un problema FORMAT_REPAIR.",
+      "keyInsights": [
+        "El markdown mal formado (## ##) activa la categoría FORMAT_REPAIR",
+        "FORMAT_REPAIR tiene nivel de seguridad REQUIRES_HUMAN_APPROVAL",
+        "Las sugerencias elegibles muestran el botón Revisar sugerencia"
+      ],
+      "riskNote": "Este es un artículo de prueba para la prueba de humo Phase 3B. No para uso en producción.",
+      "seoTitle": "Prueba de reparación de formato Phase 3B | Prueba de humo de corrección",
+      "seoDescription": "Artículo de prueba para modal de corrección Phase 3B con markdown mal formado para activar sugerencias FORMAT_REPAIR.",
+      "provenanceNotes": "Carga útil de prueba creada para prueba de humo Phase 3B. Fuente: Creación de prueba manual."
+    },
+    "ru": {
+      "headline": "Тестовая статья исправления формата Phase 3B",
+      "subheadline": "Тест обнаружения неправильного markdown для предложений по исправлению",
+      "summary": "Эта тестовая статья намеренно содержит неправильный markdown для запуска предложений по исправлению FORMAT_REPAIR на панели предварительного просмотра предлагаемых исправлений Warroom.",
+      "body": "Это тело тестовой статьи с неправильным markdown.\n\n## ##\n\nВышеуказанная строка содержит неправильные префиксы markdown (двойной хеш с пробелом), которые должны запустить глобальный аудит управления для обнаружения проблемы FORMAT_REPAIR.",
+      "keyInsights": [
+        "Неправильный markdown (## ##) запускает категорию FORMAT_REPAIR",
+        "FORMAT_REPAIR имеет уровень безопасности REQUIRES_HUMAN_APPROVAL",
+        "Подходящие предложения показывают кнопку Просмотреть предложение"
+      ],
+      "riskNote": "Это тестовая статья для дымового теста Phase 3B. Не для производственного использования.",
+      "seoTitle": "Тест исправления формата Phase 3B | Дымовой тест исправления",
+      "seoDescription": "Тестовая статья для модального окна исправления Phase 3B с неправильным markdown для запуска предложений FORMAT_REPAIR.",
+      "provenanceNotes": "Тестовая полезная нагрузка создана для дымового теста Phase 3B. Источник: Создание ручного теста."
+    },
+    "ar": {
+      "headline": "مقالة اختبار إصلاح التنسيق Phase 3B",
+      "subheadline": "اختبار كشف markdown المشوه لاقتراحات التصحيح",
+      "summary": "تحتوي مقالة الاختبار هذه عمدًا على markdown مشوه لتشغيل اقتراحات تصحيح FORMAT_REPAIR في لوحة معاينة الإصلاحات المقترحة في Warroom.",
+      "body": "هذا هو نص مقالة اختبار مع markdown مشوه.\n\n## ##\n\nيحتوي السطر أعلاه على بادئات markdown مشوهة (علامة تجزئة مزدوجة مع مسافة) يجب أن تشغل تدقيق الحوكمة العالمية لاكتشاف مشكلة FORMAT_REPAIR.",
+      "keyInsights": [
+        "markdown المشوه (## ##) يشغل فئة FORMAT_REPAIR",
+        "FORMAT_REPAIR لديه مستوى أمان REQUIRES_HUMAN_APPROVAL",
+        "الاقتراحات المؤهلة تظهر زر مراجعة الاقتراح"
+      ],
+      "riskNote": "هذه مقالة اختبار لاختبار الدخان Phase 3B. ليس للاستخدام الإنتاجي.",
+      "seoTitle": "اختبار إصلاح التنسيق Phase 3B | اختبار دخان التصحيح",
+      "seoDescription": "مقالة اختبار لنافذة التصحيح Phase 3B مع markdown مشوه لتشغيل اقتراحات FORMAT_REPAIR.",
+      "provenanceNotes": "حمولة اختبار تم إنشاؤها لاختبار الدخان Phase 3B. المصدر: إنشاء اختبار يدوي."
+    },
+    "jp": {
+      "headline": "Phase 3B フォーマット修復テスト記事",
+      "subheadline": "修正提案のための不正なmarkdown検出テスト",
+      "summary": "このテスト記事には、Warroom提案修正プレビューパネルでFORMAT_REPAIR修正提案をトリガーするために意図的に不正なmarkdownが含まれています。",
+      "body": "これは不正なmarkdownを含むテスト記事本文です。\n\n## ##\n\n上記の行には、グローバルガバナンス監査がFORMAT_REPAIR問題を検出するようトリガーする不正なmarkdownプレフィックス（スペース付きダブルハッシュ）が含まれています。",
+      "keyInsights": [
+        "不正なmarkdown（## ##）はFORMAT_REPAIRカテゴリをトリガーします",
+        "FORMAT_REPAIRはREQUIRES_HUMAN_APPROVALセキュリティレベルを持っています",
+        "適格な提案は提案を確認ボタンを表示します"
+      ],
+      "riskNote": "これはPhase 3Bスモークテスト用のテスト記事です。本番使用ではありません。",
+      "seoTitle": "Phase 3B フォーマット修復テスト | 修正スモークテスト",
+      "seoDescription": "FORMAT_REPAIR提案をトリガーするための不正なmarkdownを含むPhase 3B修正モーダルのテスト記事。",
+      "provenanceNotes": "Phase 3Bスモークテスト用に作成されたテストペイロード。ソース：手動テスト作成。"
+    },
+    "zh": {
+      "headline": "Phase 3B 格式修复测试文章",
+      "subheadline": "用于修正建议的格式错误markdown检测测试",
+      "summary": "此测试文章故意包含格式错误的markdown，以在Warroom建议修复预览面板中触发FORMAT_REPAIR修正建议。",
+      "body": "这是一个包含格式错误markdown的测试文章正文。\n\n## ##\n\n上面的行包含格式错误的markdown前缀（带空格的双井号），应该触发全局治理审计以检测FORMAT_REPAIR问题。",
+      "keyInsights": [
+        "格式错误的markdown（## ##）触发FORMAT_REPAIR类别",
+        "FORMAT_REPAIR具有REQUIRES_HUMAN_APPROVAL安全级别",
+        "符合条件的建议显示审查建议按钮"
+      ],
+      "riskNote": "这是Phase 3B冒烟测试的测试文章。不用于生产。",
+      "seoTitle": "Phase 3B 格式修复测试 | 修正冒烟测试",
+      "seoDescription": "包含格式错误markdown以触发FORMAT_REPAIR建议的Phase 3B修正模态框测试文章。",
+      "provenanceNotes": "为Phase 3B冒烟测试创建的测试有效负载。来源：手动测试创建。"
+    }
+  }
+}

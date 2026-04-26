@@ -11,6 +11,11 @@ import {
   RemediationSafetyLevel,
   type RemediationSuggestion
 } from '@/lib/editorial/remediation-types'
+import {
+  isApplyEligibleSuggestion,
+  getApplyBlockReason
+} from '@/lib/editorial/remediation-apply-types'
+import RemediationConfirmModal from './RemediationConfirmModal'
 
 interface RemediationPreviewPanelProps {
   globalAudit?: unknown
@@ -46,11 +51,16 @@ export default function RemediationPreviewPanel({
 }: RemediationPreviewPanelProps) {
   const [isPanelExpanded, setIsPanelExpanded] = useState(true)
   const [expandedSuggestions, setExpandedSuggestions] = useState<Record<string, boolean>>({})
+  
+  // Phase 3B: Modal state management
+  const [selectedSuggestion, setSelectedSuggestion] = useState<RemediationSuggestion | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Derived remediation plan - Pure calculation from props
   const remediationPlan = useMemo(() => {
-    // WORKAROUND: Phase 2A engine's suggestionsFromGlobalAudit expects the 'languages'
-    // record directly, but page.tsx provides the full GlobalAuditResult object.
+    // Extract languages record from GlobalAuditResult for remediation engine
+    // The engine expects: { en: {...}, tr: {...}, ... }
+    // But globalAudit is: { articleId, status, languages: { en: {...}, tr: {...} } }
     const auditData = (globalAudit && typeof globalAudit === 'object' && 'languages' in globalAudit)
       ? (globalAudit as any).languages
       : globalAudit;
@@ -70,6 +80,17 @@ export default function RemediationPreviewPanel({
       ...prev,
       [id]: !prev[id]
     }))
+  }
+
+  // Phase 3B: Modal handlers
+  const handleReviewSuggestion = (suggestion: RemediationSuggestion) => {
+    setSelectedSuggestion(suggestion)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedSuggestion(null)
   }
 
   // Zero-state handling
@@ -152,6 +173,7 @@ export default function RemediationPreviewPanel({
                 suggestion={suggestion}
                 isExpanded={expandedSuggestions[suggestion.id] ?? remediationPlan.suggestions.length <= 5}
                 onToggle={() => toggleSuggestion(suggestion.id)}
+                onReviewSuggestion={handleReviewSuggestion}
               />
             ))}
           </div>
@@ -161,6 +183,16 @@ export default function RemediationPreviewPanel({
           </footer>
         </div>
       )}
+
+      {/* Phase 3B: Confirmation Modal */}
+      <RemediationConfirmModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        suggestion={selectedSuggestion}
+        originalText={selectedSuggestion?.originalText}
+        articleId={articleId}
+        packageId={packageId}
+      />
     </section>
   )
 }
@@ -171,11 +203,13 @@ export default function RemediationPreviewPanel({
 function SuggestionCard({
   suggestion,
   isExpanded,
-  onToggle
+  onToggle,
+  onReviewSuggestion
 }: {
   suggestion: RemediationSuggestion,
   isExpanded: boolean,
-  onToggle: () => void
+  onToggle: () => void,
+  onReviewSuggestion: (suggestion: RemediationSuggestion) => void
 }) {
   const severityColors: Record<string, string> = {
     [RemediationSeverity.INFO]: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
@@ -186,6 +220,9 @@ function SuggestionCard({
 
   const isHumanOnly = suggestion.safetyLevel === RemediationSafetyLevel.HUMAN_ONLY ||
                       suggestion.safetyLevel === RemediationSafetyLevel.FORBIDDEN_TO_AUTOFIX
+
+  // Phase 3B: Check eligibility for Review button
+  const isEligible = isApplyEligibleSuggestion(suggestion)
 
   return (
     <article className={`border rounded-lg overflow-hidden transition-all ${isHumanOnly ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'}`}>
@@ -245,11 +282,22 @@ function SuggestionCard({
               <Info size={10} />
               Does not unlock Deploy.
             </div>
-            {suggestion.affectedField && (
-              <div className="text-[9px] text-white/40 font-mono">
-                Field: {suggestion.affectedField}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {suggestion.affectedField && (
+                <div className="text-[9px] text-white/40 font-mono">
+                  Field: {suggestion.affectedField}
+                </div>
+              )}
+              {/* Phase 3B: Review button for eligible suggestions */}
+              {isEligible && !isHumanOnly && (
+                <button
+                  onClick={() => onReviewSuggestion(suggestion)}
+                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Review Suggestion
+                </button>
+              )}
+            </div>
           </footer>
         </div>
       )}

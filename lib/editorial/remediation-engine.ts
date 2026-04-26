@@ -340,7 +340,7 @@ function classifyFinding(finding: unknown): RemediationCategory | null {
  * Maps a Global Governance Audit finding to a RemediationSuggestion.
  * Returns null if the finding cannot be mapped.
  * 
- * @param finding - The unknown finding object
+ * @param finding - The unknown finding object or string
  * @param source - The remediation source
  * @returns RemediationSuggestion or null
  */
@@ -348,7 +348,17 @@ function mapFindingToSuggestion(
   finding: unknown,
   source: RemediationSource
 ): RemediationSuggestion | null {
-  const obj = safeObject(finding);
+  // Normalize string findings to objects
+  let obj = safeObject(finding);
+  if (!obj && typeof finding === 'string') {
+    // Convert string finding to object format
+    obj = {
+      message: finding,
+      description: finding,
+      issue: finding
+    };
+  }
+  
   if (!obj) {
     console.warn('Skipping malformed finding:', finding);
     return null;
@@ -639,8 +649,13 @@ export function suggestionsFromGlobalAudit(globalAudit: unknown): RemediationSug
 
       // Map residue findings
       for (const finding of residueFindings) {
+        // Normalize string findings to objects before mapping
+        const normalizedFinding = typeof finding === 'string' 
+          ? { message: finding, language: lang, type: 'residue' }
+          : { ...safeObject(finding), language: lang, type: 'residue' };
+        
         const suggestion = mapFindingToSuggestion(
-          { ...safeObject(finding), language: lang, type: 'residue' },
+          normalizedFinding,
           RemediationSource.globalAudit
         );
         if (suggestion) suggestions.push(suggestion);
@@ -648,8 +663,12 @@ export function suggestionsFromGlobalAudit(globalAudit: unknown): RemediationSug
 
       // Map provenance findings
       for (const finding of provenanceFindings) {
+        const normalizedFinding = typeof finding === 'string'
+          ? { message: finding, language: lang, type: 'provenance' }
+          : { ...safeObject(finding), language: lang, type: 'provenance' };
+        
         const suggestion = mapFindingToSuggestion(
-          { ...safeObject(finding), language: lang, type: 'provenance' },
+          normalizedFinding,
           RemediationSource.globalAudit
         );
         if (suggestion) suggestions.push(suggestion);
@@ -657,8 +676,12 @@ export function suggestionsFromGlobalAudit(globalAudit: unknown): RemediationSug
 
       // Map critical issues
       for (const finding of criticalIssues) {
+        const normalizedFinding = typeof finding === 'string'
+          ? { message: finding, language: lang, type: 'critical' }
+          : { ...safeObject(finding), language: lang, type: 'critical' };
+        
         const suggestion = mapFindingToSuggestion(
-          { ...safeObject(finding), language: lang, type: 'critical' },
+          normalizedFinding,
           RemediationSource.globalAudit
         );
         if (suggestion) suggestions.push(suggestion);
@@ -666,8 +689,12 @@ export function suggestionsFromGlobalAudit(globalAudit: unknown): RemediationSug
 
       // Map warnings
       for (const finding of warnings) {
+        const normalizedFinding = typeof finding === 'string'
+          ? { message: finding, language: lang, type: 'warning' }
+          : { ...safeObject(finding), language: lang, type: 'warning' };
+        
         const suggestion = mapFindingToSuggestion(
-          { ...safeObject(finding), language: lang, type: 'warning' },
+          normalizedFinding,
           RemediationSource.globalAudit
         );
         if (suggestion) suggestions.push(suggestion);
@@ -675,8 +702,12 @@ export function suggestionsFromGlobalAudit(globalAudit: unknown): RemediationSug
 
       // Map parity findings
       for (const finding of parityFindings) {
+        const normalizedFinding = typeof finding === 'string'
+          ? { message: finding, language: lang, type: 'parity' }
+          : { ...safeObject(finding), language: lang, type: 'parity' };
+        
         const suggestion = mapFindingToSuggestion(
-          { ...safeObject(finding), language: lang, type: 'parity' },
+          normalizedFinding,
           RemediationSource.globalAudit
         );
         if (suggestion) suggestions.push(suggestion);
