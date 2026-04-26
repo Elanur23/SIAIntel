@@ -28,6 +28,7 @@ import PandaImport from './components/PandaImport'
 import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake-validator'
 import { runGlobalGovernanceAudit, type GlobalAuditResult } from '@/lib/editorial/global-governance-audit'
 import RemediationPreviewPanel from './components/RemediationPreviewPanel'
+import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -140,6 +141,9 @@ export default function WarRoom() {
   const [isPandaImportOpen, setIsPandaImportOpen] = useState(false)
   const [lastImportInfo, setLastImportInfo] = useState<{ id: string; time: string } | null>(null)
 
+  // PHASE 3C-3B-1: Local Remediation Controller (Scaffold Only)
+  const remediationController = useLocalDraftRemediationController()
+
   const [vault, setVault] = useState<
     Record<string, { title: string; desc: string; ready: boolean }>
   >({
@@ -199,6 +203,16 @@ export default function WarRoom() {
   ])
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
+
+  // PHASE 3C-3B-1: Sync remediation controller when news changes
+  useEffect(() => {
+    if (selectedNews) {
+      remediationController.initializeLocalDraftFromVault(vault)
+    } else {
+      remediationController.clearLocalDraftSession()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNews?.id])
 
   const activeWordCount = useMemo(() => {
     const body = (activeDraft.desc || '').trim()
