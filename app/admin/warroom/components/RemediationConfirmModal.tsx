@@ -1,8 +1,17 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { X, ShieldAlert } from 'lucide-react'
+import { X, ShieldAlert, Eye, Trash2 } from 'lucide-react'
 import type { RemediationSuggestion } from '@/lib/editorial/remediation-types'
+import {
+  isApplyEligibleSuggestion,
+  getApplyBlockReason,
+  type AppliedRemediationEvent,
+  type DraftSnapshot,
+  type AuditInvalidationState,
+  AuditInvalidationReason,
+  CONTROLLED_REMEDIATION_PHASE_3A_PROTOCOL_ONLY
+} from '@/lib/editorial/remediation-apply-types'
 
 interface RemediationConfirmModalProps {
   // Modal State
@@ -22,25 +31,43 @@ interface RemediationConfirmModalProps {
 }
 
 /**
- * Controlled Remediation Phase 3B - Confirmation Modal Prototype
+ * Phase 3C-2 Inert Preview State Model
+ * 
+ * Local in-memory preview objects that simulate future apply flow
+ * without mutating draft, vault, or audit state.
+ */
+interface InertPreviewState {
+  mockSnapshot: DraftSnapshot
+  mockAppliedEvent: AppliedRemediationEvent
+  mockAuditInvalidation: AuditInvalidationState
+  previewOnly: true
+  noMutation: true
+  createdAt: string
+}
+
+/**
+ * Controlled Remediation Phase 3C-2 - Inert Apply Preview Modal
  *
- * This component provides a UI-only confirmation modal for reviewing eligible
- * remediation suggestions. It displays a side-by-side diff preview with mandatory
- * human confirmation checkboxes and a disabled/mock apply control.
+ * This component provides a UI-only confirmation modal with inert preview capability.
+ * It displays a side-by-side diff preview with mandatory human confirmation checkboxes,
+ * a disabled real Apply button, and a separate inert preview control.
  *
- * CRITICAL PHASE 3B CONSTRAINTS:
+ * CRITICAL PHASE 3C-2 CONSTRAINTS:
  * - Strictly UI prototype only — no actual draft or vault mutation
  * - No API routes, database writes, or server persistence
  * - No audit state changes or deploy gate modifications
- * - Preview future human-approved draft apply behavior without implementing it
+ * - Preview objects are local in-memory only
+ * - Preview does not unlock Deploy
+ * - Preview does not change real audit state
  *
  * SAFETY RULES:
  * - Read-only / Presentational
- * - No Apply to Draft functionality
+ * - No Apply to Draft functionality (real button remains disabled)
  * - No vault/article mutation
  * - No API/Database calls
+ * - No localStorage/sessionStorage persistence
+ * - Preview state is local component state only
  * - Disabled apply button remains permanently disabled
- * - No console.log apply simulation
  * - Forbidden wording guarded
  */
 export default function RemediationConfirmModal({
@@ -59,7 +86,10 @@ export default function RemediationConfirmModal({
     understandsNoDeployUnlock: false
   })
 
-  // Reset confirmation state when modal closes
+  // Phase 3C-2: Local in-memory preview state (never persisted)
+  const [inertPreview, setInertPreview] = useState<InertPreviewState | null>(null)
+
+  // Reset confirmation state and preview when modal closes
   useEffect(() => {
     if (!isOpen) {
       setConfirmations({
@@ -67,6 +97,7 @@ export default function RemediationConfirmModal({
         reviewedDiff: false,
         understandsNoDeployUnlock: false
       })
+      setInertPreview(null) // Clear preview on close
     }
   }, [isOpen])
 
@@ -100,6 +131,79 @@ export default function RemediationConfirmModal({
 
   const allConfirmed = Object.values(confirmations).every(Boolean)
   const canShowApply = originalText && suggestion.suggestedText
+  
+  // Phase 3C-2: Check if suggestion is eligible for inert preview
+  const isEligibleForPreview = isApplyEligibleSuggestion(suggestion)
+  const blockReason = getApplyBlockReason(suggestion)
+
+  // Phase 3C-2: Handler for inert preview (no mutations)
+  const handleInertPreview = () => {
+    if (!suggestion || !originalText || !suggestion.suggestedText) return
+    if (!allConfirmed) return
+    if (!isEligibleForPreview) return
+
+    // Generate local in-memory preview objects only
+    const now = new Date().toISOString()
+    const previewId = `preview-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
+    const mockSnapshot: DraftSnapshot = {
+      snapshotId: `snapshot-${previewId}`,
+      articleId: articleId || 'unknown',
+      packageId: packageId || 'unknown',
+      affectedLanguage: suggestion.affectedLanguage,
+      affectedField: suggestion.affectedField,
+      beforeValue: originalText,
+      createdAt: now,
+      reason: 'INERT_PREVIEW_ONLY',
+      linkedSuggestionId: suggestion.id
+    }
+
+    const mockAppliedEvent: AppliedRemediationEvent = {
+      eventId: `event-${previewId}`,
+      suggestionId: suggestion.id,
+      articleId: articleId || 'unknown',
+      packageId: packageId || 'unknown',
+      operatorId: 'preview-operator',
+      category: suggestion.category,
+      affectedLanguage: suggestion.affectedLanguage,
+      affectedField: suggestion.affectedField,
+      originalText: originalText,
+      appliedText: suggestion.suggestedText,
+      diff: { from: originalText, to: suggestion.suggestedText },
+      auditInvalidated: true, // MOCK/FUTURE EFFECT ONLY
+      reAuditRequired: true, // MOCK/FUTURE EFFECT ONLY
+      createdAt: now,
+      approvalTextAccepted: [
+        'I understand this changes the draft and requires re-audit.',
+        'I have reviewed the before/after diff.',
+        'I understand this does not unlock Deploy.'
+      ],
+      confirmationMethod: 'INERT_PREVIEW_CHECKBOX',
+      phase: CONTROLLED_REMEDIATION_PHASE_3A_PROTOCOL_ONLY
+    }
+
+    const mockAuditInvalidation: AuditInvalidationState = {
+      auditInvalidated: true, // MOCK/FUTURE EFFECT ONLY
+      reAuditRequired: true, // MOCK/FUTURE EFFECT ONLY
+      invalidationReason: AuditInvalidationReason.REMEDIATION_APPLIED,
+      invalidatedAt: now
+    }
+
+    // Store in local component state only (never persisted)
+    setInertPreview({
+      mockSnapshot,
+      mockAppliedEvent,
+      mockAuditInvalidation,
+      previewOnly: true,
+      noMutation: true,
+      createdAt: now
+    })
+  }
+
+  // Phase 3C-2: Handler to clear preview (no changes saved)
+  const handleClearPreview = () => {
+    setInertPreview(null)
+  }
 
   return (
     <div
@@ -294,6 +398,135 @@ export default function RemediationConfirmModal({
               This is a UI prototype. No draft changes will be made.
             </p>
           </div>
+
+          {/* PHASE 3C-2: INERT PREVIEW CONTROL */}
+          {isEligibleForPreview && !inertPreview && (
+            <div className="space-y-2 pt-2 border-t border-white/10">
+              <div className="p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Eye size={14} className="text-blue-400" />
+                  <h3 className="text-xs font-bold text-blue-400 uppercase">
+                    Inert Preview Available
+                  </h3>
+                </div>
+                <ul className="text-xs text-blue-300/90 space-y-1 list-disc list-inside mb-3">
+                  <li>Preview only — this action will not change the draft or vault.</li>
+                  <li>This preview does not unlock Deploy and does not change the real audit state.</li>
+                  <li>A real Apply will invalidate the global audit and require a full re-audit.</li>
+                  <li>Human approval will be required for any future real Apply.</li>
+                  <li>Only FORMAT_REPAIR suggestions are eligible for future Tier-1 Apply in this pilot.</li>
+                </ul>
+                <button
+                  onClick={handleInertPreview}
+                  disabled={!allConfirmed}
+                  className={`w-full px-4 py-2 rounded text-sm font-bold transition-colors ${
+                    allConfirmed
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
+                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={allConfirmed ? 'Generate inert preview (no draft change)' : 'Complete all confirmations first'}
+                >
+                  Preview Apply (No Draft Change)
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* PHASE 3C-2: BLOCKED PREVIEW MESSAGE */}
+          {!isEligibleForPreview && blockReason && (
+            <div className="space-y-2 pt-2 border-t border-white/10">
+              <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert size={14} className="text-red-400" />
+                  <h3 className="text-xs font-bold text-red-400 uppercase">
+                    Preview Not Available
+                  </h3>
+                </div>
+                <p className="text-xs text-red-300/90">
+                  This suggestion category requires manual review and cannot be previewed for apply.
+                  Reason: {blockReason.replace(/_/g, ' ')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* PHASE 3C-2: INERT PREVIEW RESULT DISPLAY */}
+          {inertPreview && (
+            <div className="space-y-2 pt-2 border-t-2 border-green-500/30">
+              <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Eye size={16} className="text-green-400" />
+                    <h3 className="text-sm font-bold text-green-400 uppercase">
+                      Preview Only — No Draft Change
+                    </h3>
+                  </div>
+                  <button
+                    onClick={handleClearPreview}
+                    className="p-1 text-green-400 hover:text-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 rounded"
+                    title="Clear preview (no changes saved)"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                <div className="space-y-2 text-xs text-green-300/90">
+                  <div className="p-2 bg-black/30 rounded font-mono">
+                    <div className="text-green-400 font-bold mb-1">Preview Event ID:</div>
+                    <div className="text-green-300 break-all">{inertPreview.mockAppliedEvent.eventId}</div>
+                  </div>
+
+                  <div className="p-2 bg-black/30 rounded font-mono">
+                    <div className="text-green-400 font-bold mb-1">Suggestion ID:</div>
+                    <div className="text-green-300 break-all">{inertPreview.mockAppliedEvent.suggestionId}</div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 bg-black/30 rounded">
+                      <div className="text-green-400 font-bold mb-1">Language:</div>
+                      <div className="text-green-300">{inertPreview.mockAppliedEvent.affectedLanguage || 'N/A'}</div>
+                    </div>
+                    <div className="p-2 bg-black/30 rounded">
+                      <div className="text-green-400 font-bold mb-1">Category:</div>
+                      <div className="text-green-300">{inertPreview.mockAppliedEvent.category.replace(/_/g, ' ')}</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-yellow-900/30 border border-yellow-500/40 rounded">
+                    <div className="font-bold text-yellow-400 mb-2">Preview Status:</div>
+                    <ul className="space-y-1 list-disc list-inside text-yellow-300/90">
+                      <li>✅ No draft change made</li>
+                      <li>✅ No backend call made</li>
+                      <li>✅ Deploy remains locked</li>
+                      <li>✅ Real audit state unchanged</li>
+                      <li>⚠️ Future real Apply will invalidate audit</li>
+                      <li>⚠️ Future real Apply will require re-audit</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-2 bg-black/30 rounded">
+                    <div className="text-green-400 font-bold mb-1">Mock Audit Invalidation (Future Effect Only):</div>
+                    <div className="text-green-300">
+                      auditInvalidated: {String(inertPreview.mockAuditInvalidation.auditInvalidated)}
+                    </div>
+                    <div className="text-green-300">
+                      reAuditRequired: {String(inertPreview.mockAuditInvalidation.reAuditRequired)}
+                    </div>
+                    <div className="text-green-300">
+                      reason: {inertPreview.mockAuditInvalidation.invalidationReason}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleClearPreview}
+                  className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition-colors"
+                >
+                  Clear Preview (No Changes Saved)
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
