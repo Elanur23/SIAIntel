@@ -112,11 +112,12 @@
       "headline": "Phase 3B フォーマット修復テスト記事",
       "subheadline": "修正提案のための不正なmarkdown検出テスト",
       "summary": "このテスト記事には、Warroom提案修正プレビューパネルでFORMAT_REPAIR修正提案をトリガーするために意図的に不正なmarkdownが含まれています。",
-      "body": "これは不正なmarkdownを含むテスト記事本文です。\n\n## ##\n\n上記の行には、グローバルガバナンス監査がFORMAT_REPAIR問題を検出するようトリガーする不正なmarkdownプレフィックス（スペース付きダブルハッシュ）が含まれています。",
+      "body": "これは 不正な markdown を 含む テスト 記事 本文 です。 Phase 3B の テスト 目的 で 作成 されました。\n\n## ##\n\n上記 の 行 には、 グローバル ガバナンス 監査 が FORMAT_REPAIR 問題 を 検出 する よう トリガー する 不正な markdown プレフィックス （スペース 付き ダブル ハッシュ） が 含まれて います。 この テスト は、 Phase 3B 修正 モーダル の 完全な スモーク パス を 検証 します。 テスト には、 Panda JSON インポート、 ボールト 同期、 グローバル 9 ノード 監査、 修正 提案 生成、 FORMAT_REPAIR 提案 表示、 提案 を 確認 ボタン の 可視性、 Phase 3B 確認 モーダル の 開閉 が 含まれます。 この テスト ペイロード は、 本番 環境 での 使用 を 意図 して いません。 テスト 目的 で のみ 使用 して ください。 修正 エンジン は、 文字列 形式 の 監査 結果 を 正しく 処理 し、 適切な FORMAT_REPAIR カテゴリ に 分類 する 必要 が あります。",
       "keyInsights": [
         "不正なmarkdown（## ##）はFORMAT_REPAIRカテゴリをトリガーします",
         "FORMAT_REPAIRはREQUIRES_HUMAN_APPROVALセキュリティレベルを持っています",
-        "適格な提案は提案を確認ボタンを表示します"
+        "適格な提案は提案を確認ボタンを表示します",
+        "Phase 3Bモーダルはプロトタイプのみです（実際の適用機能はありません）"
       ],
       "riskNote": "これはPhase 3Bスモークテスト用のテスト記事です。本番使用ではありません。",
       "seoTitle": "Phase 3B フォーマット修復テスト | 修正スモークテスト",
@@ -127,11 +128,12 @@
       "headline": "Phase 3B 格式修复测试文章",
       "subheadline": "用于修正建议的格式错误markdown检测测试",
       "summary": "此测试文章故意包含格式错误的markdown，以在Warroom建议修复预览面板中触发FORMAT_REPAIR修正建议。",
-      "body": "这是一个包含格式错误markdown的测试文章正文。\n\n## ##\n\n上面的行包含格式错误的markdown前缀（带空格的双井号），应该触发全局治理审计以检测FORMAT_REPAIR问题。",
+      "body": "这是 一个 包含 格式 错误 markdown 的 测试 文章 正文。 Phase 3B 的 测试 目的 创建。\n\n## ##\n\n上面 的 行 包含 格式 错误 的 markdown 前缀 （带 空格 的 双 井号），应该 触发 全局 治理 审计 以 检测 FORMAT_REPAIR 问题。 此 测试 验证 Phase 3B 修正 模态框 的 完整 冒烟 路径。 测试 包括 Panda JSON 导入、 保险库 同步、 全局 9 节点 审计、 修正 建议 生成、 FORMAT_REPAIR 建议 显示、 审查 建议 按钮 可见性 以及 Phase 3B 确认 模态框 的 打开。 此 测试 有效 负载 不 适用于 生产 环境。 仅 用于 测试 目的。 修正 引擎 必须 正确 处理 字符串 格式 的 审计 结果，并 将 其 分类 为 适当 的 FORMAT_REPAIR 类别。",
       "keyInsights": [
         "格式错误的markdown（## ##）触发FORMAT_REPAIR类别",
         "FORMAT_REPAIR具有REQUIRES_HUMAN_APPROVAL安全级别",
-        "符合条件的建议显示审查建议按钮"
+        "符合条件的建议显示审查建议按钮",
+        "Phase 3B模态框仅为原型（无实际应用功能）"
       ],
       "riskNote": "这是Phase 3B冒烟测试的测试文章。不用于生产。",
       "seoTitle": "Phase 3B 格式修复测试 | 修正冒烟测试",
