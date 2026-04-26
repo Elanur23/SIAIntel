@@ -1,0 +1,247 @@
+/**
+ * Controlled Autonomous Remediation Phase 3A - Apply Protocol Types
+ *
+ * This module defines the foundation for human-approved draft apply events.
+ * It is strictly types-only and does not implement runtime mutation.
+ *
+ * CRITICAL SAFETY RULES:
+ * - auditInvalidated is hard-coded to `true`
+ * - reAuditRequired is hard-coded to `true`
+ * - No fields implying "publish ready" or "verified fix" are allowed
+ * - Eligibility rules enforce human-only for high-risk categories
+ */
+
+import {
+  RemediationCategory,
+  RemediationSuggestion,
+  RemediationSafetyLevel
+} from './remediation-types';
+
+export const CONTROLLED_REMEDIATION_PHASE_3A_PROTOCOL_ONLY = "3A_PROTOCOL_ONLY" as const;
+
+/**
+ * Reasons why a previous audit is no longer valid.
+ */
+export enum AuditInvalidationReason {
+  DRAFT_TEXT_CHANGED = 'DRAFT_TEXT_CHANGED',
+  LANGUAGE_NODE_CHANGED = 'LANGUAGE_NODE_CHANGED',
+  REMEDIATION_APPLIED = 'REMEDIATION_APPLIED',
+  ROLLBACK_PERFORMED = 'ROLLBACK_PERFORMED',
+  PARITY_RISK_CREATED = 'PARITY_RISK_CREATED',
+  AUDIT_CONTEXT_STALE = 'AUDIT_CONTEXT_STALE'
+}
+
+/**
+ * Result status of an attempt to transition from preview to applied.
+ */
+export enum RemediationApplyStatus {
+  APPROVED_FOR_DRAFT_CHANGE = 'APPROVED_FOR_DRAFT_CHANGE',
+  BLOCKED_HUMAN_ONLY = 'BLOCKED_HUMAN_ONLY',
+  BLOCKED_FORBIDDEN_TO_AUTOFIX = 'BLOCKED_FORBIDDEN_TO_AUTOFIX',
+  BLOCKED_MISSING_SUGGESTED_TEXT = 'BLOCKED_MISSING_SUGGESTED_TEXT',
+  BLOCKED_SOURCE_REVIEW = 'BLOCKED_SOURCE_REVIEW',
+  BLOCKED_PROVENANCE_REVIEW = 'BLOCKED_PROVENANCE_REVIEW',
+  BLOCKED_PARITY_REVIEW = 'BLOCKED_PARITY_REVIEW',
+  BLOCKED_FACT_SENSITIVE = 'BLOCKED_FACT_SENSITIVE',
+  BLOCKED_NUMERIC_OR_ENTITY_RISK = 'BLOCKED_NUMERIC_OR_ENTITY_RISK',
+  BLOCKED_REQUIRES_REAUDIT = 'BLOCKED_REQUIRES_REAUDIT',
+  ERROR_INVALID_INPUT = 'ERROR_INVALID_INPUT'
+}
+
+/**
+ * Record of a successful (future) remediation application.
+ */
+export interface AppliedRemediationEvent {
+  eventId: string;
+  suggestionId: string;
+  articleId: string;
+  packageId: string;
+  operatorId: string;
+  category: RemediationCategory;
+  affectedLanguage?: string;
+  affectedField?: string;
+  originalText: string;
+  appliedText: string;
+  diff: { from: string; to: string };
+  auditInvalidated: true; // Hard-coded safety invariant
+  reAuditRequired: true; // Hard-coded safety invariant
+  createdAt: string;
+  approvalTextAccepted: string[];
+  confirmationMethod: string;
+  phase: typeof CONTROLLED_REMEDIATION_PHASE_3A_PROTOCOL_ONLY;
+}
+
+/**
+ * Scoped record of content state before a remediation is applied.
+ */
+export interface DraftSnapshot {
+  snapshotId: string;
+  articleId: string;
+  packageId: string;
+  affectedLanguage?: string;
+  affectedField?: string;
+  beforeValue: string;
+  createdAt: string;
+  reason: string;
+  linkedSuggestionId: string;
+}
+
+/**
+ * Record of a successful (future) rollback operation.
+ */
+export interface RollbackEvent {
+  rollbackId: string;
+  linkedApplyEventId: string;
+  linkedSnapshotId: string;
+  articleId: string;
+  packageId: string;
+  affectedLanguage?: string;
+  affectedField?: string;
+  restoredText: string;
+  auditInvalidated: true;
+  reAuditRequired: true;
+  createdAt: string;
+}
+
+/**
+ * Discriminated union for apply results.
+ */
+export type RemediationApplyResult =
+  | {
+      status: RemediationApplyStatus.APPROVED_FOR_DRAFT_CHANGE;
+      suggestionId: string;
+      auditInvalidated: true;
+      reAuditRequired: true;
+      reason: string;
+    }
+  | {
+      status: Exclude<RemediationApplyStatus, RemediationApplyStatus.APPROVED_FOR_DRAFT_CHANGE | RemediationApplyStatus.ERROR_INVALID_INPUT>;
+      suggestionId?: string;
+      reason: string;
+      auditInvalidated: false;
+      reAuditRequired: false;
+    }
+  | {
+      status: RemediationApplyStatus.ERROR_INVALID_INPUT;
+      reason: string;
+      auditInvalidated: false;
+      reAuditRequired: false;
+    };
+
+// ============================================================================
+// HUMAN APPROVAL CONSTANTS
+// ============================================================================
+
+export const APPLY_APPROVAL_TEXT_DRAFT_CHANGE = "I understand this changes the draft and requires re-audit.";
+export const APPLY_APPROVAL_TEXT_DIFF_REVIEWED = "I have reviewed the before/after diff.";
+export const APPLY_APPROVAL_TEXT_DOES_NOT_UNLOCK_DEPLOY = "I understand this does not unlock Deploy.";
+
+// ============================================================================
+// FORBIDDEN WORDING
+// ============================================================================
+
+export const FORBIDDEN_APPLY_WORDING = [
+  "Auto-fix",
+  "Fix & Publish",
+  "Resolve Gate",
+  "Make Ready",
+  "Verified Fix",
+  "Safe to Deploy",
+  "Source Added",
+  "Provenance Verified",
+  "Publish Ready"
+];
+
+/**
+ * Pure helper to detect forbidden terminology in remediation labels or logs.
+ */
+export function containsForbiddenApplyWording(text: string): boolean {
+  const normalized = text.toLowerCase();
+  return FORBIDDEN_APPLY_WORDING.some(word => normalized.includes(word.toLowerCase()));
+}
+
+// ============================================================================
+// ELIGIBILITY HELPERS
+// ============================================================================
+
+/**
+ * Pure helper to determine if a suggestion is eligible for future draft application.
+ */
+export function isApplyEligibleSuggestion(suggestion: RemediationSuggestion): boolean {
+  return getApplyBlockReason(suggestion) === null;
+}
+
+/**
+ * Pure helper to identify the reason a suggestion is blocked from draft application.
+ */
+export function getApplyBlockReason(suggestion: RemediationSuggestion): RemediationApplyStatus | null {
+  // Check for high-risk categories
+  if (suggestion.category === RemediationCategory.SOURCE_REVIEW) return RemediationApplyStatus.BLOCKED_SOURCE_REVIEW;
+  if (suggestion.category === RemediationCategory.PROVENANCE_REVIEW) return RemediationApplyStatus.BLOCKED_PROVENANCE_REVIEW;
+  if (suggestion.category === RemediationCategory.PARITY_REVIEW) return RemediationApplyStatus.BLOCKED_PARITY_REVIEW;
+  if (suggestion.category === RemediationCategory.HUMAN_REVIEW_REQUIRED) return RemediationApplyStatus.BLOCKED_HUMAN_ONLY;
+
+  // Check safety levels
+  if (suggestion.safetyLevel === RemediationSafetyLevel.HUMAN_ONLY) return RemediationApplyStatus.BLOCKED_HUMAN_ONLY;
+  if (suggestion.safetyLevel === RemediationSafetyLevel.FORBIDDEN_TO_AUTOFIX) return RemediationApplyStatus.BLOCKED_FORBIDDEN_TO_AUTOFIX;
+
+  // Check content presence
+  if (!suggestion.suggestedText || suggestion.suggestedText.trim() === '') return RemediationApplyStatus.BLOCKED_MISSING_SUGGESTED_TEXT;
+
+  // Check for risk metadata (e.g., E-E-A-T or factual sensitivity)
+  if (!suggestion.preservesFacts) return RemediationApplyStatus.BLOCKED_FACT_SENSITIVE;
+  if (!suggestion.preservesNumbers) return RemediationApplyStatus.BLOCKED_NUMERIC_OR_ENTITY_RISK;
+  if (suggestion.requiresSourceVerification) return RemediationApplyStatus.BLOCKED_SOURCE_REVIEW;
+
+  return null; // Eligible
+}
+
+/**
+ * Developer-time assertion for apply safety.
+ */
+export function assertApplyProtocolSafe(suggestion: RemediationSuggestion): void {
+  const blockReason = getApplyBlockReason(suggestion);
+  if (blockReason !== null) {
+    throw new Error(`Remediation apply protocol violation: ${blockReason}`);
+  }
+}
+
+/**
+ * Always returns true as per fail-closed requirement.
+ */
+export function requiresReAuditAfterApply(): true {
+  return true;
+}
+
+/**
+ * Pure creator for blocked results.
+ */
+export function createApplyBlockedResult(
+  status: Exclude<RemediationApplyStatus, RemediationApplyStatus.APPROVED_FOR_DRAFT_CHANGE | RemediationApplyStatus.ERROR_INVALID_INPUT>,
+  reason: string,
+  suggestionId?: string
+): RemediationApplyResult {
+  return {
+    status,
+    suggestionId,
+    reason,
+    auditInvalidated: false,
+    reAuditRequired: false
+  };
+}
+
+/**
+ * Pure creator for approved results.
+ */
+export function createApplyApprovedResult(
+  suggestionId: string,
+  reason: string
+): RemediationApplyResult {
+  return {
+    status: RemediationApplyStatus.APPROVED_FOR_DRAFT_CHANGE,
+    suggestionId,
+    auditInvalidated: true,
+    reAuditRequired: true,
+    reason
+  };
+}
