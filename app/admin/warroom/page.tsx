@@ -27,6 +27,7 @@ import { Language } from '@/lib/store/language-store'
 import PandaImport from './components/PandaImport'
 import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake-validator'
 import { runGlobalGovernanceAudit, type GlobalAuditResult } from '@/lib/editorial/global-governance-audit'
+import RemediationPreviewPanel from './components/RemediationPreviewPanel'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -1121,7 +1122,17 @@ export default function WarRoom() {
                   </div>
                 </div>
               ) : null}
-              
+
+              {/* SUGGESTED FIXES PREVIEW - PHASE 2B */}
+              {selectedNews && (
+                <RemediationPreviewPanel
+                  globalAudit={globalAudit}
+                  auditResult={auditResult}
+                  articleId={selectedNews?.id}
+                  packageId={lastImportInfo?.id}
+                />
+              )}
+
               {/* Deploy Lock Reasons - Readable Cards */}
               {isDeployBlocked && selectedNews && (
                 <div className="mt-4 pt-4 border-t-2 border-red-500/30 space-y-3">
