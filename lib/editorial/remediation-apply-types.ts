@@ -165,6 +165,67 @@ export interface LocalDraftApplyRequestResult {
   noMutation: true;
 }
 
+/**
+ * Reasons why a real local draft apply request might be blocked (Phase 3C-3C-3A).
+ */
+export enum RealLocalApplyBlockReason {
+  BLOCKED_NOT_FORMAT_REPAIR = 'BLOCKED_NOT_FORMAT_REPAIR',
+  BLOCKED_NON_BODY_FIELD = 'BLOCKED_NON_BODY_FIELD',
+  BLOCKED_MISSING_LANGUAGE = 'BLOCKED_MISSING_LANGUAGE',
+  BLOCKED_MISSING_SUGGESTION_ID = 'BLOCKED_MISSING_SUGGESTION_ID',
+  BLOCKED_MISSING_SUGGESTED_TEXT = 'BLOCKED_MISSING_SUGGESTED_TEXT',
+  BLOCKED_ACKNOWLEDGEMENT_MISMATCH = 'BLOCKED_ACKNOWLEDGEMENT_MISMATCH',
+  BLOCKED_HIGH_RISK_CATEGORY = 'BLOCKED_HIGH_RISK_CATEGORY',
+  BLOCKED_DUPLICATE_CLIENT_NONCE = 'BLOCKED_DUPLICATE_CLIENT_NONCE',
+  BLOCKED_TARGET_TEXT_MISMATCH = 'BLOCKED_TARGET_TEXT_MISMATCH',
+  BLOCKED_REAL_APPLY_NOT_ACTIVE = 'BLOCKED_REAL_APPLY_NOT_ACTIVE'
+}
+
+/**
+ * Request object for applying a remediation to a local draft (Phase 3C-3C-3A).
+ * This represents a future real local apply request.
+ */
+export interface RealLocalDraftApplyRequest {
+  suggestionId: string;
+  articleId?: string;
+  packageId?: string;
+  language: string;
+  category: RemediationCategory;
+  fieldPath: 'body';
+  suggestedText: string;
+  originalText?: string;
+  operatorAcknowledgement: {
+    typedPhrase: string;
+    requiredPhrase: string;
+    acknowledgedAt: string;
+  };
+  requestedAt: string;
+  clientNonce?: string;
+  sessionOnly: true;
+  dryRunOnly: false;
+}
+
+/**
+ * Result object for a real local draft apply request (Phase 3C-3C-3A).
+ * Hard-codes safety invariants for the future real apply flow.
+ */
+export interface RealLocalDraftApplyResult {
+  success: boolean;
+  blocked: boolean;
+  reason: string;
+  snapshotId?: string;
+  appliedEventId?: string;
+  affectedLanguage?: string;
+  affectedField?: 'body';
+  auditInvalidated: true;
+  reAuditRequired: true;
+  deployBlocked: true;
+  noBackendMutation: true;
+  vaultUnchanged: true;
+  sessionOnly: true;
+  dryRunOnly: false;
+}
+
 // ============================================================================
 // HUMAN APPROVAL CONSTANTS
 // ============================================================================
@@ -241,6 +302,88 @@ export function getApplyBlockReason(suggestion: RemediationSuggestion): Remediat
   if (suggestion.requiresSourceVerification) return RemediationApplyStatus.BLOCKED_SOURCE_REVIEW;
 
   return null; // Eligible
+}
+
+/**
+ * Pure helper to determine if a real local apply request is eligible for processing.
+ */
+export function isRealLocalDraftApplyRequestEligible(request: RealLocalDraftApplyRequest): boolean {
+  return getRealLocalDraftApplyBlockReason(request) === null;
+}
+
+/**
+ * Pure helper to identify why a real local apply request is blocked.
+ */
+export function getRealLocalDraftApplyBlockReason(request: RealLocalDraftApplyRequest): RealLocalApplyBlockReason | null {
+  // Phase 3C-3C-3A: Real apply is NOT yet active at runtime.
+  // This helper is for contract hardening only.
+
+  if (request.category !== RemediationCategory.FORMAT_REPAIR) return RealLocalApplyBlockReason.BLOCKED_NOT_FORMAT_REPAIR;
+  if (request.fieldPath !== 'body') return RealLocalApplyBlockReason.BLOCKED_NON_BODY_FIELD;
+  if (!request.language) return RealLocalApplyBlockReason.BLOCKED_MISSING_LANGUAGE;
+  if (!request.suggestionId) return RealLocalApplyBlockReason.BLOCKED_MISSING_SUGGESTION_ID;
+  if (!request.suggestedText) return RealLocalApplyBlockReason.BLOCKED_MISSING_SUGGESTED_TEXT;
+
+  if (request.operatorAcknowledgement.typedPhrase !== request.operatorAcknowledgement.requiredPhrase) {
+    return RealLocalApplyBlockReason.BLOCKED_ACKNOWLEDGEMENT_MISMATCH;
+  }
+
+  // Safety categories check (redundant but good for defense-in-depth)
+  if ([
+    RemediationCategory.SOURCE_REVIEW,
+    RemediationCategory.PROVENANCE_REVIEW,
+    RemediationCategory.PARITY_REVIEW,
+    RemediationCategory.HUMAN_REVIEW_REQUIRED
+  ].includes(request.category)) {
+    return RealLocalApplyBlockReason.BLOCKED_HIGH_RISK_CATEGORY;
+  }
+
+  return null;
+}
+
+/**
+ * Pure creator for blocked real local apply results.
+ */
+export function createBlockedRealLocalApplyResult(reason: RealLocalApplyBlockReason): RealLocalDraftApplyResult {
+  return {
+    success: false,
+    blocked: true,
+    reason,
+    auditInvalidated: true,
+    reAuditRequired: true,
+    deployBlocked: true,
+    noBackendMutation: true,
+    vaultUnchanged: true,
+    sessionOnly: true,
+    dryRunOnly: false
+  };
+}
+
+/**
+ * Pure creator for successful real local apply results.
+ */
+export function createSuccessfulRealLocalApplyResult(fields: {
+  snapshotId: string;
+  appliedEventId: string;
+  language: string;
+  reason?: string;
+}): RealLocalDraftApplyResult {
+  return {
+    success: true,
+    blocked: false,
+    reason: fields.reason || 'SUCCESS_LOCAL_APPLY',
+    snapshotId: fields.snapshotId,
+    appliedEventId: fields.appliedEventId,
+    affectedLanguage: fields.language,
+    affectedField: 'body',
+    auditInvalidated: true,
+    reAuditRequired: true,
+    deployBlocked: true,
+    noBackendMutation: true,
+    vaultUnchanged: true,
+    sessionOnly: true,
+    dryRunOnly: false
+  };
 }
 
 /**
