@@ -32,7 +32,11 @@ import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemedia
 import { RemediationCategory } from '@/lib/editorial/remediation-types'
 import {
   type LocalDraftApplyRequest,
-  type LocalDraftApplyRequestResult
+  type LocalDraftApplyRequestResult,
+  type RealLocalDraftApplyRequest,
+  type RealLocalDraftApplyResult,
+  getRealLocalDraftApplyBlockReason,
+  createBlockedRealLocalApplyResult
 } from '@/lib/editorial/remediation-apply-types'
 
 // Fallback implementations for missing dependencies
@@ -572,6 +576,43 @@ export default function WarRoom() {
       reason: "DRY_RUN_PLUMBING_ONLY_NO_APPLY_EXECUTED",
       dryRunOnly: true,
       noMutation: true
+    };
+  };
+
+  // PHASE 3C-3C-3B-1: Real Local Apply Preflight Mapping Only
+  const handleRequestRealLocalApply = (request: RealLocalDraftApplyRequest): RealLocalDraftApplyResult => {
+    // CRITICAL PHASE 3C-3C-3B-1 CONSTRAINTS:
+    // - This is preflight mapping ONLY
+    // - No controller execution
+    // - No mutations
+    // - Pure validation only
+
+    // 1. Validate request structure
+    if (!request) {
+      return createBlockedRealLocalApplyResult('BLOCKED_MISSING_SUGGESTION_ID' as any);
+    }
+
+    // 2. Call preflight guard (pure helper)
+    const blockReason = getRealLocalDraftApplyBlockReason(request);
+
+    // 3. If blocked, return blocked result
+    if (blockReason !== null) {
+      return createBlockedRealLocalApplyResult(blockReason);
+    }
+
+    // 4. Preflight success - return success WITHOUT calling controller
+    // IMPORTANT: No controller invocation. No mutations. Preflight only.
+    return {
+      success: true,
+      blocked: false,
+      reason: 'REAL_LOCAL_APPLY_PREFLIGHT_ONLY_NO_CONTROLLER_EXECUTED',
+      auditInvalidated: true,
+      reAuditRequired: true,
+      deployBlocked: true,
+      noBackendMutation: true,
+      vaultUnchanged: true,
+      sessionOnly: true,
+      dryRunOnly: false
     };
   };
 
@@ -1187,6 +1228,7 @@ export default function WarRoom() {
                   articleId={selectedNews?.id}
                   packageId={lastImportInfo?.id}
                   onRequestLocalDraftApply={handleRequestLocalDraftApply}
+                  onRequestRealLocalApply={handleRequestRealLocalApply}
                 />
               )}
 
