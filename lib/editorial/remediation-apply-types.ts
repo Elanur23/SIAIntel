@@ -386,6 +386,196 @@ export function createSuccessfulRealLocalApplyResult(fields: {
   };
 }
 
+// ============================================================================
+// PHASE 3C-3C-3B-2A: ADAPTER & CONTRACT ALIGNMENT
+// ============================================================================
+
+/**
+ * Controller input shape expected by applyToLocalDraftController.
+ * This is the existing controller signature from Phase 3C-3B.
+ */
+export interface ControllerApplyInput {
+  suggestion: RemediationSuggestion;
+  language: string;
+  fieldPath: string;
+  operatorId?: string;
+}
+
+/**
+ * Controller output shape returned by applyToLocalDraftController.
+ * This is the existing controller return type from Phase 3C-3B.
+ */
+export interface ControllerApplyOutput {
+  appliedEvent: AppliedRemediationEvent;
+  snapshot: DraftSnapshot;
+}
+
+/**
+ * Pure adapter that maps RealLocalDraftApplyRequest to controller input format.
+ * 
+ * CRITICAL PHASE 3C-3C-3B-2A CONSTRAINTS:
+ * - This is a pure type adapter only
+ * - Does NOT call applyToLocalDraftController
+ * - Does NOT mutate localDraftCopy
+ * - Does NOT mutate vault
+ * - Does NOT append ledger
+ * - Does NOT create runtime snapshots
+ * - Does NOT call backend/network/storage
+ * - Preserves all safety invariants
+ * 
+ * @param request - The real local apply request from UI
+ * @param suggestion - The remediation suggestion object (must be provided by caller)
+ * @returns Controller-compatible input object
+ */
+export function mapRealLocalApplyRequestToControllerInput(
+  request: RealLocalDraftApplyRequest,
+  suggestion: RemediationSuggestion
+): ControllerApplyInput {
+  // Validate request eligibility using existing guard
+  const blockReason = getRealLocalDraftApplyBlockReason(request);
+  if (blockReason !== null) {
+    throw new Error(`Cannot map blocked request: ${blockReason}`);
+  }
+
+  // Validate suggestion eligibility using existing guard
+  const suggestionBlockReason = getApplyBlockReason(suggestion);
+  if (suggestionBlockReason !== null) {
+    throw new Error(`Cannot map ineligible suggestion: ${suggestionBlockReason}`);
+  }
+
+  // Ensure suggestion ID matches request
+  if (suggestion.id !== request.suggestionId) {
+    throw new Error('Suggestion ID mismatch between request and suggestion object');
+  }
+
+  // Map to controller input format
+  return {
+    suggestion,
+    language: request.language,
+    fieldPath: request.fieldPath,
+    operatorId: 'warroom-operator' // Hard-coded for Phase 3C-3C-3B-2A
+  };
+}
+
+/**
+ * Pure adapter that maps controller output to RealLocalDraftApplyResult format.
+ * 
+ * CRITICAL PHASE 3C-3C-3B-2A CONSTRAINTS:
+ * - This is a pure type adapter only
+ * - Hard-codes all safety invariants
+ * - Does NOT mutate any state
+ * - Does NOT call backend/network/storage
+ * 
+ * @param controllerOutput - The output from applyToLocalDraftController
+ * @param request - The original request (for context)
+ * @returns RealLocalDraftApplyResult with hard-coded safety invariants
+ */
+export function mapControllerOutputToRealLocalApplyResult(
+  controllerOutput: ControllerApplyOutput,
+  request: RealLocalDraftApplyRequest
+): RealLocalDraftApplyResult {
+  return {
+    success: true,
+    blocked: false,
+    reason: 'SUCCESS_CONTROLLER_APPLIED',
+    snapshotId: controllerOutput.snapshot.snapshotId,
+    appliedEventId: controllerOutput.appliedEvent.eventId,
+    affectedLanguage: request.language,
+    affectedField: 'body',
+    // Hard-coded safety invariants (Phase 3C-3C-3B-2A)
+    auditInvalidated: true,
+    reAuditRequired: true,
+    deployBlocked: true,
+    noBackendMutation: true,
+    vaultUnchanged: true,
+    sessionOnly: true,
+    dryRunOnly: false
+  };
+}
+
+/**
+ * Pure validator that checks if a request and suggestion are compatible for adapter mapping.
+ * 
+ * @param request - The real local apply request
+ * @param suggestion - The remediation suggestion
+ * @returns true if compatible, false otherwise
+ */
+export function isRequestSuggestionCompatible(
+  request: RealLocalDraftApplyRequest,
+  suggestion: RemediationSuggestion
+): boolean {
+  // Check ID match
+  if (suggestion.id !== request.suggestionId) return false;
+
+  // Check category match
+  if (suggestion.category !== request.category) return false;
+
+  // Check eligibility
+  if (getRealLocalDraftApplyBlockReason(request) !== null) return false;
+  if (getApplyBlockReason(suggestion) !== null) return false;
+
+  return true;
+}
+
+/**
+ * Pure helper that validates adapter preconditions without performing the mapping.
+ * Throws descriptive errors if preconditions are not met.
+ * 
+ * @param request - The real local apply request
+ * @param suggestion - The remediation suggestion
+ */
+export function validateAdapterPreconditions(
+  request: RealLocalDraftApplyRequest,
+  suggestion: RemediationSuggestion
+): void {
+  // Validate request
+  const requestBlockReason = getRealLocalDraftApplyBlockReason(request);
+  if (requestBlockReason !== null) {
+    throw new Error(`Request validation failed: ${requestBlockReason}`);
+  }
+
+  // Validate suggestion
+  const suggestionBlockReason = getApplyBlockReason(suggestion);
+  if (suggestionBlockReason !== null) {
+    throw new Error(`Suggestion validation failed: ${suggestionBlockReason}`);
+  }
+
+  // Validate compatibility
+  if (!isRequestSuggestionCompatible(request, suggestion)) {
+    throw new Error('Request and suggestion are not compatible');
+  }
+
+  // Validate acknowledgement
+  if (request.operatorAcknowledgement.typedPhrase !== request.operatorAcknowledgement.requiredPhrase) {
+    throw new Error('Operator acknowledgement mismatch');
+  }
+
+  // Validate category
+  if (request.category !== RemediationCategory.FORMAT_REPAIR) {
+    throw new Error('Only FORMAT_REPAIR category is supported');
+  }
+
+  // Validate field path
+  if (request.fieldPath !== 'body') {
+    throw new Error('Only body field path is supported');
+  }
+
+  // Validate language
+  if (!request.language || request.language.trim() === '') {
+    throw new Error('Language is required');
+  }
+
+  // Validate suggestion ID
+  if (!request.suggestionId || request.suggestionId.trim() === '') {
+    throw new Error('Suggestion ID is required');
+  }
+
+  // Validate suggested text
+  if (!request.suggestedText || request.suggestedText.trim() === '') {
+    throw new Error('Suggested text is required');
+  }
+}
+
 /**
  * Developer-time assertion for apply safety.
  */
