@@ -14,7 +14,10 @@ import {
   type LocalDraftApplyRequest,
   type LocalDraftApplyRequestResult,
   type RealLocalDraftApplyRequest,
-  type RealLocalDraftApplyResult
+  type RealLocalDraftApplyResult,
+  validateAdapterPreconditions,
+  mapRealLocalApplyRequestToControllerInput,
+  mapControllerOutputToRealLocalApplyResult
 } from '@/lib/editorial/remediation-apply-types'
 
 interface RemediationConfirmModalProps {
@@ -35,6 +38,9 @@ interface RemediationConfirmModalProps {
 
   // Phase 3C-3C-3B-1: Real local apply preflight handler (Preflight mapping only)
   onRequestRealLocalApply?: (request: RealLocalDraftApplyRequest) => RealLocalDraftApplyResult
+
+  // Phase 3C-3C-3B-2B: Real local apply handler with controller execution
+  onRequestRealLocalApplyWithController?: (request: RealLocalDraftApplyRequest, suggestion: RemediationSuggestion) => Promise<RealLocalDraftApplyResult>
 
   // Styling
   className?: string
@@ -89,6 +95,7 @@ export default function RemediationConfirmModal({
   packageId,
   onRequestLocalDraftApply,
   onRequestRealLocalApply,
+  onRequestRealLocalApplyWithController,
   className = ''
 }: RemediationConfirmModalProps) {
   // Local UI state for confirmation checkboxes
@@ -111,6 +118,9 @@ export default function RemediationConfirmModal({
   // Phase 3C-3C-3B-1: Real local apply preflight result state (modal-local only)
   const [realLocalApplyResult, setRealLocalApplyResult] = useState<RealLocalDraftApplyResult | null>(null)
 
+  // Phase 3C-3C-3B-2B: Loading state for real apply with controller
+  const [isApplying, setIsApplying] = useState(false)
+
   // Reset confirmation state and preview when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -123,6 +133,7 @@ export default function RemediationConfirmModal({
       setTypedAcknowledgement('') // Clear typed acknowledgement on close
       setDryRunResult(null) // Clear dry-run result on close
       setRealLocalApplyResult(null) // Clear real local apply result on close
+      setIsApplying(false) // Clear loading state on close
     }
   }, [isOpen])
 
@@ -288,6 +299,66 @@ export default function RemediationConfirmModal({
     
     // Store result in modal-local state only
     setRealLocalApplyResult(result)
+  }
+
+  // Phase 3C-3C-3B-2B: Handler for real local apply with controller execution
+  const handleRealLocalApply = async () => {
+    if (!suggestion || !onRequestRealLocalApplyWithController) return
+    if (!allConfirmed) return
+    if (!isAcknowledgementValid) return
+    if (!isEligibleForPreview) return
+
+    // Set loading state
+    setIsApplying(true)
+
+    try {
+      // Construct RealLocalDraftApplyRequest
+      const request: RealLocalDraftApplyRequest = {
+        suggestionId: suggestion.id,
+        articleId: articleId || 'unknown',
+        packageId: packageId || 'unknown',
+        language: suggestion.affectedLanguage || '',
+        category: suggestion.category,
+        fieldPath: 'body',
+        suggestedText: suggestion.suggestedText || '',
+        originalText: suggestion.originalText,
+        operatorAcknowledgement: {
+          typedPhrase: typedAcknowledgement,
+          requiredPhrase: REQUIRED_ACKNOWLEDGEMENT_PHRASE,
+          acknowledgedAt: new Date().toISOString()
+        },
+        requestedAt: new Date().toISOString(),
+        sessionOnly: true,
+        dryRunOnly: false
+      }
+
+      // Validate adapter preconditions
+      validateAdapterPreconditions(request, suggestion)
+
+      // Call the real apply handler with controller execution
+      const result = await onRequestRealLocalApplyWithController(request, suggestion)
+      
+      // Store result in modal-local state only
+      setRealLocalApplyResult(result)
+    } catch (error) {
+      // Handle errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      setRealLocalApplyResult({
+        success: false,
+        blocked: true,
+        reason: `APPLY_EXECUTION_ERROR: ${errorMessage}`,
+        auditInvalidated: true,
+        reAuditRequired: true,
+        deployBlocked: true,
+        noBackendMutation: true,
+        vaultUnchanged: true,
+        sessionOnly: true,
+        dryRunOnly: false
+      })
+    } finally {
+      // Clear loading state
+      setIsApplying(false)
+    }
   }
 
   return (
@@ -731,8 +802,68 @@ export default function RemediationConfirmModal({
             </div>
           )}
 
-          {/* PHASE 3C-3C-3B-1: REAL LOCAL APPLY PREFLIGHT BUTTON */}
-          {isEligibleForPreview && !realLocalApplyResult && onRequestRealLocalApply && (
+          {/* PHASE 3C-3C-3B-2B: REAL LOCAL APPLY BUTTON WITH CONTROLLER EXECUTION */}
+          {isEligibleForPreview && !realLocalApplyResult && onRequestRealLocalApplyWithController && (
+            <div className="space-y-2 pt-2 border-t-2 border-green-500/30">
+              <div className="p-4 bg-green-900/20 border-2 border-green-500/40 rounded-lg space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert size={16} className="text-green-400" />
+                  <h3 className="text-sm font-bold text-green-400 uppercase">
+                    Apply to Local Draft Copy
+                  </h3>
+                </div>
+                
+                <div className="space-y-2 text-xs text-green-300/90">
+                  <div className="p-3 bg-black/30 border border-green-500/20 rounded">
+                    <div className="font-bold text-green-400 mb-2">Session-Scoped Mutation:</div>
+                    <ul className="space-y-1 list-disc list-inside">
+                      <li>This button applies changes to your local draft copy</li>
+                      <li>Changes are session-scoped only (browser memory)</li>
+                      <li>No vault mutation will occur</li>
+                      <li>No backend call will be made</li>
+                      <li>Deploy remains locked</li>
+                      <li>Full re-audit will be required</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleRealLocalApply}
+                  disabled={!allConfirmed || !isAcknowledgementValid || isApplying}
+                  className={`w-full px-4 py-3 rounded text-sm font-bold transition-colors ${
+                    allConfirmed && isAcknowledgementValid && !isApplying
+                      ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
+                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={
+                    !allConfirmed 
+                      ? 'Complete all confirmations first'
+                      : !isAcknowledgementValid
+                      ? `Type exactly "${REQUIRED_ACKNOWLEDGEMENT_PHRASE}" first`
+                      : isApplying
+                      ? 'Applying...'
+                      : 'Execute session-only apply to local draft copy'
+                  }
+                >
+                  {isApplying ? 'Applying...' : 'Apply to Local Draft Copy'}
+                </button>
+
+                {!allConfirmed && (
+                  <div className="text-xs text-green-300/70 text-center italic">
+                    Complete all confirmation checkboxes to enable
+                  </div>
+                )}
+                {allConfirmed && !isAcknowledgementValid && (
+                  <div className="text-xs text-green-300/70 text-center italic">
+                    Type exactly "{REQUIRED_ACKNOWLEDGEMENT_PHRASE}" to enable
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* PHASE 3C-3C-3B-1: REAL LOCAL APPLY PREFLIGHT BUTTON (KEPT FOR TESTING) */}
+          {isEligibleForPreview && !realLocalApplyResult && onRequestRealLocalApply && !onRequestRealLocalApplyWithController && (
             <div className="space-y-2 pt-2 border-t-2 border-orange-500/30">
               <div className="p-4 bg-orange-900/20 border-2 border-orange-500/40 rounded-lg space-y-3">
                 <div className="flex items-center gap-2 mb-2">

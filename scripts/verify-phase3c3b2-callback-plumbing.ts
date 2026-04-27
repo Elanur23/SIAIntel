@@ -70,11 +70,28 @@ check('Page handler validates fieldPath === body', pageContent.includes("fieldPa
 check('Page handler validates language', pageContent.includes('!!language'));
 check('Page handler validates suggestionId', pageContent.includes('!!suggestionId'));
 
-// 6. Safety/Inertness Proof
-check('Page handler does NOT call applyToLocalDraftController', !pageContent.match(/handleRequestLocalDraftApply[\s\S]*?remediationController\.applyToLocalDraft/));
-check('Page handler does NOT call rollbackLastLocalDraftChange', !pageContent.match(/handleRequestLocalDraftApply[\s\S]*?remediationController\.rollbackLastLocalDraftChange/));
-check('No fetch/axios/network calls added in handler', !pageContent.match(/handleRequestLocalDraftApply[\s\S]*?fetch\(/) && !pageContent.match(/handleRequestLocalDraftApply[\s\S]*?axios\./));
-check('No storage calls added in handler', !pageContent.match(/handleRequestLocalDraftApply[\s\S]*?localStorage/) && !pageContent.match(/handleRequestLocalDraftApply[\s\S]*?sessionStorage/));
+// 6. Safety/Inertness Proof (Updated for Phase 3C-3C-3B-2B)
+// Phase 3C-3C-3B-2B allows controller call ONLY in handleRequestRealLocalApplyWithController
+// The dry-run handler handleRequestLocalDraftApply must NOT call the controller
+
+function extractFunctionBody(content: string, funcName: string): string {
+  const startRegex = new RegExp(`const ${funcName} = [\\s\\S]*?=> {`);
+  const match = content.match(startRegex);
+  if (!match) return '';
+
+  const startIndex = match.index! + match[0].length;
+  const endMatch = content.substring(startIndex).match(/\n  };|\n\n  \/\/ PHASE/);
+  const endIndex = endMatch ? startIndex + endMatch.index! : content.length;
+
+  return content.substring(startIndex, endIndex);
+}
+
+const dryRunHandlerCode = extractFunctionBody(pageContent, 'handleRequestLocalDraftApply');
+
+check('Page handler does NOT call applyToLocalDraftController', !dryRunHandlerCode.includes('remediationController.applyToLocalDraftController'));
+check('Page handler does NOT call rollbackLastLocalDraftChange', !dryRunHandlerCode.includes('remediationController.rollbackLastLocalDraftChange'));
+check('No fetch/axios/network calls added in handler', !dryRunHandlerCode.includes('fetch(') && !dryRunHandlerCode.includes('axios.'));
+check('No storage calls added in handler', !dryRunHandlerCode.includes('localStorage') && !dryRunHandlerCode.includes('sessionStorage'));
 
 // 7. Component Wiring
 check('Page passes handler to PreviewPanel', pageContent.includes('onRequestLocalDraftApply={handleRequestLocalDraftApply}'));

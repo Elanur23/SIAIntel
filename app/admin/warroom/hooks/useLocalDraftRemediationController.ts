@@ -76,6 +76,25 @@ export function useLocalDraftRemediationController() {
       throw new Error('Local draft session not initialized');
     }
 
+    // PHASE 3C-3C-3B-2B: Controller internal revalidation
+    // Revalidate category constraint
+    if (input.suggestion.category !== 'FORMAT_REPAIR') {
+      throw new Error('CONTROLLER_REVALIDATION_FAILED: Only FORMAT_REPAIR category is allowed');
+    }
+
+    // Revalidate field constraint
+    if (input.fieldPath !== 'body') {
+      throw new Error('CONTROLLER_REVALIDATION_FAILED: Only body field is allowed');
+    }
+
+    // Revalidate duplicate detection
+    const isDuplicate = sessionRemediationLedger.some(
+      entry => entry.appliedEvent.suggestionId === input.suggestion.id
+    );
+    if (isDuplicate) {
+      throw new Error('CONTROLLER_REVALIDATION_FAILED: Duplicate apply detected for suggestion ' + input.suggestion.id);
+    }
+
     // Call pure helper to compute the next state
     const {
       nextLocalDraft,
@@ -98,7 +117,7 @@ export function useLocalDraftRemediationController() {
     setLatestRollbackEvent(null);
 
     return { appliedEvent, snapshot };
-  }, [localDraftCopy]);
+  }, [localDraftCopy, sessionRemediationLedger]);
 
   /**
    * Internal logic to rollback the last remediation in the session.

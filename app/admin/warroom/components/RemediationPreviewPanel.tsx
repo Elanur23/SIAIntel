@@ -30,6 +30,7 @@ interface RemediationPreviewPanelProps {
   packageId?: string
   onRequestLocalDraftApply?: (request: LocalDraftApplyRequest) => Promise<LocalDraftApplyRequestResult> | LocalDraftApplyRequestResult
   onRequestRealLocalApply?: (request: RealLocalDraftApplyRequest) => RealLocalDraftApplyResult
+  onRequestRealLocalApplyWithController?: (request: RealLocalDraftApplyRequest, suggestion: RemediationSuggestion) => Promise<RealLocalDraftApplyResult>
   className?: string
 }
 
@@ -55,6 +56,7 @@ export default function RemediationPreviewPanel({
   packageId,
   onRequestLocalDraftApply,
   onRequestRealLocalApply,
+  onRequestRealLocalApplyWithController,
   className = ''
 }: RemediationPreviewPanelProps) {
   const [isPanelExpanded, setIsPanelExpanded] = useState(true)
@@ -202,6 +204,7 @@ export default function RemediationPreviewPanel({
         packageId={packageId}
         onRequestLocalDraftApply={onRequestLocalDraftApply}
         onRequestRealLocalApply={onRequestRealLocalApply}
+        onRequestRealLocalApplyWithController={onRequestRealLocalApplyWithController}
       />
     </section>
   )

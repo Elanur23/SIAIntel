@@ -29,14 +29,16 @@ import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake
 import { runGlobalGovernanceAudit, type GlobalAuditResult } from '@/lib/editorial/global-governance-audit'
 import RemediationPreviewPanel from './components/RemediationPreviewPanel'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
-import { RemediationCategory } from '@/lib/editorial/remediation-types'
+import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
 import {
   type LocalDraftApplyRequest,
   type LocalDraftApplyRequestResult,
   type RealLocalDraftApplyRequest,
   type RealLocalDraftApplyResult,
   getRealLocalDraftApplyBlockReason,
-  createBlockedRealLocalApplyResult
+  createBlockedRealLocalApplyResult,
+  mapRealLocalApplyRequestToControllerInput,
+  mapControllerOutputToRealLocalApplyResult
 } from '@/lib/editorial/remediation-apply-types'
 
 // Fallback implementations for missing dependencies
@@ -614,6 +616,46 @@ export default function WarRoom() {
       sessionOnly: true,
       dryRunOnly: false
     };
+  };
+
+  // PHASE 3C-3C-3B-2B: Real Local Apply with Controller Execution
+  const handleRequestRealLocalApplyWithController = async (
+    request: RealLocalDraftApplyRequest,
+    suggestion: RemediationSuggestion
+  ): Promise<RealLocalDraftApplyResult> => {
+    // CRITICAL PHASE 3C-3C-3B-2B CONSTRAINTS:
+    // - This executes the full adapter chain with controller invocation
+    // - Session-scoped mutations only
+    // - No vault mutation
+    // - No backend/network/storage calls
+
+    try {
+      // 1. Map request to controller input using adapter
+      const controllerInput = mapRealLocalApplyRequestToControllerInput(request, suggestion);
+
+      // 2. Call controller to perform session-scoped mutation
+      const controllerOutput = remediationController.applyToLocalDraftController(controllerInput);
+
+      // 3. Map controller output to result using adapter
+      const result = mapControllerOutputToRealLocalApplyResult(controllerOutput, request);
+
+      return result;
+    } catch (error) {
+      // Handle errors and return blocked result
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        blocked: true,
+        reason: `CONTROLLER_EXECUTION_FAILED: ${errorMessage}`,
+        auditInvalidated: true,
+        reAuditRequired: true,
+        deployBlocked: true,
+        noBackendMutation: true,
+        vaultUnchanged: true,
+        sessionOnly: true,
+        dryRunOnly: false
+      };
+    }
   };
 
   return (
@@ -1229,6 +1271,7 @@ export default function WarRoom() {
                   packageId={lastImportInfo?.id}
                   onRequestLocalDraftApply={handleRequestLocalDraftApply}
                   onRequestRealLocalApply={handleRequestRealLocalApply}
+                  onRequestRealLocalApplyWithController={handleRequestRealLocalApplyWithController}
                 />
               )}
 

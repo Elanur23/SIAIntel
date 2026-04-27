@@ -60,7 +60,7 @@ function createMockSuggestion(overrides: Partial<RemediationSuggestion> = {}): R
   return {
     id: 'test-suggestion-id',
     source: RemediationSource.globalAudit,
-    category: RemediationCategory.RESIDUE_REMOVAL,
+    category: RemediationCategory.FORMAT_REPAIR,
     severity: RemediationSeverity.WARNING,
     safetyLevel: RemediationSafetyLevel.REQUIRES_HUMAN_APPROVAL,
     issueType: 'residue',
@@ -92,10 +92,12 @@ function createMockSuggestion(overrides: Partial<RemediationSuggestion> = {}): R
 console.log("=== Phase 3A Apply Protocol Verification ===\n");
 
 runTest("Eligible Category Matrix", () => {
-  // Safe categories should pass
-  assert(isApplyEligibleSuggestion(createMockSuggestion({ category: RemediationCategory.RESIDUE_REMOVAL })), "Residue removal should be eligible");
+  // Current strict policy (Phase 3C-3C-3B-2B): Only FORMAT_REPAIR is eligible
   assert(isApplyEligibleSuggestion(createMockSuggestion({ category: RemediationCategory.FORMAT_REPAIR })), "Format repair should be eligible");
-  assert(isApplyEligibleSuggestion(createMockSuggestion({ category: RemediationCategory.FOOTER_REPAIR })), "Footer repair should be eligible");
+
+  // Previously safe but now blocked categories (Tier-1 hardening)
+  assertEqual(getApplyBlockReason(createMockSuggestion({ category: RemediationCategory.RESIDUE_REMOVAL })), RemediationApplyStatus.BLOCKED_CATEGORY_NOT_TIER1, "Residue removal must be blocked in current phase");
+  assertEqual(getApplyBlockReason(createMockSuggestion({ category: RemediationCategory.FOOTER_REPAIR })), RemediationApplyStatus.BLOCKED_CATEGORY_NOT_TIER1, "Footer repair must be blocked in current phase");
 
   // Blocked categories
   assertEqual(getApplyBlockReason(createMockSuggestion({ category: RemediationCategory.SOURCE_REVIEW })), RemediationApplyStatus.BLOCKED_SOURCE_REVIEW, "Source review must be blocked");
@@ -127,7 +129,7 @@ runTest("AppliedRemediationEvent Hard-coded Invariants", () => {
     articleId: 'art-123',
     packageId: 'pkg-123',
     operatorId: 'op-123',
-    category: RemediationCategory.RESIDUE_REMOVAL,
+    category: RemediationCategory.FORMAT_REPAIR,
     originalText: 'a',
     appliedText: 'b',
     diff: { from: 'a', to: 'b' },

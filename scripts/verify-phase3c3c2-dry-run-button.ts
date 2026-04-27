@@ -359,19 +359,21 @@ async function main() {
     'Handler returns noMutation: true'
   ))
 
-  // 41. Handler does NOT call applyToLocalDraftController
-  checks.push(checkNotPresent(
-    pageContent,
-    /handleRequestLocalDraftApply.*applyToLocalDraftController/s,
-    'Handler does NOT call applyToLocalDraftController'
-  ))
+  // 41. Handler does NOT call applyToLocalDraftController (Updated for Phase 3C-3C-3B-2B)
+  // Phase 3C-3C-3B-2B allows controller call ONLY in handleRequestRealLocalApplyWithController
+  // Extract just the dry-run handler to check it doesn't call the controller
+  const dryRunHandlerMatch = pageContent.match(/const handleRequestLocalDraftApply = \(request: LocalDraftApplyRequest\)[\s\S]*?(?=const handleRequestRealLocalApply|const handleRequestRealLocalApplyWithController|export default)/);
+  const dryRunHandlerCode = dryRunHandlerMatch ? dryRunHandlerMatch[0] : '';
+  checks.push({
+    label: 'Handler does NOT call applyToLocalDraftController',
+    passed: !dryRunHandlerCode.includes('applyToLocalDraftController')
+  })
 
   // 42. Handler does NOT call rollbackLastLocalDraftChange
-  checks.push(checkNotPresent(
-    pageContent,
-    /handleRequestLocalDraftApply.*rollbackLastLocalDraftChange/s,
-    'Handler does NOT call rollbackLastLocalDraftChange'
-  ))
+  checks.push({
+    label: 'Handler does NOT call rollbackLastLocalDraftChange',
+    passed: !dryRunHandlerCode.includes('rollbackLastLocalDraftChange')
+  })
 
   console.log('--- PHASE 3C-3C-2 DRY-RUN BUTTON VERIFICATION COMPLETE ---')
   

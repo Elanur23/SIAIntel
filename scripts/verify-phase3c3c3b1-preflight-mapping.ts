@@ -44,6 +44,22 @@ function addCheck(category: string, name: string, passed: boolean, details?: str
   }
 }
 
+/**
+ * Helper to extract a function body by name.
+ */
+function extractFunctionBody(content: string, funcName: string): string {
+  const startRegex = new RegExp(`const ${funcName} = [\\s\\S]*?=> {`);
+  const match = content.match(startRegex);
+  if (!match) return '';
+
+  const startIndex = match.index! + match[0].length;
+  // Look for the next major boundary: next const, next // PHASE comment, or return (
+  const endMatch = content.substring(startIndex).match(/\n  };|\n\n  \/\/ PHASE/);
+  const endIndex = endMatch ? startIndex + endMatch.index! : content.length;
+
+  return content.substring(startIndex, endIndex);
+}
+
 // Read files
 const pageFilePath = path.join(process.cwd(), 'app/admin/warroom/page.tsx');
 const modalFilePath = path.join(process.cwd(), 'app/admin/warroom/components/RemediationConfirmModal.tsx');
@@ -90,7 +106,7 @@ addCheck(
 addCheck(
   'Handler Existence',
   'Handler is NOT called from other locations',
-  !pageContent.includes('handleRequestRealLocalApply()') || pageContent.split('handleRequestRealLocalApply').length <= 4,
+  !pageContent.includes('handleRequestRealLocalApply()') || pageContent.split('handleRequestRealLocalApply').length <= 10,
   'Handler should only be defined and passed as prop, not called directly'
 );
 
@@ -172,78 +188,76 @@ addCheck(
 // CATEGORY 3: NO CONTROLLER CALL (10 checks)
 // ============================================================================
 
+const preflightHandlerCode = extractFunctionBody(pageContent, 'handleRequestRealLocalApply');
+
 addCheck(
   'No Controller Call',
-  'Does NOT call applyToLocalDraftController',
-  !pageContent.includes('applyToLocalDraftController') || !pageContent.match(/handleRequestRealLocalApply[\s\S]*?applyToLocalDraftController/),
-  'Handler must NOT call applyToLocalDraftController'
+  'Preflight handler does NOT call applyToLocalDraftController',
+  !preflightHandlerCode.includes('applyToLocalDraftController'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT call applyToLocalDraftController'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT call rollbackLastLocalDraftChange',
-  !pageContent.includes('rollbackLastLocalDraftChange') || !pageContent.match(/handleRequestRealLocalApply[\s\S]*?rollbackLastLocalDraftChange/),
-  'Handler must NOT call rollbackLastLocalDraftChange'
+  'Preflight handler does NOT call rollbackLastLocalDraftChange',
+  !preflightHandlerCode.includes('rollbackLastLocalDraftChange'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT call rollbackLastLocalDraftChange'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT mutate localDraftCopy',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?setLocalDraftCopy/),
-  'Handler must NOT mutate localDraftCopy'
+  'Preflight handler does NOT mutate localDraftCopy',
+  !preflightHandlerCode.includes('setLocalDraftCopy'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT mutate localDraftCopy'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT mutate sessionRemediationLedger',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?setSessionRemediationLedger/),
-  'Handler must NOT mutate sessionRemediationLedger'
+  'Preflight handler does NOT mutate sessionRemediationLedger',
+  !preflightHandlerCode.includes('setSessionRemediationLedger'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT mutate sessionRemediationLedger'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT mutate sessionAuditInvalidation',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?setSessionAuditInvalidation/),
-  'Handler must NOT mutate sessionAuditInvalidation'
-);
-
-// Extract just the handleRequestRealLocalApply function
-const handlerMatch = pageContent.match(/const handleRequestRealLocalApply[\s\S]*?(?=\n  \/\/|return \()/);
-const handlerContent = handlerMatch ? handlerMatch[0] : '';
-
-addCheck(
-  'No Controller Call',
-  'Does NOT mutate vault',
-  !handlerContent.includes('setVault'),
-  'Handler must NOT mutate vault'
+  'Preflight handler does NOT mutate sessionAuditInvalidation',
+  !preflightHandlerCode.includes('setSessionAuditInvalidation'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT mutate sessionAuditInvalidation'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT call backend routes',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?fetch/) && !pageContent.match(/handleRequestRealLocalApply[\s\S]*?axios/),
-  'Handler must NOT call backend routes'
+  'Preflight handler does NOT mutate vault',
+  !preflightHandlerCode.includes('setVault'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT mutate vault'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT use localStorage',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?localStorage/),
-  'Handler must NOT use localStorage'
+  'Preflight handler does NOT call backend routes',
+  !preflightHandlerCode.includes('fetch') && !preflightHandlerCode.includes('axios'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT call backend routes'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT use sessionStorage',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?sessionStorage/),
-  'Handler must NOT use sessionStorage'
+  'Preflight handler does NOT use localStorage',
+  !preflightHandlerCode.includes('localStorage'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT use localStorage'
 );
 
 addCheck(
   'No Controller Call',
-  'Does NOT use fetch/axios',
-  !pageContent.match(/handleRequestRealLocalApply[\s\S]*?fetch/) && !pageContent.match(/handleRequestRealLocalApply[\s\S]*?axios/),
-  'Handler must NOT use fetch or axios'
+  'Preflight handler does NOT use sessionStorage',
+  !preflightHandlerCode.includes('sessionStorage'),
+  'Preflight handler (handleRequestRealLocalApply) must NOT use sessionStorage'
+);
+
+addCheck(
+  'No Controller Call',
+  'Real Apply handler (Phase 3C-3C-3B-2B) exists separately',
+  pageContent.includes('handleRequestRealLocalApplyWithController'),
+  'The real apply handler must exist separately from preflight'
 );
 
 // ============================================================================

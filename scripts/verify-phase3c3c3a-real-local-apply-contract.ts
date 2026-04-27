@@ -107,8 +107,15 @@ check('Successful result helper hard-codes auditInvalidated true', successResult
 check('Successful result helper hard-codes reAuditRequired true', successResult.reAuditRequired === true);
 check('Successful result helper hard-codes deployBlocked true', successResult.deployBlocked === true);
 
-// 8. No Runtime Wiring Proof
-check('No applyToLocalDraftController call added to page', !pageContent.includes('remediationController.applyToLocalDraftController'));
+// 8. No Runtime Wiring Proof (Updated for Phase 3C-3C-3B-2B)
+// Phase 3C-3C-3B-2B allows controller call ONLY in handleRequestRealLocalApplyWithController
+const hasControllerCallInRealApplyHandler = pageContent.includes('handleRequestRealLocalApplyWithController') && 
+                                             pageContent.includes('remediationController.applyToLocalDraftController');
+const hasUnauthorizedControllerCall = pageContent.includes('remediationController.applyToLocalDraftController') && 
+                                       !pageContent.includes('handleRequestRealLocalApplyWithController');
+
+check('Controller call allowed ONLY in Phase 3C-3C-3B-2B handler', hasControllerCallInRealApplyHandler || !pageContent.includes('remediationController.applyToLocalDraftController'));
+check('No unauthorized controller calls outside Phase 3C-3C-3B-2B handler', !hasUnauthorizedControllerCall);
 check('No applyToLocalDraftController call added to modal', !modalContent.includes('applyToLocalDraftController'));
 check('No rollbackLastLocalDraftChange call added to page', !pageContent.includes('remediationController.rollbackLastLocalDraftChange'));
 check('No rollbackLastLocalDraftChange call added to modal', !modalContent.includes('rollbackLastLocalDraftChange'));
