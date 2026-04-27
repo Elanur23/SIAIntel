@@ -164,7 +164,8 @@ function verifyHighRiskCategoriesBlocked() {
   // High-risk categories should show blocked message
   check(
     'Blocked preview message exists for ineligible suggestions',
-    modal.includes('Preview Not Available') && modal.includes('requires manual review')
+    (modal.includes('Not Eligible for Local Draft Apply') || modal.includes('Preview Not Available')) && 
+    (modal.includes('requires human judgment and manual editing') || modal.includes('requires manual review'))
   )
 }
 

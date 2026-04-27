@@ -95,6 +95,10 @@ export default function RemediationConfirmModal({
   // Phase 3C-2: Local in-memory preview state (never persisted)
   const [inertPreview, setInertPreview] = useState<InertPreviewState | null>(null)
 
+  // Phase 3C-3C-1: Typed acknowledgement scaffold (UI-only, no execution)
+  const [typedAcknowledgement, setTypedAcknowledgement] = useState('')
+  const REQUIRED_ACKNOWLEDGEMENT_PHRASE = 'STAGE'
+
   // Reset confirmation state and preview when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -104,6 +108,7 @@ export default function RemediationConfirmModal({
         understandsNoDeployUnlock: false
       })
       setInertPreview(null) // Clear preview on close
+      setTypedAcknowledgement('') // Clear typed acknowledgement on close
     }
   }, [isOpen])
 
@@ -141,6 +146,9 @@ export default function RemediationConfirmModal({
   // Phase 3C-2: Check if suggestion is eligible for inert preview
   const isEligibleForPreview = isApplyEligibleSuggestion(suggestion)
   const blockReason = getApplyBlockReason(suggestion)
+
+  // Phase 3C-3C-1: Check if typed acknowledgement matches required phrase
+  const isAcknowledgementValid = typedAcknowledgement.trim() === REQUIRED_ACKNOWLEDGEMENT_PHRASE
 
   // Phase 3C-2: Handler for inert preview (no mutations)
   const handleInertPreview = () => {
@@ -391,6 +399,120 @@ export default function RemediationConfirmModal({
             </div>
           </div>
 
+          {/* PHASE 3C-3C-1: UI SAFETY SCAFFOLD FOR FUTURE LOCAL DRAFT APPLY */}
+          {isEligibleForPreview && (
+            <div className="space-y-2 pt-2 border-t-2 border-orange-500/30">
+              <div className="p-4 bg-orange-900/20 border-2 border-orange-500/40 rounded-lg space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert size={16} className="text-orange-400" />
+                  <h3 className="text-sm font-bold text-orange-400 uppercase">
+                    Future Local Draft Copy Only
+                  </h3>
+                </div>
+                
+                <div className="space-y-2 text-xs text-orange-300/90">
+                  <div className="p-3 bg-black/30 border border-orange-500/20 rounded">
+                    <div className="font-bold text-orange-400 mb-2">Safety Constraints:</div>
+                    <ul className="space-y-1.5 list-disc list-inside">
+                      <li><strong>Local Draft Copy Only</strong> — Vault remains unchanged</li>
+                      <li><strong>This will not save or publish</strong> — No backend mutation</li>
+                      <li><strong>Deploy remains locked</strong> — No unlock mechanism</li>
+                      <li><strong>Future local apply will invalidate the current Global Audit</strong></li>
+                      <li><strong>A full re-audit will be required before deploy</strong></li>
+                      <li><strong>FORMAT_REPAIR + body only</strong> — Other categories require manual review</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-3 bg-black/30 border border-orange-500/20 rounded">
+                    <div className="font-bold text-orange-400 mb-2">Eligibility:</div>
+                    <ul className="space-y-1 list-disc list-inside">
+                      <li>Category: <span className="font-mono text-orange-200">{suggestion.category}</span></li>
+                      <li>Field: <span className="font-mono text-orange-200">{suggestion.affectedField || 'N/A'}</span></li>
+                      <li>Status: <span className="text-green-400 font-bold">✓ Eligible for future local apply</span></li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Typed Acknowledgement Input Scaffold */}
+                <div className="space-y-2">
+                  <label className="block">
+                    <div className="text-xs font-bold text-orange-400 mb-2 uppercase">
+                      Future Local Apply Acknowledgement (Scaffold Only)
+                    </div>
+                    <div className="text-xs text-orange-300/70 mb-2 italic">
+                      Future local apply will require typing: <span className="font-mono font-bold text-orange-200">{REQUIRED_ACKNOWLEDGEMENT_PHRASE}</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={typedAcknowledgement}
+                      onChange={(e) => setTypedAcknowledgement(e.target.value)}
+                      placeholder={`Type "${REQUIRED_ACKNOWLEDGEMENT_PHRASE}" to prepare acknowledgement`}
+                      className="w-full px-3 py-2 bg-black/50 border border-orange-500/30 rounded text-sm text-orange-200 font-mono placeholder:text-orange-500/30 focus:outline-none focus:border-orange-500/60 focus:ring-2 focus:ring-orange-500/20"
+                    />
+                  </label>
+                  
+                  {/* Acknowledgement Status Display (UI-only feedback) */}
+                  {typedAcknowledgement && (
+                    <div className={`p-2 rounded text-xs font-bold ${
+                      isAcknowledgementValid 
+                        ? 'bg-green-900/30 border border-green-500/40 text-green-400'
+                        : 'bg-red-900/30 border border-red-500/40 text-red-400'
+                    }`}>
+                      {isAcknowledgementValid 
+                        ? '✓ Acknowledgement prepared (UI scaffold only — no action enabled)'
+                        : `✗ Must type exactly: ${REQUIRED_ACKNOWLEDGEMENT_PHRASE}`
+                      }
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-3 bg-yellow-900/30 border border-yellow-500/40 rounded">
+                  <div className="text-xs font-bold text-yellow-400 mb-1 uppercase">
+                    ⚠ Phase 3C-3C-1 Scaffold Notice
+                  </div>
+                  <div className="text-xs text-yellow-300/80 leading-relaxed">
+                    This is UI-only safety scaffold. No apply action is enabled. No controller invocation. No vault mutation.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PHASE 3C-3C-1: INELIGIBLE SUGGESTION EXPLANATION */}
+          {!isEligibleForPreview && blockReason && (
+            <div className="space-y-2 pt-2 border-t-2 border-red-500/30">
+              <div className="p-4 bg-red-900/20 border-2 border-red-500/40 rounded-lg space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert size={16} className="text-red-400" />
+                  <h3 className="text-sm font-bold text-red-400 uppercase">
+                    Not Eligible for Local Draft Apply
+                  </h3>
+                </div>
+                
+                <div className="space-y-2 text-xs text-red-300/90">
+                  <div className="p-3 bg-black/30 border border-red-500/20 rounded">
+                    <div className="font-bold text-red-400 mb-2">Reason:</div>
+                    <div className="text-red-300">{blockReason.replace(/_/g, ' ')}</div>
+                  </div>
+
+                  <div className="p-3 bg-black/30 border border-red-500/20 rounded">
+                    <div className="font-bold text-red-400 mb-2">Category:</div>
+                    <div className="font-mono text-red-300">{suggestion.category}</div>
+                  </div>
+
+                  <div className="p-3 bg-yellow-900/30 border border-yellow-500/40 rounded">
+                    <div className="font-bold text-yellow-400 mb-2">Manual Review Required:</div>
+                    <ul className="space-y-1 list-disc list-inside text-yellow-300/90">
+                      <li>This suggestion requires human judgment and manual editing</li>
+                      <li>Only FORMAT_REPAIR suggestions on body field are eligible for future local apply</li>
+                      <li>High-risk categories (SOURCE_REVIEW, PROVENANCE_REVIEW, PARITY_REVIEW, etc.) must be handled manually</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* DISABLED/MOCK APPLY CONTROL */}
           <div className="space-y-2">
             <button
@@ -434,24 +556,6 @@ export default function RemediationConfirmModal({
                 >
                   Preview Apply (No Draft Change)
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* PHASE 3C-2: BLOCKED PREVIEW MESSAGE */}
-          {!isEligibleForPreview && blockReason && (
-            <div className="space-y-2 pt-2 border-t border-white/10">
-              <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <ShieldAlert size={14} className="text-red-400" />
-                  <h3 className="text-xs font-bold text-red-400 uppercase">
-                    Preview Not Available
-                  </h3>
-                </div>
-                <p className="text-xs text-red-300/90">
-                  This suggestion category requires manual review and cannot be previewed for apply.
-                  Reason: {blockReason.replace(/_/g, ' ')}
-                </p>
               </div>
             </div>
           )}
