@@ -29,6 +29,11 @@ import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake
 import { runGlobalGovernanceAudit, type GlobalAuditResult } from '@/lib/editorial/global-governance-audit'
 import RemediationPreviewPanel from './components/RemediationPreviewPanel'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
+import { RemediationCategory } from '@/lib/editorial/remediation-types'
+import {
+  type LocalDraftApplyRequest,
+  type LocalDraftApplyRequestResult
+} from '@/lib/editorial/remediation-apply-types'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -533,6 +538,42 @@ export default function WarRoom() {
       setIsAuditing(false)
     }
   }
+
+  // PHASE 3C-3B-2: Guarded Dry-Run Handler Only
+  const handleRequestLocalDraftApply = (request: LocalDraftApplyRequest): LocalDraftApplyRequestResult => {
+    // 1. Validate mandatory fields
+    const { category, fieldPath, language, suggestionId } = request;
+
+    // 2. Strict Dry-Run Constraints
+    // - Must be FORMAT_REPAIR
+    // - Must be 'body' field
+    // - Must have language and suggestion ID
+    const isValid =
+      category === RemediationCategory.FORMAT_REPAIR &&
+      fieldPath === 'body' &&
+      !!language &&
+      !!suggestionId;
+
+    if (!isValid) {
+      return {
+        accepted: false,
+        blocked: true,
+        reason: "INVALID_REQUEST_PARAMETERS_OR_OUT_OF_SCOPE",
+        dryRunOnly: true,
+        noMutation: true
+      };
+    }
+
+    // 3. Success: Confirm dry-run acceptance
+    // IMPORTANT: No mutation occurs here. No call to remediationController.
+    return {
+      accepted: true,
+      blocked: false,
+      reason: "DRY_RUN_PLUMBING_ONLY_NO_APPLY_EXECUTED",
+      dryRunOnly: true,
+      noMutation: true
+    };
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-gradient-to-br from-[#0a0a0f] via-[#18181c] to-[#0a0a0f] text-[13px] text-white font-mono">
@@ -1145,6 +1186,7 @@ export default function WarRoom() {
                   auditResult={auditResult}
                   articleId={selectedNews?.id}
                   packageId={lastImportInfo?.id}
+                  onRequestLocalDraftApply={handleRequestLocalDraftApply}
                 />
               )}
 

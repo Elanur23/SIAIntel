@@ -10,7 +10,9 @@ import {
   type DraftSnapshot,
   type AuditInvalidationState,
   AuditInvalidationReason,
-  CONTROLLED_REMEDIATION_PHASE_3A_PROTOCOL_ONLY
+  CONTROLLED_REMEDIATION_PHASE_3A_PROTOCOL_ONLY,
+  type LocalDraftApplyRequest,
+  type LocalDraftApplyRequestResult
 } from '@/lib/editorial/remediation-apply-types'
 
 interface RemediationConfirmModalProps {
@@ -26,6 +28,9 @@ interface RemediationConfirmModalProps {
   articleId?: string
   packageId?: string
   
+  // Phase 3C-3B-2: Typed callback plumbing (Dry-run only)
+  onRequestLocalDraftApply?: (request: LocalDraftApplyRequest) => Promise<LocalDraftApplyRequestResult> | LocalDraftApplyRequestResult
+
   // Styling
   className?: string
 }
@@ -77,6 +82,7 @@ export default function RemediationConfirmModal({
   originalText,
   articleId,
   packageId,
+  onRequestLocalDraftApply,
   className = ''
 }: RemediationConfirmModalProps) {
   // Local UI state for confirmation checkboxes

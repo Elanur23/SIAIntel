@@ -13,7 +13,9 @@ import {
 } from '@/lib/editorial/remediation-types'
 import {
   isApplyEligibleSuggestion,
-  getApplyBlockReason
+  getApplyBlockReason,
+  type LocalDraftApplyRequest,
+  type LocalDraftApplyRequestResult
 } from '@/lib/editorial/remediation-apply-types'
 import RemediationConfirmModal from './RemediationConfirmModal'
 
@@ -24,6 +26,7 @@ interface RemediationPreviewPanelProps {
   deployLockReasons?: unknown[]
   articleId?: string
   packageId?: string
+  onRequestLocalDraftApply?: (request: LocalDraftApplyRequest) => Promise<LocalDraftApplyRequestResult> | LocalDraftApplyRequestResult
   className?: string
 }
 
@@ -47,6 +50,7 @@ export default function RemediationPreviewPanel({
   deployLockReasons,
   articleId,
   packageId,
+  onRequestLocalDraftApply,
   className = ''
 }: RemediationPreviewPanelProps) {
   const [isPanelExpanded, setIsPanelExpanded] = useState(true)
@@ -192,6 +196,7 @@ export default function RemediationPreviewPanel({
         originalText={selectedSuggestion?.originalText}
         articleId={articleId}
         packageId={packageId}
+        onRequestLocalDraftApply={onRequestLocalDraftApply}
       />
     </section>
   )

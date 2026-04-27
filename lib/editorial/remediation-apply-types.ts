@@ -140,6 +140,31 @@ export interface AuditInvalidationState {
   invalidatedAt?: string;
 }
 
+/**
+ * Request object for applying a remediation to a local draft (Phase 3C-3B-2).
+ * Strictly dry-run only in this phase.
+ */
+export interface LocalDraftApplyRequest {
+  suggestionId: string;
+  language: string;
+  fieldPath: string;
+  category: RemediationCategory;
+  requestedAt: string;
+  dryRunOnly: true;
+}
+
+/**
+ * Result object for a local draft apply request (Phase 3C-3B-2).
+ * Confirms that no mutation occurred.
+ */
+export interface LocalDraftApplyRequestResult {
+  accepted: boolean;
+  blocked: boolean;
+  reason: string;
+  dryRunOnly: true;
+  noMutation: true;
+}
+
 // ============================================================================
 // HUMAN APPROVAL CONSTANTS
 // ============================================================================
