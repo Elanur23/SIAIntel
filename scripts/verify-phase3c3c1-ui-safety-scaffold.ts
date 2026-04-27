@@ -77,8 +77,13 @@ check('Human judgment explanation exists', modalContent.includes('This suggestio
 check('FORMAT_REPAIR eligibility explanation exists', modalContent.includes('Only FORMAT_REPAIR suggestions on body field are eligible'));
 check('High-risk categories explanation exists', modalContent.includes('High-risk categories') && modalContent.includes('must be handled manually'));
 
-// 8. Safety Invariants - No Invocation
-check('Modal does NOT invoke onRequestLocalDraftApply', !modalContent.includes('onRequestLocalDraftApply('));
+// 8. Safety Invariants - Phase 3C-3C-2 Update
+// The modal may now invoke onRequestLocalDraftApply from the dry-run button
+// Check that old Apply button and Preview Apply do NOT invoke it
+const hasOldApplyInvocation = modalContent.match(/Apply to Draft — Disabled in Phase 3B[\s\S]{0,200}onRequestLocalDraftApply\(/);
+const hasPreviewApplyInvocation = modalContent.match(/handleInertPreview[\s\S]{0,500}onRequestLocalDraftApply\(/);
+check('Old Apply button does NOT invoke onRequestLocalDraftApply', !hasOldApplyInvocation);
+check('Preview Apply does NOT invoke onRequestLocalDraftApply', !hasPreviewApplyInvocation);
 check('Modal does NOT call handleRequestLocalDraftApply', !modalContent.includes('handleRequestLocalDraftApply('));
 check('Modal does NOT call applyToLocalDraftController', !modalContent.includes('applyToLocalDraftController'));
 check('Modal does NOT call rollbackLastLocalDraftChange', !modalContent.includes('rollbackLastLocalDraftChange'));
@@ -86,7 +91,14 @@ check('Modal does NOT call rollbackLastLocalDraftChange', !modalContent.includes
 // 9. Existing Controls Preserved
 check('Real Apply button remains disabled', modalContent.includes('disabled={true}') && modalContent.includes('Apply to Draft — Disabled in Phase 3B'));
 check('Preview Apply remains inert', modalContent.includes('Preview Apply (No Draft Change)'));
-check('Preview handler does not invoke onRequestLocalDraftApply', !modalContent.match(/handleInertPreview[\s\S]*?onRequestLocalDraftApply\(/));
+
+// Extract handleInertPreview function body to check it doesn't call onRequestLocalDraftApply
+const inertPreviewStart = modalContent.indexOf('const handleInertPreview = () => {');
+const inertPreviewEnd = modalContent.indexOf('const handleClearPreview', inertPreviewStart);
+const inertPreviewBody = inertPreviewStart !== -1 && inertPreviewEnd !== -1 
+  ? modalContent.substring(inertPreviewStart, inertPreviewEnd)
+  : '';
+check('Preview handler does not invoke onRequestLocalDraftApply', !inertPreviewBody.includes('onRequestLocalDraftApply('));
 
 console.log("--- PHASE 3C-3C-1 UI SAFETY SCAFFOLD VERIFICATION COMPLETE ---");
 process.exit(0);

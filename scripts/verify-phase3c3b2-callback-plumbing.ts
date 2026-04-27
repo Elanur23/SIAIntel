@@ -47,7 +47,14 @@ check('NoMutation flag in result type', typesContent.includes('noMutation: true'
 check('Modal accepts onRequestLocalDraftApply prop', modalContent.includes('onRequestLocalDraftApply?: (request: LocalDraftApplyRequest)'));
 check('Modal Apply button remains disabled', modalContent.includes('disabled={true}'));
 check('Modal contains "Disabled in Phase 3B"', modalContent.includes('Apply to Draft — Disabled in Phase 3B'));
-check('Modal does NOT invoke onRequestLocalDraftApply', !modalContent.includes('onRequestLocalDraftApply('));
+
+// Phase 3C-3C-2 Update: Allow dry-run button invocation, but verify safety
+// The modal may now invoke onRequestLocalDraftApply ONLY from the dry-run button
+// Check that old Apply button and Preview Apply do NOT invoke it
+const hasOldApplyInvocation = modalContent.match(/Apply to Draft — Disabled in Phase 3B[\s\S]{0,200}onRequestLocalDraftApply\(/);
+const hasPreviewApplyInvocation = modalContent.match(/handleInertPreview[\s\S]{0,500}onRequestLocalDraftApply\(/);
+check('Old Apply button does NOT invoke onRequestLocalDraftApply', !hasOldApplyInvocation);
+check('Preview Apply does NOT invoke onRequestLocalDraftApply', !hasPreviewApplyInvocation);
 
 // 4. Panel Plumbing
 check('Panel accepts onRequestLocalDraftApply prop', panelContent.includes('onRequestLocalDraftApply?: (request: LocalDraftApplyRequest)'));

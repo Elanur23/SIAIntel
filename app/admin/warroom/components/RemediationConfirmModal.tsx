@@ -99,6 +99,9 @@ export default function RemediationConfirmModal({
   const [typedAcknowledgement, setTypedAcknowledgement] = useState('')
   const REQUIRED_ACKNOWLEDGEMENT_PHRASE = 'STAGE'
 
+  // Phase 3C-3C-2: Dry-run result state (modal-local only)
+  const [dryRunResult, setDryRunResult] = useState<LocalDraftApplyRequestResult | null>(null)
+
   // Reset confirmation state and preview when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -109,6 +112,7 @@ export default function RemediationConfirmModal({
       })
       setInertPreview(null) // Clear preview on close
       setTypedAcknowledgement('') // Clear typed acknowledgement on close
+      setDryRunResult(null) // Clear dry-run result on close
     }
   }, [isOpen])
 
@@ -217,6 +221,29 @@ export default function RemediationConfirmModal({
   // Phase 3C-2: Handler to clear preview (no changes saved)
   const handleClearPreview = () => {
     setInertPreview(null)
+  }
+
+  // Phase 3C-3C-2: Handler for dry-run button (no mutations)
+  const handleDryRunApply = async () => {
+    if (!suggestion || !onRequestLocalDraftApply) return
+    if (!allConfirmed) return
+    if (!isAcknowledgementValid) return
+    if (!isEligibleForPreview) return
+
+    // Call the dry-run handler (no controller invocation, no mutations)
+    const request: LocalDraftApplyRequest = {
+      category: suggestion.category,
+      fieldPath: suggestion.affectedField || 'body',
+      language: suggestion.affectedLanguage || '',
+      suggestionId: suggestion.id,
+      requestedAt: new Date().toISOString(),
+      dryRunOnly: true
+    }
+
+    const result = await Promise.resolve(onRequestLocalDraftApply(request))
+    
+    // Store result in modal-local state only
+    setDryRunResult(result)
   }
 
   return (
@@ -509,6 +536,153 @@ export default function RemediationConfirmModal({
                     </ul>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* PHASE 3C-3C-2: DRY-RUN BUTTON */}
+          {isEligibleForPreview && !dryRunResult && (
+            <div className="space-y-2 pt-2 border-t-2 border-purple-500/30">
+              <div className="p-4 bg-purple-900/20 border-2 border-purple-500/40 rounded-lg space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert size={16} className="text-purple-400" />
+                  <h3 className="text-sm font-bold text-purple-400 uppercase">
+                    Dry-Run Apply Gate
+                  </h3>
+                </div>
+                
+                <div className="space-y-2 text-xs text-purple-300/90">
+                  <div className="p-3 bg-black/30 border border-purple-500/20 rounded">
+                    <div className="font-bold text-purple-400 mb-2">Dry-Run Only:</div>
+                    <ul className="space-y-1 list-disc list-inside">
+                      <li>This button tests the UI-to-page dry-run path only</li>
+                      <li>No local draft copy will be changed</li>
+                      <li>No controller invocation will occur</li>
+                      <li>No vault mutation will occur</li>
+                      <li>No backend call will be made</li>
+                      <li>Deploy remains locked</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleDryRunApply}
+                  disabled={!allConfirmed || !isAcknowledgementValid}
+                  className={`w-full px-4 py-3 rounded text-sm font-bold transition-colors ${
+                    allConfirmed && isAcknowledgementValid
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={
+                    !allConfirmed 
+                      ? 'Complete all confirmations first'
+                      : !isAcknowledgementValid
+                      ? `Type exactly "${REQUIRED_ACKNOWLEDGEMENT_PHRASE}" first`
+                      : 'Execute dry-run (no mutations)'
+                  }
+                >
+                  Apply to Local Draft Copy — Dry Run
+                </button>
+
+                {!allConfirmed && (
+                  <div className="text-xs text-purple-300/70 text-center italic">
+                    Complete all confirmation checkboxes to enable
+                  </div>
+                )}
+                {allConfirmed && !isAcknowledgementValid && (
+                  <div className="text-xs text-purple-300/70 text-center italic">
+                    Type exactly "{REQUIRED_ACKNOWLEDGEMENT_PHRASE}" to enable
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* PHASE 3C-3C-2: DRY-RUN RESULT DISPLAY */}
+          {dryRunResult && (
+            <div className="space-y-2 pt-2 border-t-2 border-purple-500/30">
+              <div className={`p-4 border-2 rounded-lg space-y-3 ${
+                dryRunResult.accepted
+                  ? 'bg-green-900/20 border-green-500/40'
+                  : 'bg-red-900/20 border-red-500/40'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert size={16} className={dryRunResult.accepted ? 'text-green-400' : 'text-red-400'} />
+                    <h3 className={`text-sm font-bold uppercase ${
+                      dryRunResult.accepted ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {dryRunResult.accepted ? 'Dry-Run Accepted' : 'Local Apply Dry-Run Unavailable'}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setDryRunResult(null)}
+                    className={`p-1 focus:outline-none focus:ring-2 rounded ${
+                      dryRunResult.accepted
+                        ? 'text-green-400 hover:text-green-300 focus:ring-green-500'
+                        : 'text-red-400 hover:text-red-300 focus:ring-red-500'
+                    }`}
+                    title="Clear result"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                {dryRunResult.accepted && (
+                  <div className="space-y-2 text-xs text-green-300/90">
+                    <div className="p-3 bg-black/30 border border-green-500/20 rounded">
+                      <div className="font-bold text-green-400 mb-2">Success:</div>
+                      <ul className="space-y-1 list-disc list-inside">
+                        <li>Dry-run accepted — no local draft change was made.</li>
+                        <li>Vault remains unchanged.</li>
+                        <li>No backend call was made.</li>
+                        <li>Deploy remains locked.</li>
+                        <li>This only verified the future apply gate.</li>
+                        <li>Future real local apply will require a full re-audit.</li>
+                      </ul>
+                    </div>
+
+                    <div className="p-2 bg-black/30 rounded font-mono">
+                      <div className="text-green-400 font-bold mb-1">Reason:</div>
+                      <div className="text-green-300 break-all">{dryRunResult.reason}</div>
+                    </div>
+
+                    <div className="p-2 bg-black/30 rounded font-mono">
+                      <div className="text-green-400 font-bold mb-1">Flags:</div>
+                      <div className="text-green-300">dryRunOnly: {String(dryRunResult.dryRunOnly)}</div>
+                      <div className="text-green-300">noMutation: {String(dryRunResult.noMutation)}</div>
+                    </div>
+                  </div>
+                )}
+
+                {!dryRunResult.accepted && (
+                  <div className="space-y-2 text-xs text-red-300/90">
+                    <div className="p-3 bg-black/30 border border-red-500/20 rounded">
+                      <div className="font-bold text-red-400 mb-2">Blocked:</div>
+                      <ul className="space-y-1 list-disc list-inside">
+                        <li>Local apply dry-run unavailable.</li>
+                        <li>Only FORMAT_REPAIR body suggestions are eligible.</li>
+                        <li>Manual editorial review required.</li>
+                      </ul>
+                    </div>
+
+                    <div className="p-2 bg-black/30 rounded font-mono">
+                      <div className="text-red-400 font-bold mb-1">Reason:</div>
+                      <div className="text-red-300 break-all">{dryRunResult.reason}</div>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setDryRunResult(null)}
+                  className={`w-full px-4 py-2 text-white text-sm font-bold rounded transition-colors ${
+                    dryRunResult.accepted
+                      ? 'bg-gray-700 hover:bg-gray-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`}
+                >
+                  Clear Result
+                </button>
               </div>
             </div>
           )}
