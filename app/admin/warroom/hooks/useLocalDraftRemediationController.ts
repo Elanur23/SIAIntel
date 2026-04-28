@@ -176,6 +176,108 @@ export function useLocalDraftRemediationController() {
     sessionAuditInvalidation?.auditInvalidated ?? false
   , [sessionAuditInvalidation]);
 
+  // ============================================================================
+  // SESSION VIEW MODEL HELPERS (Task 2 - Session Preview / Session State UI)
+  // ============================================================================
+  // Pure derived state for UI consumption - read-only, no side effects
+
+  /**
+   * True when a session draft exists (localDraftCopy is not null).
+   */
+  const hasSessionDraft = useMemo(() => 
+    localDraftCopy !== null
+  , [localDraftCopy]);
+
+  /**
+   * True when audit is stale due to session changes or audit invalidation.
+   */
+  const isAuditStale = useMemo(() =>
+    sessionAuditInvalidation?.auditInvalidated ?? false
+  , [sessionAuditInvalidation]);
+
+  /**
+   * Count of remediations applied in this session.
+   */
+  const sessionRemediationCount = useMemo(() =>
+    sessionRemediationLedger.length
+  , [sessionRemediationLedger]);
+
+  /**
+   * True when session remediation ledger has entries.
+   */
+  const hasSessionRemediationLedger = useMemo(() =>
+    sessionRemediationLedger.length > 0
+  , [sessionRemediationLedger]);
+
+  /**
+   * True when session draft has body content available.
+   * Checks if localDraftCopy exists and has at least one language node with body content.
+   */
+  const sessionDraftBodyAvailable = useMemo(() => {
+    if (!localDraftCopy) return false;
+    // Check if any language node has body content (desc field contains body)
+    return Object.values(localDraftCopy).some(node => 
+      node.desc && node.desc.trim().length > 0
+    );
+  }, [localDraftCopy]);
+
+  /**
+   * List of fields modified in session draft.
+   * Currently only 'body' is supported for session modifications.
+   */
+  const sessionDraftModifiedFields = useMemo(() => {
+    if (!localDraftCopy || sessionRemediationLedger.length === 0) return [];
+    // Extract unique affected fields from ledger
+    const fields = new Set<string>();
+    sessionRemediationLedger.forEach(entry => {
+      if (entry.appliedEvent.affectedField) {
+        fields.add(entry.appliedEvent.affectedField);
+      }
+    });
+    return Array.from(fields);
+  }, [localDraftCopy, sessionRemediationLedger]);
+
+  /**
+   * Human-readable deploy block reason when session draft exists or audit is stale.
+   * Returns null when no session-related blocking exists.
+   */
+  const deployBlockReason = useMemo(() => {
+    if (localDraftCopy !== null) {
+      return "Local session draft exists — full protocol re-audit required.";
+    }
+    if (sessionAuditInvalidation?.auditInvalidated) {
+      return "Audit invalidated by session changes — re-audit required.";
+    }
+    return null;
+  }, [localDraftCopy, sessionAuditInvalidation]);
+
+  /**
+   * Primary session warning copy for banner display.
+   * Returns null when no session draft exists.
+   */
+  const sessionWarningCopy = useMemo(() => {
+    if (localDraftCopy === null) return null;
+    return "Session Draft Active — Not Saved to Vault — Not Deployed";
+  }, [localDraftCopy]);
+
+  /**
+   * Audit stale warning copy for banner/chip display.
+   * Returns null when audit is not stale.
+   */
+  const auditStaleCopy = useMemo(() => {
+    if (!sessionAuditInvalidation?.auditInvalidated) return null;
+    return "Full re-audit required before deploy.";
+  }, [sessionAuditInvalidation]);
+
+  /**
+   * Volatility warning copy for banner display.
+   * Returns null when no session draft exists.
+   */
+  const volatilityWarningCopy = useMemo(() => {
+    if (localDraftCopy === null) return null;
+    return "Session changes are volatile and may be lost on refresh.";
+  }, [localDraftCopy]);
+
   return {
     // State
     localDraftCopy,
@@ -187,6 +289,18 @@ export function useLocalDraftRemediationController() {
     sessionAuditInvalidation,
     reAuditRequired,
     deployBlockedByLocalDraft,
+
+    // Session View Model Helpers (Task 2)
+    hasSessionDraft,
+    isAuditStale,
+    sessionRemediationCount,
+    hasSessionRemediationLedger,
+    sessionDraftBodyAvailable,
+    sessionDraftModifiedFields,
+    deployBlockReason,
+    sessionWarningCopy,
+    auditStaleCopy,
+    volatilityWarningCopy,
 
     // Functions
     initializeLocalDraftFromVault,

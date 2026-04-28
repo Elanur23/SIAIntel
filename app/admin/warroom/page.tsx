@@ -28,6 +28,12 @@ import PandaImport from './components/PandaImport'
 import { PandaPackage, PANDA_REQUIRED_LANGS } from '@/lib/editorial/panda-intake-validator'
 import { runGlobalGovernanceAudit, type GlobalAuditResult } from '@/lib/editorial/global-governance-audit'
 import RemediationPreviewPanel from './components/RemediationPreviewPanel'
+import SessionStateBanner from './components/SessionStateBanner'
+import DraftSourceSwitcher, { type DraftSource } from './components/DraftSourceSwitcher'
+import SessionDraftPreviewPanel from './components/SessionDraftPreviewPanel'
+import SessionStatusChips from './components/SessionStatusChips'
+import SessionLedgerSummary from './components/SessionLedgerSummary'
+import SessionDraftComparison from './components/SessionDraftComparison'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
 import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
 import {
@@ -139,6 +145,8 @@ export default function WarRoom() {
   const [publishCategory, setPublishCategory] = useState('MARKET')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+  const [draftSource, setDraftSource] = useState<DraftSource>('canonical')
+  const [showComparison, setShowComparison] = useState(false)
   const lockRef = useRef<string | null>(null)
   const [transformedArticle, setTransformedArticle] = useState<FormattedArticle | null>(null)
   const [isTransforming, setIsTransforming] = useState(false)
@@ -183,6 +191,13 @@ export default function WarRoom() {
     if (!selectedNews || !vault[activeLang].ready || isPublishing || isTransforming || transformError) {
       return true
     }
+
+    // PHASE 3C-3C-3B-2B SAFETY GATE: Deploy remains locked when session draft exists
+    // Full protocol re-audit and vault update required to unlock deploy.
+    if (remediationController.hasSessionDraft) {
+      return true
+    }
+
     // MUST have a global audit pass
     if (!globalAudit || !globalAudit.publishable) {
       return true
@@ -210,7 +225,8 @@ export default function WarRoom() {
     transformedArticle,
     auditResult,
     globalAudit,
-    protocolConfig.enableScarcityTone
+    protocolConfig.enableScarcityTone,
+    remediationController.hasSessionDraft
   ])
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
@@ -224,6 +240,17 @@ export default function WarRoom() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNews?.id])
+
+  // Task 4: Reset draft source to canonical when session draft becomes unavailable
+  // Task 8: Also reset comparison view when session draft becomes unavailable
+  useEffect(() => {
+    if (!remediationController.hasSessionDraft && draftSource === 'session') {
+      setDraftSource('canonical')
+    }
+    if (!remediationController.hasSessionDraft && showComparison) {
+      setShowComparison(false)
+    }
+  }, [remediationController.hasSessionDraft, draftSource, showComparison])
 
   const activeWordCount = useMemo(() => {
     const body = (activeDraft.desc || '').trim()
@@ -757,6 +784,14 @@ export default function WarRoom() {
         <div className="flex flex-col min-h-[640px] lg:min-h-0 lg:col-span-8 xl:col-span-6 overflow-hidden rounded-2xl border-4 border-[#FFB800]/40 bg-gradient-to-b from-[#23232a]/98 via-[#18181c]/95 to-[#23232a]/98 p-2 shadow-[0_8px_48px_0_rgba(255,184,0,0.10)] ring-2 ring-[#FFB800]/10">
           <CyberBox title="Analysis Command Center" icon={Terminal} className="h-full border-[#FFB800]/30 ring-[#FFB800]/10">
             <div className="h-full flex flex-col p-4 sm:p-6 xl:p-8">
+              {/* Session State Banner - Task 3 */}
+              <SessionStateBanner
+                visible={remediationController.hasSessionDraft}
+                sessionWarningCopy={remediationController.sessionWarningCopy}
+                auditStaleCopy={remediationController.auditStaleCopy}
+                volatilityWarningCopy={remediationController.volatilityWarningCopy}
+              />
+
               {selectedNews ? (
                 <>
                     <div className="mb-4 flex shrink-0 flex-col gap-4 border-2 border-[#23232a] rounded-lg bg-gradient-to-r from-[#23232a]/90 to-[#18181c]/90 px-3 py-3 shadow-[0_4px_18px_rgba(255,184,0,0.10)] sm:px-4 sm:py-4 lg:mb-6 lg:flex-row lg:items-center lg:justify-between">
@@ -774,6 +809,30 @@ export default function WarRoom() {
                         Preview
                       </button>
                     </div>
+
+                    {/* Draft Source Switcher - Task 4 */}
+                    <DraftSourceSwitcher
+                      currentSource={draftSource}
+                      onSourceChange={setDraftSource}
+                      sessionDraftAvailable={remediationController.hasSessionDraft}
+                    />
+
+                    {/* Task 8: Comparison Toggle - Only visible when session draft exists */}
+                    {remediationController.hasSessionDraft && (
+                      <button
+                        onClick={() => setShowComparison(!showComparison)}
+                        disabled={!remediationController.hasSessionDraft}
+                        className={`flex items-center justify-center gap-2 px-4 py-2 text-xs font-black uppercase rounded-md transition-all tracking-wide border-2 sm:px-5 sm:py-2.5 sm:text-sm ${
+                          showComparison
+                            ? 'bg-blue-600/80 text-blue-100 border-blue-400/60 shadow-[0_8px_16px_rgba(59,130,246,0.18)] ring-2 ring-blue-400/40'
+                            : 'bg-blue-900/40 text-blue-300/80 border-blue-500/40 hover:bg-blue-800/60 hover:text-blue-200'
+                        }`}
+                        title="Compare canonical vault with session draft side-by-side"
+                      >
+                        Compare Canonical vs Session
+                      </button>
+                    )}
+
                     <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
                       <button
                         onClick={handleTransform}
@@ -822,152 +881,177 @@ export default function WarRoom() {
                   )}
 
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                    {viewMode === 'edit' ? (
-                    <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-h-0">
-                        <input
-                          value={activeDraft.title}
-                          onChange={(e) =>
-                            setVault({
-                              ...vault,
-                              [activeLang]: { ...activeDraft, title: e.target.value },
-                            })
-                          }
-                          className="w-full bg-[#23232a]/90 border-2 border-[#FFB800]/30 p-4 sm:p-5 text-xl sm:text-2xl font-black text-[#FFB800] outline-none shrink-0 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/60 transition-colors tracking-tight"
-                          placeholder="ENTER HEADLINE..."
-                        />
-
-                        {/* Edit Mode Mini Preview */}
-                        {imageUrl && (
-                          <div className="relative h-28 w-full rounded-md overflow-hidden border border-white/15 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-help shrink-0 shadow-lg">
-                            <Image
-                              src={imageUrl}
-                              alt="Haber Görseli"
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white uppercase tracking-wider bg-black/50 backdrop-blur-sm">
-                              ACTIVE_VISUAL_LOCKED
-                            </div>
-                          </div>
-                        )}
-
-                        <textarea
-                          value={activeDraft.desc}
-                          onChange={(e) => {
-                            setVault({
-                              ...vault,
-                              [activeLang]: {
-                                ...activeDraft,
-                                desc: e.target.value,
-                                ready: !!e.target.value,
-                              },
-                            })
-                            // Clear stale global audit on manual edit
-                            setGlobalAudit(null)
-                          }}
-                          className="flex-1 bg-[#18181c]/90 border-2 border-[#FFB800]/20 p-4 sm:p-6 outline-none resize-none text-sm sm:text-base leading-6 sm:leading-7 custom-scrollbar font-sans text-white/95 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/40 transition-colors"
-                          placeholder="ENTER INTELLIGENCE DATA..."
-                        />
-                      </div>
+                    {/* Task 8: Conditionally render Comparison, Session Draft Preview Panel, or Canonical Editor/Preview */}
+                    {showComparison && remediationController.hasSessionDraft ? (
+                      /* ── CANONICAL VS SESSION COMPARISON (READ-ONLY) ── */
+                      <SessionDraftComparison
+                        canonicalBody={activeDraft.desc || ''}
+                        sessionBody={remediationController.localDraftCopy?.[activeLang]?.desc || ''}
+                        currentLanguage={activeLang}
+                        visible={true}
+                        auditStaleCopy={remediationController.auditStaleCopy}
+                        volatilityWarningCopy={remediationController.volatilityWarningCopy}
+                      />
+                    ) : draftSource === 'session' && remediationController.hasSessionDraft ? (
+                      /* ── SESSION DRAFT PREVIEW PANEL (READ-ONLY) ── */
+                      <SessionDraftPreviewPanel
+                        sessionBody={remediationController.localDraftCopy?.[activeLang]?.desc || ''}
+                        currentLanguage={activeLang}
+                        visible={true}
+                        auditStaleCopy={remediationController.auditStaleCopy}
+                        volatilityWarningCopy={remediationController.volatilityWarningCopy}
+                      />
                     ) : (
-                      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-[#18181c]/95 to-[#23232a]/90 border-2 border-[#FFB800]/20 rounded-lg space-y-6 sm:space-y-8 shadow-[0_2px_24px_rgba(255,184,0,0.08)]">
-                        {imageUrl && (
-                          <div className="relative aspect-video w-full rounded-md overflow-hidden border border-white/20 shadow-2xl">
-                            <Image
-                              src={imageUrl}
-                              alt="Preview"
-                              fill
-                              className="object-cover opacity-90"
-                              unoptimized
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                          </div>
-                        )}
-
-                        {/* Transform error banner */}
-                        {transformError && (
-                          <div className="flex items-center gap-3 px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg text-red-300 text-sm font-medium">
-                            <AlertCircle size={14} className="shrink-0" />
-                            <span>{transformError} — showing raw content.</span>
-                          </div>
-                        )}
-
-                        {transformedArticle ? (
-                          /* ── FORMATTED ARTICLE PREVIEW ── */
-                          <>
-                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 opacity-80">
-                              <Wand2 size={12} /> Transformed Article
-                            </div>
-                            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-2">
-                              {transformedArticle.headline}
-                            </h1>
-                            {transformedArticle.subheadline && (
-                              <p className="text-lg text-white/70 font-semibold leading-snug">
-                                {transformedArticle.subheadline}
-                              </p>
-                            )}
-                            {transformedArticle.summary && (
-                              <p className="text-base text-white/60 italic border-l-2 border-purple-500/50 pl-4">
-                                {transformedArticle.summary}
-                              </p>
-                            )}
-
-                            {/* 🔥 DYNAMIC CHART PREVIEW */}
-                            <TechnicalChart
-                              articleBody={transformedArticle.body}
-                              category={publishCategory}
-                              lang={activeLang}
+                      /* ── CANONICAL VAULT EDITOR/PREVIEW (DEFAULT) ── */
+                      <>
+                        {viewMode === 'edit' ? (
+                          <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-h-0">
+                            <input
+                              value={activeDraft.title}
+                              onChange={(e) =>
+                                setVault({
+                                  ...vault,
+                                  [activeLang]: { ...activeDraft, title: e.target.value },
+                                })
+                              }
+                              className="w-full bg-[#23232a]/90 border-2 border-[#FFB800]/30 p-4 sm:p-5 text-xl sm:text-2xl font-black text-[#FFB800] outline-none shrink-0 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/60 transition-colors tracking-tight"
+                              placeholder="ENTER HEADLINE..."
                             />
 
-                            <div
-                              className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
-                              dangerouslySetInnerHTML={{
-                                __html: formatArticleBody(transformedArticle.body, activeLang),
-                              }}
-                            />
-                            {transformedArticle.keyInsights.length > 0 && (
-                              <div className="border border-purple-500/30 bg-purple-900/10 rounded-lg p-5 space-y-2">
-                                <p className="text-xs font-black uppercase tracking-widest text-purple-400">Key Insights</p>
-                                <ul className="space-y-1.5">
-                                  {transformedArticle.keyInsights.map((insight, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-sm text-white/80">
-                                      <span className="text-purple-400 mt-0.5 shrink-0">•</span>
-                                      {insight}
-                                    </li>
-                                  ))}
-                                </ul>
+                            {/* Edit Mode Mini Preview */}
+                            {imageUrl && (
+                              <div className="relative h-28 w-full rounded-md overflow-hidden border border-white/15 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-help shrink-0 shadow-lg">
+                                <Image
+                                  src={imageUrl}
+                                  alt="Haber Görseli"
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white uppercase tracking-wider bg-black/50 backdrop-blur-sm">
+                                  ACTIVE_VISUAL_LOCKED
+                                </div>
                               </div>
                             )}
-                            {transformedArticle.riskNote && (
-                              <p className="text-xs text-white/40 italic border-t border-white/10 pt-4">
-                                {transformedArticle.riskNote}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          /* ── RAW REPORT FALLBACK PREVIEW ── */
-                          <>
-                            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-4">
-                              {activeDraft.title}
-                            </h1>
 
-                            {/* 🔥 DYNAMIC CHART PREVIEW */}
-                            <TechnicalChart
-                              articleBody={activeDraft.desc}
-                              category={publishCategory}
-                              lang={activeLang}
-                            />
-
-                            <div
-                              className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
-                              dangerouslySetInnerHTML={{
-                                __html: formatArticleBody(activeDraft.desc, activeLang),
+                            <textarea
+                              value={activeDraft.desc}
+                              onChange={(e) => {
+                                setVault({
+                                  ...vault,
+                                  [activeLang]: {
+                                    ...activeDraft,
+                                    desc: e.target.value,
+                                    ready: !!e.target.value,
+                                  },
+                                })
+                                // Clear stale global audit on manual edit
+                                setGlobalAudit(null)
                               }}
+                              className="flex-1 bg-[#18181c]/90 border-2 border-[#FFB800]/20 p-4 sm:p-6 outline-none resize-none text-sm sm:text-base leading-6 sm:leading-7 custom-scrollbar font-sans text-white/95 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[#FFB800]/40 transition-colors"
+                              placeholder="ENTER INTELLIGENCE DATA..."
                             />
-                          </>
+                          </div>
+                        ) : (
+                          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-[#18181c]/95 to-[#23232a]/90 border-2 border-[#FFB800]/20 rounded-lg space-y-6 sm:space-y-8 shadow-[0_2px_24px_rgba(255,184,0,0.08)]">
+                            {imageUrl && (
+                              <div className="relative aspect-video w-full rounded-md overflow-hidden border border-white/20 shadow-2xl">
+                                <Image
+                                  src={imageUrl}
+                                  alt="Preview"
+                                  fill
+                                  className="object-cover opacity-90"
+                                  unoptimized
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                              </div>
+                            )}
+
+                            {/* Transform error banner */}
+                            {transformError && (
+                              <div className="flex items-center gap-3 px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg text-red-300 text-sm font-medium">
+                                <AlertCircle size={14} className="shrink-0" />
+                                <span>{transformError} — showing raw content.</span>
+                              </div>
+                            )}
+
+                            {transformedArticle ? (
+                              /* ── FORMATTED ARTICLE PREVIEW ── */
+                              <>
+                                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 opacity-80">
+                                  <Wand2 size={12} /> Transformed Article
+                                </div>
+                                <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-2">
+                                  {transformedArticle.headline}
+                                </h1>
+                                {transformedArticle.subheadline && (
+                                  <p className="text-lg text-white/70 font-semibold leading-snug">
+                                    {transformedArticle.subheadline}
+                                  </p>
+                                )}
+                                {transformedArticle.summary && (
+                                  <p className="text-base text-white/60 italic border-l-2 border-purple-500/50 pl-4">
+                                    {transformedArticle.summary}
+                                  </p>
+                                )}
+
+                                {/* 🔥 DYNAMIC CHART PREVIEW */}
+                                <TechnicalChart
+                                  articleBody={transformedArticle.body}
+                                  category={publishCategory}
+                                  lang={activeLang}
+                                />
+
+                                <div
+                                  className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
+                                  dangerouslySetInnerHTML={{
+                                    __html: formatArticleBody(transformedArticle.body, activeLang),
+                                  }}
+                                />
+                                {transformedArticle.keyInsights.length > 0 && (
+                                  <div className="border border-purple-500/30 bg-purple-900/10 rounded-lg p-5 space-y-2">
+                                    <p className="text-xs font-black uppercase tracking-widest text-purple-400">Key Insights</p>
+                                    <ul className="space-y-1.5">
+                                      {transformedArticle.keyInsights.map((insight, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm text-white/80">
+                                          <span className="text-purple-400 mt-0.5 shrink-0">•</span>
+                                          {insight}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {transformedArticle.riskNote && (
+                                  <p className="text-xs text-white/40 italic border-t border-white/10 pt-4">
+                                    {transformedArticle.riskNote}
+                                  </p>
+                                )}
+                              </>
+                            ) : (
+                              /* ── RAW REPORT FALLBACK PREVIEW ── */
+                              <>
+                                <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white leading-tight uppercase italic tracking-tight drop-shadow-lg mb-4">
+                                  {activeDraft.title}
+                                </h1>
+
+                                {/* 🔥 DYNAMIC CHART PREVIEW */}
+                                <TechnicalChart
+                                  articleBody={activeDraft.desc}
+                                  category={publishCategory}
+                                  lang={activeLang}
+                                />
+
+                                <div
+                                  className="prose prose-invert prose-sm max-w-none text-white/85 leading-relaxed"
+                                  dangerouslySetInnerHTML={{
+                                    __html: formatArticleBody(activeDraft.desc, activeLang),
+                                  }}
+                                />
+                              </>
+                            )}
+                          </div>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
                 </>
@@ -1035,6 +1119,26 @@ export default function WarRoom() {
                 {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}{' '}
                 {isDeployBlocked && !isPublishing ? 'GATING_RESTRICTED' : 'Deploy Hub'}
               </button>
+
+              {/* Task 6: Session Status Chips - Read-only indicators */}
+              <SessionStatusChips
+                hasSessionDraft={remediationController.hasSessionDraft}
+                isAuditStale={remediationController.isAuditStale}
+                sessionRemediationCount={remediationController.sessionRemediationCount}
+              />
+
+              {/* Deploy Block Reason - Display only when session draft exists */}
+              {remediationController.deployBlockReason && (
+                <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-md text-xs text-red-300/90 leading-relaxed">
+                  {remediationController.deployBlockReason}
+                </div>
+              )}
+
+              {/* Task 7: Session Ledger Summary - Read-only remediation history */}
+              <SessionLedgerSummary
+                sessionRemediationLedger={remediationController.sessionRemediationLedger}
+                visible={remediationController.hasSessionRemediationLedger}
+              />
             </div>
           </CyberBox>
 
