@@ -915,6 +915,21 @@ export default function WarRoom() {
                             </div>
                           </div>
                         )}
+                        {/* Transform Failure Panel - Shows when transform fails while viewing session draft */}
+                        {transformError && (
+                          <div className="mx-4 my-4 px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg flex items-start gap-3">
+                            <AlertCircle size={16} className="text-red-400 mt-0.5 shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-red-300 mb-1">Article Transform Did Not Complete</p>
+                              <p className="text-xs text-white/70 mb-2">
+                                The transform step did not produce a formatted article. The draft remains session-only and deploy remains locked.
+                              </p>
+                              <p className="text-xs font-mono text-red-200/80 bg-black/20 px-2 py-1 rounded">
+                                Reason: {transformError}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </>
                     ) : (
                       /* ── CANONICAL VAULT EDITOR/PREVIEW (DEFAULT) ── */
