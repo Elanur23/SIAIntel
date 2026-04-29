@@ -141,6 +141,83 @@ export interface AuditInvalidationState {
 }
 
 /**
+ * Unique identity for a specific session draft state.
+ * Used to bind audit results to a specific point in the session timeline.
+ *
+ * CRITICAL SAFETY RULES:
+ * - Must be derived from immutable content state.
+ * - Must be invalidated by any ledger change.
+ */
+export interface SnapshotIdentity {
+  contentHash: string;
+  ledgerSequence: number;
+  latestAppliedEventId: string | null;
+  timestamp: string;
+}
+
+/**
+ * Pure helper to compute a snapshot identity from content and ledger state.
+ */
+export function computeSnapshotIdentity(
+  contentHash: string,
+  ledgerSequence: number,
+  latestAppliedEventId: string | null,
+  timestamp: string = new Date().toISOString()
+): SnapshotIdentity {
+  return {
+    contentHash,
+    ledgerSequence,
+    latestAppliedEventId,
+    timestamp
+  };
+}
+
+/**
+ * Lifecycle status for a session-scoped re-audit.
+ */
+export enum SessionAuditLifecycle {
+  NOT_RUN = 'NOT_RUN',
+  RUNNING = 'RUNNING',
+  PASSED = 'PASSED',
+  FAILED = 'FAILED',
+  STALE = 'STALE'
+}
+
+/**
+ * Result of a session-scoped re-audit.
+ * Strictly informational and session-memory only.
+ *
+ * CRITICAL SAFETY RULES:
+ * - Must NOT be used to unlock canonical deploy gate.
+ * - Must NOT persist to backend or storage.
+ * - Must NOT overwrite canonical audit records.
+ * - Must NOT mutate vault.
+ */
+export interface SessionAuditResult {
+  identity: SnapshotIdentity;
+  lifecycle: SessionAuditLifecycle;
+  globalAuditPass: boolean;
+  pandaCheckPass: boolean;
+  findings: string[];
+  globalAuditResult: any; // Type-cast to GlobalAuditResult in implementation
+  pandaCheckResult: any;
+  pandaStructuralErrors?: string[];
+  timestamp: string;
+  isStale: boolean;
+
+  // Hard-coded safety invariants
+  memoryOnly: true;
+  deployUnlockAllowed: false;
+  canonicalAuditOverwriteAllowed: false;
+  vaultMutationAllowed: false;
+}
+
+export const SESSION_DRAFT_AUDIT = 'SESSION_DRAFT_AUDIT' as const;
+export const SESSION_DRAFT_PANDA_CHECK = 'SESSION_DRAFT_PANDA_CHECK' as const;
+export const AUDIT_TYPE_SESSION_DRAFT = SESSION_DRAFT_AUDIT;
+export const PANDA_CHECK_TYPE_SESSION_DRAFT = SESSION_DRAFT_PANDA_CHECK;
+
+/**
  * Request object for applying a remediation to a local draft (Phase 3C-3B-2).
  * Strictly dry-run only in this phase.
  */

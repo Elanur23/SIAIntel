@@ -12,9 +12,19 @@ import {
   DraftSnapshot,
   AuditInvalidationState,
   AuditInvalidationReason,
-  RollbackEvent
+  RollbackEvent,
+  SnapshotIdentity,
+  SessionAuditLifecycle,
+  SessionAuditResult,
+  computeSnapshotIdentity,
+  SESSION_DRAFT_AUDIT,
+  SESSION_DRAFT_PANDA_CHECK
 } from '@/lib/editorial/remediation-apply-types';
 import { RemediationSuggestion } from '@/lib/editorial/remediation-types';
+import { buildSessionDraftGlobalAuditPayload } from '@/lib/editorial/session-draft-global-audit-adapter';
+import { buildSessionDraftPandaPackage } from '@/lib/editorial/session-draft-panda-adapter';
+import { runGlobalGovernanceAudit } from '@/lib/editorial/global-governance-audit';
+import { validatePandaPackage } from '@/lib/editorial/panda-intake-validator';
 
 /**
  * Entry in the session remediation ledger tracking what was applied.
@@ -39,6 +49,10 @@ export function useLocalDraftRemediationController() {
   const [latestRollbackEvent, setLatestRollbackEvent] = useState<RollbackEvent | null>(null);
   const [sessionAuditInvalidation, setSessionAuditInvalidation] = useState<AuditInvalidationState | null>(null);
 
+  // PHASE 3C-3C-3B-2: Session Re-Audit State
+  const [sessionAuditResult, setSessionAuditResult] = useState<SessionAuditResult | null>(null);
+  const [sessionAuditLifecycle, setSessionAuditLifecycle] = useState<SessionAuditLifecycle>(SessionAuditLifecycle.NOT_RUN);
+
   /**
    * Initializes a local draft session from a canonical vault article.
    */
@@ -50,6 +64,9 @@ export function useLocalDraftRemediationController() {
     setSessionRemediationLedger([]);
     setLatestRollbackEvent(null);
     setSessionAuditInvalidation(null);
+    // Clear session audit
+    setSessionAuditResult(null);
+    setSessionAuditLifecycle(SessionAuditLifecycle.NOT_RUN);
   }, []);
 
   /**
@@ -60,6 +77,9 @@ export function useLocalDraftRemediationController() {
     setSessionRemediationLedger([]);
     setLatestRollbackEvent(null);
     setSessionAuditInvalidation(null);
+    // Clear session audit
+    setSessionAuditResult(null);
+    setSessionAuditLifecycle(SessionAuditLifecycle.NOT_RUN);
   }, []);
 
   /**
@@ -116,6 +136,12 @@ export function useLocalDraftRemediationController() {
     // Clearing rollback since we just moved forward
     setLatestRollbackEvent(null);
 
+    // Any change to local draft invalidates current session audit
+    if (sessionAuditResult) {
+      setSessionAuditResult(prev => prev ? { ...prev, isStale: true } : null);
+      setSessionAuditLifecycle(SessionAuditLifecycle.STALE);
+    }
+
     return { appliedEvent, snapshot };
   }, [localDraftCopy, sessionRemediationLedger]);
 
@@ -156,7 +182,111 @@ export function useLocalDraftRemediationController() {
       invalidatedAt: new Date().toISOString()
     });
 
+    // Rollback invalidates session audit
+    if (sessionAuditResult) {
+      setSessionAuditResult(prev => prev ? { ...prev, isStale: true } : null);
+      setSessionAuditLifecycle(SessionAuditLifecycle.STALE);
+    }
+
     return { rollbackEvent };
+  }, [localDraftCopy, sessionRemediationLedger]);
+
+  /**
+   * Executes a read-only session re-audit (Global Audit + Panda validation)
+   * against the current localDraftCopy.
+   */
+  const runSessionDraftReAudit = useCallback(async (articleId: string) => {
+    if (!localDraftCopy) {
+      console.warn('[CONTROLLER] Cannot run audit: No local draft exists.');
+      return;
+    }
+
+    try {
+      setSessionAuditLifecycle(SessionAuditLifecycle.RUNNING);
+
+      // 1. Compute Snapshot Identity
+      const contentHash = JSON.stringify(
+        Object.keys(localDraftCopy).sort().map(l => localDraftCopy[l].desc)
+      );
+      const ledgerSequence = sessionRemediationLedger.length;
+      const latestAppliedEventId = sessionRemediationLedger.length > 0
+        ? sessionRemediationLedger[sessionRemediationLedger.length - 1].appliedEvent.eventId
+        : null;
+
+      const identity = computeSnapshotIdentity(contentHash, ledgerSequence, latestAppliedEventId);
+
+      // 2. Global Audit Flow
+      const globalAuditAdapterResult = buildSessionDraftGlobalAuditPayload(
+        articleId,
+        localDraftCopy,
+        identity
+      );
+
+      let globalAuditResult: any = null;
+      let globalAuditPass = false;
+
+      if (globalAuditAdapterResult.ok && globalAuditAdapterResult.payload) {
+        globalAuditResult = runGlobalGovernanceAudit(
+          articleId,
+          localDraftCopy
+        );
+        globalAuditPass = globalAuditResult.publishable;
+      }
+
+      // 3. Panda Validation Flow
+      const pandaAdapterResult = buildSessionDraftPandaPackage(
+        articleId,
+        localDraftCopy,
+        identity
+      );
+
+      let pandaCheckResult: any = null;
+      let pandaCheckPass = false;
+
+      if (pandaAdapterResult.ok && pandaAdapterResult.package) {
+        pandaCheckResult = validatePandaPackage(pandaAdapterResult.package);
+        pandaCheckPass = pandaCheckResult.ok;
+      }
+
+      // 4. Assemble Findings
+      const findings: string[] = [];
+      if (globalAuditResult) {
+        findings.push(...(globalAuditResult.globalFindings || []));
+      }
+      if (pandaCheckResult && !pandaCheckResult.ok) {
+        findings.push(...(pandaCheckResult.errors?.map((e: any) =>
+          `${e.lang?.toUpperCase() || 'CORE'}: ${e.message}`
+        ) || []));
+      }
+
+      // 5. Store Result in Session Memory Only
+      const result: SessionAuditResult = {
+        identity,
+        lifecycle: (globalAuditPass && pandaCheckPass) ? SessionAuditLifecycle.PASSED : SessionAuditLifecycle.FAILED,
+        globalAuditPass,
+        pandaCheckPass,
+        findings,
+        globalAuditResult,
+        pandaCheckResult,
+        pandaStructuralErrors: pandaAdapterResult.errorType === 'PANDA_PACKAGE_STRUCTURE_ERROR'
+          ? [pandaAdapterResult.error || 'Unknown structural error']
+          : undefined,
+        timestamp: new Date().toISOString(),
+        isStale: false,
+        memoryOnly: true,
+        deployUnlockAllowed: false,
+        canonicalAuditOverwriteAllowed: false,
+        vaultMutationAllowed: false
+      };
+
+      setSessionAuditResult(result);
+      setSessionAuditLifecycle(result.lifecycle);
+
+    } catch (err) {
+      console.error('[CONTROLLER] Session re-audit failed:', err);
+      setSessionAuditLifecycle(SessionAuditLifecycle.FAILED);
+      setSessionAuditResult(null);
+    }
   }, [localDraftCopy, sessionRemediationLedger]);
 
   // Derived state helpers
@@ -289,6 +419,8 @@ export function useLocalDraftRemediationController() {
     sessionAuditInvalidation,
     reAuditRequired,
     deployBlockedByLocalDraft,
+    sessionAuditResult,
+    sessionAuditLifecycle,
 
     // Session View Model Helpers (Task 2)
     hasSessionDraft,
@@ -306,6 +438,7 @@ export function useLocalDraftRemediationController() {
     initializeLocalDraftFromVault,
     clearLocalDraftSession,
     applyToLocalDraftController,
-    rollbackLastLocalDraftChange
+    rollbackLastLocalDraftChange,
+    runSessionDraftReAudit
   };
 }
