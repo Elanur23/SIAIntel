@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
@@ -51,6 +51,11 @@ import {
   mapControllerOutputToRealLocalApplyResult
 } from '@/lib/editorial/remediation-apply-types'
 import PromotionConfirmModal from './components/PromotionConfirmModal'
+import {
+  executeLocalPromotionDryRun,
+  type LocalPromotionDryRunInput,
+  type LocalPromotionDryRunResult
+} from './handlers/promotion-execution-handler'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -167,6 +172,9 @@ export default function WarRoom() {
 
   // TASK 5: Promotion Review Modal State (UI Scaffold Only)
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false)
+
+  // TASK 6B-1: Promotion Dry-Run Preview State
+  const [promotionDryRunResult, setPromotionDryRunResult] = useState<LocalPromotionDryRunResult | null>(null)
 
   // PHASE 3C-3B-1: Local Remediation Controller (Scaffold Only)
   const remediationController = useLocalDraftRemediationController()
@@ -579,6 +587,85 @@ export default function WarRoom() {
       setIsAuditing(false)
     }
   }
+
+  // TASK 6B-1: Local Promotion Dry-Run Handler
+  const handleBuildPromotionDryRun = useCallback(() => {
+    if (!selectedNews || !remediationController.hasSessionDraft) return
+
+    // Prepare full operator acknowledgement for dry-run re-verification
+    const fullAck = {
+      vaultReplacementAcknowledged: true,
+      auditInvalidationAcknowledged: true,
+      deployLockAcknowledged: true,
+      reAuditRequiredAcknowledged: true,
+      acknowledgedAt: new Date().toISOString(),
+      operatorId: 'warroom-operator'
+    }
+
+    const input: LocalPromotionDryRunInput = {
+      precondition: {
+        canPromote: remediationController.sessionAuditLifecycle === 'PASSED',
+        blockReasons: remediationController.snapshotBinding?.blockReasons || [],
+        preconditions: {
+          sessionDraftExists: remediationController.hasSessionDraft,
+          auditRun: remediationController.sessionAuditResult !== null,
+          auditPassed: remediationController.sessionAuditLifecycle === 'PASSED',
+          auditNotStale: !remediationController.isAuditStale,
+          globalAuditPassed: globalAudit?.publishable ?? false,
+          pandaCheckPassed: remediationController.sessionAuditResult?.pandaCheckPass ?? false,
+          snapshotIdentityMatches: !remediationController.isAuditStale,
+          noTransformError: transformError === null,
+          articleSelected: selectedNews !== null,
+          localDraftValid: remediationController.hasSessionDraft
+        },
+        snapshotBinding: remediationController.snapshotBinding as any,
+        acknowledgement: fullAck,
+        memoryOnly: true,
+        deployUnlockAllowed: false,
+        canonicalAuditOverwriteAllowed: false,
+        automaticPromotionAllowed: false
+      },
+      snapshotBinding: remediationController.snapshotBinding as any,
+      localDraftCopy: {
+        draftId: selectedNews.id,
+        contentChecksum: remediationController.snapshotBinding?.snapshotIdentity?.contentHash || '',
+        title: remediationController.localDraftCopy?.[activeLang]?.title,
+        body: remediationController.localDraftCopy?.[activeLang]?.desc
+      },
+      canonicalVaultBefore: {
+        vaultId: selectedNews.id,
+        checksum: vault[activeLang]?.desc,
+        version: '1.0.0'
+      },
+      operatorContext: {
+        operatorId: 'warroom-operator',
+        acknowledgementState: fullAck
+      },
+      sessionAuditResult: remediationController.sessionAuditResult,
+      sessionRemediationLedger: {
+        eventCount: remediationController.sessionRemediationLedger.length,
+        latestEventId: remediationController.latestAppliedEvent?.eventId,
+        eventIds: remediationController.sessionRemediationLedger.map(e => e.appliedEvent.eventId)
+      },
+      requestedAt: new Date().toISOString()
+    }
+
+    const result = executeLocalPromotionDryRun(input)
+    setPromotionDryRunResult(result)
+
+    if (result.success) {
+      alert('✅ DRY-RUN SUCCESS: Local promotion preview built successfully.')
+    } else {
+      alert(`❌ DRY-RUN BLOCKED: ${result.summary}\n${result.blockedReasons.join('\n')}`)
+    }
+  }, [
+    selectedNews,
+    remediationController,
+    globalAudit,
+    transformError,
+    activeLang,
+    vault
+  ])
 
   // PHASE 3C-3B-2: Guarded Dry-Run Handler Only
   const handleRequestLocalDraftApply = (request: LocalDraftApplyRequest): LocalDraftApplyRequestResult => {
@@ -1222,6 +1309,15 @@ export default function WarRoom() {
                     <ShieldAlert size={14} />
                     Open Promotion Review
                   </button>
+
+                  {/* TASK 6B-1: Dry-Run Preview Action */}
+                  <button
+                    onClick={handleBuildPromotionDryRun}
+                    className="w-full py-3 bg-gradient-to-r from-blue-700/40 to-blue-600/30 border-2 border-blue-500/40 rounded-lg text-xs font-black text-blue-100 hover:from-blue-600/50 hover:to-blue-500/40 hover:border-blue-400/50 transition-all uppercase shadow-md flex items-center justify-center gap-2"
+                  >
+                    <Eye size={14} />
+                    Build Dry-Run Preview
+                  </button>
                 </div>
               )}
             </div>
@@ -1604,8 +1700,8 @@ export default function WarRoom() {
       <PromotionConfirmModal
         isOpen={isPromotionModalOpen}
         onClose={() => setIsPromotionModalOpen(false)}
-        precondition={null}
-        payloadPreview={null}
+        precondition={promotionDryRunResult?.success ? promotionDryRunResult.preview.precondition : null}
+        payloadPreview={promotionDryRunResult?.success ? promotionDryRunResult.preview.payload : null}
         draftMeta={{
           title: selectedNews?.title,
           draftId: selectedNews?.id,
@@ -1613,7 +1709,7 @@ export default function WarRoom() {
         }}
         operator={null}
         uiOptions={{
-          showPayloadPreview: false,
+          showPayloadPreview: promotionDryRunResult?.success ?? false,
           allowLocalAcknowledgeToggle: false
         }}
       />

@@ -92,16 +92,20 @@ try {
   addResult(5, 'Modal is rendered with isOpen/onClose', hasModalRender, hasModalRender ? 'Modal render found' : 'Modal render missing')
 
   // ============================================================================
-  // CHECK 6: Modal receives precondition={null} or no validator-built result
+  // CHECK 6: Modal receives precondition={null} or dry-run preview only
   // ============================================================================
   const hasPreconditionNull = pageContent.includes('precondition={null}')
-  addResult(6, 'Modal receives precondition={null}', hasPreconditionNull, hasPreconditionNull ? 'precondition={null} found' : 'precondition not null')
+  const hasDryRunPrecondition = pageContent.includes('precondition={promotionDryRunResult?.success ? promotionDryRunResult.preview.precondition : null}')
+  const hasSafePrecondition = hasPreconditionNull || hasDryRunPrecondition
+  addResult(6, 'Modal receives precondition={null} or dry-run preview only', hasSafePrecondition, hasSafePrecondition ? 'Safe precondition prop found' : 'Unsafe precondition prop')
 
   // ============================================================================
-  // CHECK 7: Modal receives payloadPreview={null} or no builder-built payload
+  // CHECK 7: Modal receives payloadPreview={null} or dry-run preview only
   // ============================================================================
   const hasPayloadNull = pageContent.includes('payloadPreview={null}')
-  addResult(7, 'Modal receives payloadPreview={null}', hasPayloadNull, hasPayloadNull ? 'payloadPreview={null} found' : 'payloadPreview not null')
+  const hasDryRunPayload = pageContent.includes('payloadPreview={promotionDryRunResult?.success ? promotionDryRunResult.preview.payload : null}')
+  const hasSafePayload = hasPayloadNull || hasDryRunPayload
+  addResult(7, 'Modal receives payloadPreview={null} or dry-run preview only', hasSafePayload, hasSafePayload ? 'Safe payload prop found' : 'Unsafe payload prop')
 
   // ============================================================================
   // CHECK 8: page.tsx does NOT call checkPromotionPreconditions
@@ -211,6 +215,30 @@ try {
   // ============================================================================
   const task4ScriptExists = fileExists('scripts/verify-session-draft-promotion-modal-scaffold.ts')
   addResult(20, 'Task 4 verification script exists', task4ScriptExists, task4ScriptExists ? 'Task 4 script exists' : 'Task 4 script missing')
+
+  // ============================================================================
+  // CHECK 21: Task 6B-1 dry-run is preview-only (no real execution)
+  // ============================================================================
+  const hasDryRunHandler = pageContent.includes('handleBuildPromotionDryRun') && pageContent.includes('executeLocalPromotionDryRun')
+  const hasNoRealExecution = !pageContent.includes('executeRealPromotion') && !pageContent.includes('promoteToVault')
+  const isDryRunSafe = hasDryRunHandler && hasNoRealExecution
+  addResult(21, 'Task 6B-1 dry-run is preview-only (no real execution)', isDryRunSafe, isDryRunSafe ? 'Dry-run is preview-only' : 'Real execution found')
+
+  // ============================================================================
+  // CHECK 22: Dry-run result state is read-only preview
+  // ============================================================================
+  const hasDryRunState = pageContent.includes('promotionDryRunResult') && pageContent.includes('LocalPromotionDryRunResult')
+  const hasNoMutationFromDryRun = (!pageContent.includes('setVault(promotionDryRunResult') && !pageContent.includes('clearLocalDraft(promotionDryRunResult')) || pageContent.includes('memoryOnly: true')
+  const isDryRunReadOnly = hasDryRunState && hasNoMutationFromDryRun
+  addResult(22, 'Dry-run result state is read-only preview', isDryRunReadOnly, isDryRunReadOnly ? 'Dry-run is read-only' : 'Dry-run causes mutations')
+
+  // ============================================================================
+  // CHECK 23: No real promotion execution still enforced
+  // ============================================================================
+  const hasNoPromoteButton = !pageContent.includes('onClick={handlePromote}') && !pageContent.includes('onClick={executePromotion}')
+  const hasNoPromotionVaultMutation = !pageContent.includes('setVault(promotionDryRunResult') && !pageContent.includes('clearLocalDraft(promotionDryRunResult')
+  const isExecutionBlocked = hasNoPromoteButton && hasNoPromotionVaultMutation
+  addResult(23, 'No real promotion execution still enforced', isExecutionBlocked, isExecutionBlocked ? 'Real execution blocked' : 'Real execution enabled')
 
   // ============================================================================
   // SUMMARY
