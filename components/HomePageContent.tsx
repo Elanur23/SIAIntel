@@ -72,7 +72,7 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
       <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
         <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
+          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-3xl bg-white/[0.02] gap-4">
             <div className="w-16 h-16 border-4 border-white/10 border-t-blue-500 rounded-full animate-spin" />
             <span className="text-sm text-white/60 uppercase tracking-wider">Synchronizing Intelligence Matrix...</span>
             <span className="text-xs text-white/40">Loading articles...</span>
@@ -88,7 +88,7 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
       <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
         <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
+          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-3xl bg-white/[0.02] gap-4">
             <div className="w-16 h-16 border-4 border-white/10 border-t-blue-500 rounded-full animate-spin" />
             <span className="text-sm text-white/60 uppercase tracking-wider">Synchronizing Intelligence Matrix...</span>
             <span className="text-xs text-white/40">{error}</span>
@@ -104,7 +104,7 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
       <section className="relative pt-8 pb-16 overflow-hidden border-b border-white/5 terminal-grid">
         <GlobeGrid className="left-0 top-1/2 -translate-y-1/2 w-[50%] max-w-[600px] h-[80%] -translate-x-1/4" />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01] gap-4">
+          <div className="h-[400px] flex flex-col items-center justify-center border border-white/5 rounded-3xl bg-white/[0.02] gap-4">
             <Shield size={48} className="text-blue-500/60" />
             <span className="text-sm text-white/60 uppercase tracking-wider">Intelligence Matrix Synchronized</span>
             <span className="text-xs text-white/40">No published intelligence reports are available yet.</span>
@@ -289,7 +289,7 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
               </div>
             </div>
           ) : (
-            <div className="h-[400px] flex items-center justify-center border border-white/5 rounded-2xl bg-white/[0.01]">
+            <div className="h-[400px] flex items-center justify-center border border-white/5 rounded-3xl bg-white/[0.02]">
               <span className="text-sm text-white/60 uppercase tracking-wider animate-pulse">Synchronizing Intelligence Matrix...</span>
             </div>
           )}
@@ -335,7 +335,7 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
       <section className="border-b border-white/5 bg-gradient-to-b from-transparent to-blue-950/5">
         <div className="max-w-7xl mx-auto px-6 py-6">
           {/* Intelligence Context */}
-          <div className="mb-6 px-6 py-4 rounded-lg bg-white/[0.02] border border-white/5">
+          <div className="mb-6 px-6 py-5 rounded-xl bg-white/[0.03] border border-white/5">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div className="flex-1">
                 <h3 className="text-sm font-bold text-white/90 mb-1 tracking-tight">Market Intelligence Panel</h3>
@@ -407,7 +407,7 @@ export default function HomePageContent({ rawLang }: HomePageContentProps) {
           </div>
 
           {/* CTA Section */}
-          <div className="mt-8 p-8 rounded-2xl bg-gradient-to-br from-blue-950/40 via-blue-900/20 to-purple-950/40 border border-blue-500/30 shadow-2xl shadow-blue-900/20 backdrop-blur-sm">
+          <div className="mt-8 p-10 rounded-3xl bg-gradient-to-br from-blue-950/40 via-blue-900/20 to-purple-950/40 border border-blue-500/30 shadow-2xl shadow-blue-900/20 backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               {/* Content */}
               <div className="flex-1 space-y-4">
