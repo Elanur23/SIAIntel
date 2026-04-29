@@ -17,6 +17,9 @@ import {
   Database,
   Wand2,
   FileJson,
+  ShieldAlert,
+  Lock,
+  AlertTriangle,
 } from 'lucide-react'
 import { applyLegalShield, LEGAL_CONFIG } from '@/lib/compliance/legal-enforcer'
 import TechnicalChart from '@/components/TechnicalChart'
@@ -47,6 +50,7 @@ import {
   mapRealLocalApplyRequestToControllerInput,
   mapControllerOutputToRealLocalApplyResult
 } from '@/lib/editorial/remediation-apply-types'
+import PromotionConfirmModal from './components/PromotionConfirmModal'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -160,6 +164,9 @@ export default function WarRoom() {
   const [manualSummary, setManualSummary] = useState('')
   const [isPandaImportOpen, setIsPandaImportOpen] = useState(false)
   const [lastImportInfo, setLastImportInfo] = useState<{ id: string; time: string } | null>(null)
+
+  // TASK 5: Promotion Review Modal State (UI Scaffold Only)
+  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false)
 
   // PHASE 3C-3B-1: Local Remediation Controller (Scaffold Only)
   const remediationController = useLocalDraftRemediationController()
@@ -1179,6 +1186,44 @@ export default function WarRoom() {
                 sessionRemediationLedger={remediationController.sessionRemediationLedger}
                 visible={remediationController.hasSessionRemediationLedger}
               />
+
+              {/* TASK 5: Promotion Review Entry Point - UI Scaffold Only */}
+              {remediationController.hasSessionDraft && (
+                <div className="mt-4 px-4 py-4 bg-gradient-to-b from-amber-900/20 to-amber-800/10 border-2 border-amber-500/40 rounded-lg space-y-3 shadow-lg">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
+                    <ShieldAlert size={14} />
+                    Promotion Review
+                  </div>
+                  
+                  {/* Required Warning Copy */}
+                  <div className="space-y-2 text-[11px] text-amber-200/80 leading-relaxed">
+                    <p className="flex items-start gap-2">
+                      <Lock size={10} className="mt-0.5 shrink-0 text-amber-400" />
+                      <span><strong>Review only</strong> — promotion execution is disabled.</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <Database size={10} className="mt-0.5 shrink-0 text-amber-400" />
+                      <span>Session draft is <strong>not saved</strong> to canonical vault.</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <Lock size={10} className="mt-0.5 shrink-0 text-amber-400" />
+                      <span>Deploy remains <strong>locked</strong>.</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <AlertTriangle size={10} className="mt-0.5 shrink-0 text-amber-400" />
+                      <span>Canonical re-audit is <strong>required</strong> before deploy.</span>
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setIsPromotionModalOpen(true)}
+                    className="w-full py-3 bg-gradient-to-r from-amber-700/60 to-amber-600/50 border-2 border-amber-500/50 rounded-lg text-xs font-black text-amber-100 hover:from-amber-600/70 hover:to-amber-500/60 hover:border-amber-400/60 transition-all uppercase shadow-md flex items-center justify-center gap-2"
+                  >
+                    <ShieldAlert size={14} />
+                    Open Promotion Review
+                  </button>
+                </div>
+              )}
             </div>
           </CyberBox>
 
@@ -1553,6 +1598,24 @@ export default function WarRoom() {
         isOpen={isPandaImportOpen}
         onClose={() => setIsPandaImportOpen(false)}
         onApply={applyPandaPackageToVault}
+      />
+
+      {/* TASK 5: Promotion Confirm Modal - UI Scaffold Only */}
+      <PromotionConfirmModal
+        isOpen={isPromotionModalOpen}
+        onClose={() => setIsPromotionModalOpen(false)}
+        precondition={null}
+        payloadPreview={null}
+        draftMeta={{
+          title: selectedNews?.title,
+          draftId: selectedNews?.id,
+          sessionId: selectedNews?.id
+        }}
+        operator={null}
+        uiOptions={{
+          showPayloadPreview: false,
+          allowLocalAcknowledgeToggle: false
+        }}
       />
     </div>
   )
