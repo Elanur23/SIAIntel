@@ -20,6 +20,15 @@ import {
   SESSION_DRAFT_AUDIT,
   SESSION_DRAFT_PANDA_CHECK
 } from '@/lib/editorial/remediation-apply-types';
+import {
+  PromotionBlockReason,
+  OperatorAcknowledgementState,
+  PromotionSnapshotBinding
+} from '@/lib/editorial/session-draft-promotion-types';
+import {
+  checkPromotionPreconditions,
+  PreconditionCheckInput
+} from '@/lib/editorial/session-draft-promotion-preconditions';
 import { RemediationSuggestion } from '@/lib/editorial/remediation-types';
 import { buildSessionDraftGlobalAuditPayload } from '@/lib/editorial/session-draft-global-audit-adapter';
 import { buildSessionDraftPandaPackage } from '@/lib/editorial/session-draft-panda-adapter';
@@ -306,6 +315,48 @@ export function useLocalDraftRemediationController() {
     sessionAuditInvalidation?.auditInvalidated ?? false
   , [sessionAuditInvalidation]);
 
+  /**
+   * Snapshot Identity of current session draft.
+   */
+  const currentSnapshotIdentity = useMemo(() => {
+    if (!localDraftCopy) return null;
+    const contentHash = JSON.stringify(
+      Object.keys(localDraftCopy).sort().map(l => localDraftCopy[l].desc)
+    );
+    const ledgerSequence = sessionRemediationLedger.length;
+    const latestAppliedEventId = sessionRemediationLedger.length > 0
+      ? sessionRemediationLedger[sessionRemediationLedger.length - 1].appliedEvent.eventId
+      : null;
+
+    return computeSnapshotIdentity(contentHash, ledgerSequence, latestAppliedEventId);
+  }, [localDraftCopy, sessionRemediationLedger]);
+
+  /**
+   * Read-only exposure of promotion snapshot binding.
+   * Uses default (non-acknowledged) state for read-only precondition check.
+   */
+  const snapshotBinding = useMemo(() => {
+    const defaultAck: OperatorAcknowledgementState = {
+      vaultReplacementAcknowledged: false,
+      auditInvalidationAcknowledged: false,
+      deployLockAcknowledged: false,
+      reAuditRequiredAcknowledged: false
+    };
+
+    const input: PreconditionCheckInput = {
+      hasSessionDraft: localDraftCopy !== null,
+      sessionAuditResult,
+      sessionAuditLifecycle,
+      currentSnapshotIdentity,
+      transformError: null,
+      hasSelectedArticle: localDraftCopy !== null,
+      hasLocalDraftCopy: localDraftCopy !== null,
+      acknowledgement: defaultAck
+    };
+
+    return checkPromotionPreconditions(input).snapshotBinding;
+  }, [localDraftCopy, sessionAuditResult, sessionAuditLifecycle, currentSnapshotIdentity]);
+
   // ============================================================================
   // SESSION VIEW MODEL HELPERS (Task 2 - Session Preview / Session State UI)
   // ============================================================================
@@ -421,6 +472,7 @@ export function useLocalDraftRemediationController() {
     deployBlockedByLocalDraft,
     sessionAuditResult,
     sessionAuditLifecycle,
+    snapshotBinding,
 
     // Session View Model Helpers (Task 2)
     hasSessionDraft,
