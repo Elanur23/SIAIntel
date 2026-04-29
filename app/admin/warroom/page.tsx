@@ -32,6 +32,7 @@ import SessionStateBanner from './components/SessionStateBanner'
 import DraftSourceSwitcher, { type DraftSource } from './components/DraftSourceSwitcher'
 import SessionDraftPreviewPanel from './components/SessionDraftPreviewPanel'
 import SessionStatusChips from './components/SessionStatusChips'
+import SessionAuditStatePanel from './components/SessionAuditStatePanel'
 import SessionLedgerSummary from './components/SessionLedgerSummary'
 import SessionDraftComparison from './components/SessionDraftComparison'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
@@ -894,13 +895,27 @@ export default function WarRoom() {
                       />
                     ) : draftSource === 'session' && remediationController.hasSessionDraft ? (
                       /* ── SESSION DRAFT PREVIEW PANEL (READ-ONLY) ── */
-                      <SessionDraftPreviewPanel
-                        sessionBody={remediationController.localDraftCopy?.[activeLang]?.desc || ''}
-                        currentLanguage={activeLang}
-                        visible={true}
-                        auditStaleCopy={remediationController.auditStaleCopy}
-                        volatilityWarningCopy={remediationController.volatilityWarningCopy}
-                      />
+                      <>
+                        <SessionDraftPreviewPanel
+                          sessionBody={remediationController.localDraftCopy?.[activeLang]?.desc || ''}
+                          currentLanguage={activeLang}
+                          visible={true}
+                          auditStaleCopy={remediationController.auditStaleCopy}
+                          volatilityWarningCopy={remediationController.volatilityWarningCopy}
+                        />
+                        {/* Transform Feedback Panel - Shows when transform completes while viewing session draft */}
+                        {transformedArticle && (
+                          <div className="mx-4 my-4 px-4 py-3 bg-purple-900/30 border border-purple-500/40 rounded-lg flex items-start gap-3">
+                            <Wand2 size={16} className="text-purple-400 mt-0.5 shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-purple-300 mb-1">Article Transform Completed</p>
+                              <p className="text-xs text-white/70">
+                                You are currently viewing the session draft. Switch to <span className="font-bold text-purple-400">Canonical Vault</span> view to preview the formatted article.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       /* ── CANONICAL VAULT EDITOR/PREVIEW (DEFAULT) ── */
                       <>
@@ -1125,6 +1140,15 @@ export default function WarRoom() {
                 hasSessionDraft={remediationController.hasSessionDraft}
                 isAuditStale={remediationController.isAuditStale}
                 sessionRemediationCount={remediationController.sessionRemediationCount}
+                sessionAuditLifecycle={remediationController.sessionAuditLifecycle}
+              />
+
+              {/* Task 7: Session Audit State Panel - Detailed lifecycle & Re-audit trigger */}
+              <SessionAuditStatePanel
+                lifecycle={remediationController.sessionAuditLifecycle}
+                onReAudit={() => remediationController.runSessionDraftReAudit(selectedNews?.id)}
+                hasSessionDraft={remediationController.hasSessionDraft}
+                sessionAuditResult={remediationController.sessionAuditResult}
               />
 
               {/* Deploy Block Reason - Display only when session draft exists */}
