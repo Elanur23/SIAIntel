@@ -54,8 +54,15 @@ import PromotionConfirmModal from './components/PromotionConfirmModal'
 import {
   executeLocalPromotionDryRun,
   type LocalPromotionDryRunInput,
-  type LocalPromotionDryRunResult
+  type LocalPromotionDryRunResult,
+  executeRealLocalPromotion
 } from './handlers/promotion-execution-handler'
+import type {
+  RealPromotionExecutionInput
+} from '@/lib/editorial/session-draft-promotion-6b2b-types'
+import type {
+  OperatorAcknowledgementState
+} from '@/lib/editorial/session-draft-promotion-types'
 
 // Fallback implementations for missing dependencies
 function formatArticleBody(body: string, lang: string): string {
@@ -179,6 +186,10 @@ export default function WarRoom() {
   // TASK 10: Promotion Finalization Summary State
   const [promotionFinalizationSummary, setPromotionFinalizationSummary] = useState<any>(null)
 
+  // TASK 12: Promotion Execution State
+  const [isPromotionExecuting, setIsPromotionExecuting] = useState(false)
+  const [promotionExecutionError, setPromotionExecutionError] = useState<string | null>(null)
+
   // PHASE 3C-3B-1: Local Remediation Controller (Scaffold Only)
   const remediationController = useLocalDraftRemediationController()
 
@@ -298,12 +309,16 @@ export default function WarRoom() {
 
   // Task 4: Reset draft source to canonical when session draft becomes unavailable
   // Task 8: Also reset comparison view when session draft becomes unavailable
+  // Task 12: Reset promotion execution error when session draft becomes unavailable
   useEffect(() => {
     if (!remediationController.hasSessionDraft && draftSource === 'session') {
       setDraftSource('canonical')
     }
     if (!remediationController.hasSessionDraft && showComparison) {
       setShowComparison(false)
+    }
+    if (!remediationController.hasSessionDraft) {
+      setPromotionExecutionError(null)
     }
   }, [remediationController.hasSessionDraft, draftSource, showComparison])
 
@@ -704,6 +719,172 @@ export default function WarRoom() {
     transformError,
     activeLang,
     vault
+  ])
+
+  // TASK 12: Real Local Promotion Execution Handler
+  const handleExecuteRealLocalPromotion = useCallback(async (acknowledgement: OperatorAcknowledgementState) => {
+    // PHASE A: Early validation before calling executeRealLocalPromotion
+    
+    // A1: Validate selectedNews
+    if (!selectedNews) {
+      setPromotionExecutionError('BLOCKED: No article selected')
+      return
+    }
+
+    // A2: Validate promotionDryRunResult exists and succeeded
+    if (!promotionDryRunResult || !promotionDryRunResult.success) {
+      setPromotionExecutionError('BLOCKED: Dry-run preview missing or failed')
+      return
+    }
+
+    // A3: Validate dry-run preview
+    const preview = promotionDryRunResult.preview
+    if (!preview) {
+      setPromotionExecutionError('BLOCKED: Dry-run preview data missing')
+      return
+    }
+
+    // A4: Validate session draft exists
+    if (!remediationController.hasSessionDraft) {
+      setPromotionExecutionError('BLOCKED: Session draft does not exist')
+      return
+    }
+
+    // A5: Validate localDraftCopy exists
+    if (!remediationController.localDraftCopy) {
+      setPromotionExecutionError('BLOCKED: Local draft copy missing')
+      return
+    }
+
+    // A6: Validate all acknowledgements are true
+    if (
+      !acknowledgement.vaultReplacementAcknowledged ||
+      !acknowledgement.auditInvalidationAcknowledged ||
+      !acknowledgement.deployLockAcknowledged ||
+      !acknowledgement.reAuditRequiredAcknowledged
+    ) {
+      setPromotionExecutionError('BLOCKED: Required acknowledgements missing')
+      return
+    }
+
+    // PHASE B: Set execution state
+    setIsPromotionExecuting(true)
+    setPromotionExecutionError(null)
+
+    try {
+      // PHASE C: Assemble executeRealLocalPromotion input
+
+      // C1: Memory-only callback wrappers
+      const applyLocalVaultUpdate = (promotedVaultContent: Record<string, { title: string; desc: string; ready: boolean }>) => {
+        try {
+          setVault(promotedVaultContent)
+          return { success: true }
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          }
+        }
+      }
+
+      const invalidateCanonicalAudit = () => {
+        try {
+          // Invalidate canonical audit state
+          setGlobalAudit(null)
+          // Invalidate active audit result (page-level)
+          // Note: auditResult will be cleared in clearDerivedPromotionState
+          return { success: true }
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          }
+        }
+      }
+
+      const clearDerivedPromotionState = () => {
+        try {
+          // Clear ONLY page-level derived state:
+          // - transformedArticle (page-level derived state)
+          // - transformError (page-level derived state)
+          // - auditResult (page-level active audit result)
+          setTransformedArticle(null)
+          setTransformError(null)
+          setAuditResult(null)
+          
+          // CRITICAL - Do NOT clear:
+          // - globalAudit (already invalidated in invalidateCanonicalAudit)
+          // - sessionAuditResult (session state, preserved until finalization)
+          // - promotionDryRunResult (preserved for traceability)
+          // - localDraftCopy (session draft, preserved until finalization)
+          // - sessionRemediationLedger (session state, preserved until finalization)
+          // - vault (already updated in applyLocalVaultUpdate)
+          
+          return { success: true }
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          }
+        }
+      }
+
+      // C2: Assemble input
+      const input: RealPromotionExecutionInput = {
+        dryRunPreview: preview,
+        precondition: preview.precondition,
+        snapshotBinding: preview.snapshotBinding,
+        sessionDraftContent: remediationController.localDraftCopy,
+        currentVault: vault,
+        acknowledgement,
+        operatorId: 'warroom-operator',
+        articleId: selectedNews.id,
+        packageId: lastImportInfo?.id || selectedNews.id,
+        requestedAt: new Date().toISOString(),
+        applyLocalVaultUpdate,
+        invalidateCanonicalAudit,
+        clearDerivedPromotionState,
+        finalizePromotionSession
+      }
+
+      // PHASE D: Execute real local promotion
+      const result = executeRealLocalPromotion(input)
+
+      // PHASE E: Handle result
+      if (result.success) {
+        // Success - close modal and show success message
+        setIsPromotionModalOpen(false)
+        setPromotionExecutionError(null)
+        
+        // Show success alert
+        alert('✅ LOCAL PROMOTION SUCCESS\n\nSession draft promoted to canonical vault.\nCanonical audit invalidated.\nFull re-audit required before deploy.\nDeploy remains locked.')
+      } else {
+        // Blocked - keep modal open and show error
+        const blockSummary = result.summary || 'Promotion blocked'
+        const blockDetails = result.blockReasons.join('\n')
+        setPromotionExecutionError(`${blockSummary}\n\n${blockDetails}`)
+        
+        // If partial mutation occurred, show critical warning
+        if (result.blockCategory === 'AUDIT_INVALIDATION' || result.blockCategory === 'SESSION_CLEAR') {
+          alert(`⚠️ CRITICAL: Promotion partially failed\n\n${blockSummary}\n\nVault may have been updated. Manual review required.`)
+        }
+      }
+    } catch (error) {
+      // Unexpected error
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      setPromotionExecutionError(`UNEXPECTED ERROR: ${errorMessage}`)
+      alert(`❌ PROMOTION FAILED\n\nUnexpected error: ${errorMessage}`)
+    } finally {
+      // PHASE F: Always clear execution state
+      setIsPromotionExecuting(false)
+    }
+  }, [
+    selectedNews,
+    promotionDryRunResult,
+    remediationController,
+    vault,
+    lastImportInfo,
+    finalizePromotionSession
   ])
 
   // PHASE 3C-3B-2: Guarded Dry-Run Handler Only
@@ -1738,7 +1919,13 @@ export default function WarRoom() {
       {/* TASK 5: Promotion Confirm Modal - UI Scaffold Only */}
       <PromotionConfirmModal
         isOpen={isPromotionModalOpen}
-        onClose={() => setIsPromotionModalOpen(false)}
+        onClose={() => {
+          // Only allow close if not executing
+          if (!isPromotionExecuting) {
+            setIsPromotionModalOpen(false)
+            setPromotionExecutionError(null)
+          }
+        }}
         precondition={promotionDryRunResult?.success ? promotionDryRunResult.preview.precondition : null}
         payloadPreview={promotionDryRunResult?.success ? promotionDryRunResult.preview.payload : null}
         draftMeta={{
@@ -1749,8 +1936,11 @@ export default function WarRoom() {
         operator={null}
         uiOptions={{
           showPayloadPreview: promotionDryRunResult?.success ?? false,
-          allowLocalAcknowledgeToggle: false
+          allowLocalAcknowledgeToggle: true
         }}
+        onPromote={handleExecuteRealLocalPromotion}
+        isPromoting={isPromotionExecuting}
+        promotionExecutionError={promotionExecutionError}
       />
     </div>
   )

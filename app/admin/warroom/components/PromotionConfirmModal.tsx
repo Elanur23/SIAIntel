@@ -13,19 +13,18 @@ import type {
 /**
  * Props for PromotionConfirmModal component.
  * 
- * CRITICAL: This modal is a UI scaffold only.
- * - No promotion execution logic
- * - No vault mutation
- * - No session mutation
- * - No deploy unlock
- * - No API calls
- * - No backend persistence
+ * TASK 12: Modal now supports real execution wiring.
+ * - onPromote callback executes real local promotion
+ * - Acknowledgement state managed by page
+ * - Execution state (isPromoting, error) managed by page
+ * - Deploy remains locked after promotion
+ * - No API calls, no backend persistence
  */
 export interface PromotionConfirmModalProps {
   /** Whether the modal is open */
   isOpen: boolean
   
-  /** Callback to close the modal (only active callback) */
+  /** Callback to close the modal */
   onClose: () => void
   
   /** Precondition check result (null if not available) */
@@ -53,35 +52,35 @@ export interface PromotionConfirmModalProps {
     showPayloadPreview?: boolean
     allowLocalAcknowledgeToggle?: boolean
   }
+  
+  /** TASK 12: Promotion execution callback */
+  onPromote?: (acknowledgement: OperatorAcknowledgementState) => Promise<void> | void
+  
+  /** TASK 12: Whether promotion is currently executing */
+  isPromoting?: boolean
+  
+  /** TASK 12: Promotion execution error message */
+  promotionExecutionError?: string | null
 }
 
 /**
- * Promotion Confirm Modal - UI Scaffold Only
+ * Promotion Confirm Modal - TASK 12: Real Execution Wiring
  * 
- * This component provides a read-only preview of promotion preconditions
- * and payload metadata. It does NOT execute promotion.
+ * This component provides promotion precondition review and execution UI.
  * 
- * CRITICAL SAFETY RULES:
- * - UI scaffold only — no promotion execution
- * - No vault mutation
- * - No session draft mutation
- * - No deploy unlock
- * - No API calls
- * - No backend persistence
+ * TASK 12 SAFETY RULES:
+ * - Memory-only local promotion (no backend/API/database/provider)
+ * - Deploy remains locked after promotion
+ * - Canonical audit invalidated after promotion
+ * - Full canonical re-audit required before deploy
  * - No localStorage/sessionStorage
- * - Promote button is permanently disabled
- * - Only onClose callback is active
- * 
- * FORBIDDEN WORDING:
- * - Do not use: "Promoted", "Saved", "Published", "Live", "Deploy Ready",
- *   "Approved for Deploy", "Final", "Complete", "Go Live", "Success",
- *   "Ready to Deploy", "Safe to Publish", "Promotion Complete", "Vault Updated"
+ * - Requires all four acknowledgements before enabling promote button
+ * - Prevents double-click execution
  * 
  * SAFE WORDING:
- * - Use: "Review Promotion Preconditions", "Promotion Intent Preview",
- *   "Staged Promotion Payload", "Not Promoted", "Not Saved to Vault",
+ * - Use: "Local Promotion Applied", "Canonical Audit Invalidated",
  *   "Deploy Remains Locked", "Canonical Re-Audit Required",
- *   "Execution Disabled in This Phase", "Review Preview", "Advisory"
+ *   "Memory-Only Promotion", "Session Draft Promoted to Vault"
  */
 export default function PromotionConfirmModal({
   isOpen,
@@ -90,11 +89,38 @@ export default function PromotionConfirmModal({
   payloadPreview,
   draftMeta,
   operator,
-  uiOptions = {}
+  uiOptions = {},
+  onPromote,
+  isPromoting = false,
+  promotionExecutionError = null
 }: PromotionConfirmModalProps) {
   // Default UI options
   const showPayloadPreview = uiOptions.showPayloadPreview ?? false
   const allowLocalAcknowledgeToggle = uiOptions.allowLocalAcknowledgeToggle ?? false
+
+  // TASK 12: Local acknowledgement state (UI-only, not persisted)
+  const [localAcknowledgement, setLocalAcknowledgement] = React.useState<OperatorAcknowledgementState>({
+    vaultReplacementAcknowledged: false,
+    auditInvalidationAcknowledged: false,
+    deployLockAcknowledged: false,
+    reAuditRequiredAcknowledged: false,
+    acknowledgedAt: '',
+    operatorId: 'warroom-operator'
+  })
+
+  // Reset acknowledgement state when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setLocalAcknowledgement({
+        vaultReplacementAcknowledged: false,
+        auditInvalidationAcknowledged: false,
+        deployLockAcknowledged: false,
+        reAuditRequiredAcknowledged: false,
+        acknowledgedAt: '',
+        operatorId: 'warroom-operator'
+      })
+    }
+  }, [isOpen])
 
   // Modal not rendered when closed
   if (!isOpen) {
@@ -105,6 +131,35 @@ export default function PromotionConfirmModal({
   const canPromote = precondition?.canPromote ?? false
   const blockReasons = precondition?.blockReasons ?? []
   const preconditions = precondition?.preconditions
+
+  // TASK 12: Determine if promote button should be enabled
+  const allAcknowledgementsChecked = 
+    localAcknowledgement.vaultReplacementAcknowledged &&
+    localAcknowledgement.auditInvalidationAcknowledged &&
+    localAcknowledgement.deployLockAcknowledged &&
+    localAcknowledgement.reAuditRequiredAcknowledged
+
+  const promoteButtonEnabled = 
+    canPromote &&
+    allAcknowledgementsChecked &&
+    !isPromoting &&
+    !!onPromote &&
+    !!precondition &&
+    !!payloadPreview
+
+  // TASK 12: Handle promote button click
+  const handlePromoteClick = async () => {
+    if (!promoteButtonEnabled || !onPromote) return
+
+    // Stamp acknowledgement with timestamp
+    const stampedAcknowledgement: OperatorAcknowledgementState = {
+      ...localAcknowledgement,
+      acknowledgedAt: new Date().toISOString()
+    }
+
+    // Call onPromote callback
+    await onPromote(stampedAcknowledgement)
+  }
 
   return (
     <div
@@ -186,15 +241,14 @@ export default function PromotionConfirmModal({
             <div className="flex items-center gap-2 mb-2">
               <ShieldAlert size={16} className="text-amber-400" />
               <h3 className="text-sm font-bold text-amber-400 uppercase">
-                Review Preview Only — No Promotion Execution
+                Memory-Only Local Promotion
               </h3>
             </div>
             <ul className="text-xs text-amber-300/90 space-y-1.5 list-disc list-inside">
-              <li><strong>This is a Review Preview only.</strong> No content has been promoted or saved to the vault.</li>
-              <li><strong>Session audit is not the canonical audit.</strong> Session audit results are advisory only.</li>
-              <li><strong>Canonical audit will be invalidated by a future promotion;</strong> this preview is advisory.</li>
-              <li><strong>Deploy remains locked.</strong> Promotion from this UI scaffold will not unlock deploy.</li>
-              <li><strong>A full protocol re-audit is required after promotion.</strong> Canonical re-audit must pass before deploy.</li>
+              <li><strong>This is a memory-only local promotion.</strong> Session draft will be promoted to canonical vault in React memory.</li>
+              <li><strong>Canonical audit will be invalidated.</strong> Full protocol re-audit required before deploy.</li>
+              <li><strong>Deploy remains locked.</strong> Promotion does not unlock deploy.</li>
+              <li><strong>No backend persistence.</strong> No API calls, no database writes, no localStorage/sessionStorage.</li>
             </ul>
           </div>
 
@@ -414,67 +468,104 @@ export default function PromotionConfirmModal({
             </div>
           )}
 
-          {/* OPERATOR ACKNOWLEDGEMENT PREVIEW */}
+          {/* OPERATOR ACKNOWLEDGEMENT CONTROLS */}
           <div className="space-y-2">
             <div className="text-xs font-bold text-white/80 uppercase tracking-wider">
               Operator Acknowledgement Required
             </div>
             <div className="p-4 bg-white/5 border border-white/10 rounded-lg space-y-3">
               <p className="text-xs text-white/70 leading-relaxed">
-                This promotion requires explicit operator acknowledgement. Acknowledgement here is local to this UI scaffold and does not perform promotion or persist state.
+                This promotion requires explicit operator acknowledgement. All four acknowledgements must be checked to enable the promote button.
               </p>
 
               <div className="space-y-2">
-                <label className="flex items-start gap-2 opacity-50 cursor-not-allowed">
+                <label className={`flex items-start gap-2 ${allowLocalAcknowledgeToggle ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                   <input
                     type="checkbox"
-                    disabled={!allowLocalAcknowledgeToggle}
-                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2 cursor-not-allowed"
+                    disabled={!allowLocalAcknowledgeToggle || isPromoting}
+                    checked={localAcknowledgement.vaultReplacementAcknowledged}
+                    onChange={(e) => setLocalAcknowledgement(prev => ({
+                      ...prev,
+                      vaultReplacementAcknowledged: e.target.checked
+                    }))}
+                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2"
                   />
-                  <span className="text-xs text-white/60 leading-relaxed">
-                    I understand this session audit is not the canonical audit.
+                  <span className="text-xs text-white/80 leading-relaxed">
+                    I understand session draft will replace canonical vault content in memory.
                   </span>
                 </label>
 
-                <label className="flex items-start gap-2 opacity-50 cursor-not-allowed">
+                <label className={`flex items-start gap-2 ${allowLocalAcknowledgeToggle ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                   <input
                     type="checkbox"
-                    disabled={!allowLocalAcknowledgeToggle}
-                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2 cursor-not-allowed"
+                    disabled={!allowLocalAcknowledgeToggle || isPromoting}
+                    checked={localAcknowledgement.auditInvalidationAcknowledged}
+                    onChange={(e) => setLocalAcknowledgement(prev => ({
+                      ...prev,
+                      auditInvalidationAcknowledged: e.target.checked
+                    }))}
+                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2"
                   />
-                  <span className="text-xs text-white/60 leading-relaxed">
-                    I understand promotion does not unlock deploy.
+                  <span className="text-xs text-white/80 leading-relaxed">
+                    I understand canonical audit will be invalidated and full re-audit is required.
                   </span>
                 </label>
 
-                <label className="flex items-start gap-2 opacity-50 cursor-not-allowed">
+                <label className={`flex items-start gap-2 ${allowLocalAcknowledgeToggle ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                   <input
                     type="checkbox"
-                    disabled={!allowLocalAcknowledgeToggle}
-                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2 cursor-not-allowed"
+                    disabled={!allowLocalAcknowledgeToggle || isPromoting}
+                    checked={localAcknowledgement.deployLockAcknowledged}
+                    onChange={(e) => setLocalAcknowledgement(prev => ({
+                      ...prev,
+                      deployLockAcknowledged: e.target.checked
+                    }))}
+                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2"
                   />
-                  <span className="text-xs text-white/60 leading-relaxed">
-                    I understand canonical audit will be invalidated.
+                  <span className="text-xs text-white/80 leading-relaxed">
+                    I understand deploy remains locked after promotion.
                   </span>
                 </label>
 
-                <label className="flex items-start gap-2 opacity-50 cursor-not-allowed">
+                <label className={`flex items-start gap-2 ${allowLocalAcknowledgeToggle ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                   <input
                     type="checkbox"
-                    disabled={!allowLocalAcknowledgeToggle}
-                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2 cursor-not-allowed"
+                    disabled={!allowLocalAcknowledgeToggle || isPromoting}
+                    checked={localAcknowledgement.reAuditRequiredAcknowledged}
+                    onChange={(e) => setLocalAcknowledgement(prev => ({
+                      ...prev,
+                      reAuditRequiredAcknowledged: e.target.checked
+                    }))}
+                    className="mt-1 w-4 h-4 text-amber-600 bg-gray-900 border-gray-600 rounded focus:ring-amber-500 focus:ring-2"
                   />
-                  <span className="text-xs text-white/60 leading-relaxed">
+                  <span className="text-xs text-white/80 leading-relaxed">
                     I understand full canonical re-audit is required before deploy.
                   </span>
                 </label>
               </div>
 
-              <div className="p-2 bg-gray-900/50 border border-gray-700 rounded text-xs text-gray-400 italic text-center">
-                Acknowledgement controls disabled in UI scaffold
-              </div>
+              {!allowLocalAcknowledgeToggle && (
+                <div className="p-2 bg-gray-900/50 border border-gray-700 rounded text-xs text-gray-400 italic text-center">
+                  Acknowledgement controls disabled (allowLocalAcknowledgeToggle not enabled)
+                </div>
+              )}
             </div>
           </div>
+
+          {/* TASK 12: Promotion Execution Error Display */}
+          {promotionExecutionError && (
+            <div className="p-4 bg-red-900/30 border-2 border-red-500/50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle size={16} className="text-red-400" />
+                <h3 className="text-sm font-bold text-red-400 uppercase">
+                  Promotion Execution Error
+                </h3>
+              </div>
+              <p className="text-xs text-red-300/90 leading-relaxed font-mono">
+                {promotionExecutionError}
+              </p>
+            </div>
+          )}
 
           {/* MANDATORY SAFETY FOOTERS */}
           <div className="space-y-1.5 pt-2">
@@ -496,26 +587,50 @@ export default function PromotionConfirmModal({
         {/* Footer Actions */}
         <footer className="p-4 border-t border-white/10 bg-gray-900/50 space-y-3">
           <div className="flex flex-col sm:flex-row gap-3">
-            {/* Primary button - Disabled */}
+            {/* Primary button - Promote (enabled when all acknowledgements checked) */}
             <button
-              disabled={true}
-              className="flex-1 px-4 py-3 bg-gray-600 text-gray-400 rounded cursor-not-allowed text-sm font-bold"
-              title="Promotion disabled in UI scaffold. This modal only previews preconditions and payload. No promotion will be executed."
+              disabled={!promoteButtonEnabled}
+              onClick={handlePromoteClick}
+              className={`flex-1 px-4 py-3 rounded text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                promoteButtonEnabled
+                  ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              }`}
+              title={
+                !canPromote
+                  ? 'Preconditions not met'
+                  : !allAcknowledgementsChecked
+                  ? 'All acknowledgements must be checked'
+                  : isPromoting
+                  ? 'Promotion in progress'
+                  : !onPromote
+                  ? 'Promotion handler not provided'
+                  : !precondition || !payloadPreview
+                  ? 'Precondition or payload missing'
+                  : 'Execute memory-only local promotion'
+              }
             >
-              Promote Disabled in Scaffold
+              {isPromoting ? 'Promoting...' : 'Promote to Canonical Vault'}
             </button>
 
-            {/* Secondary button - Active */}
+            {/* Secondary button - Close/Cancel */}
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+              disabled={isPromoting}
+              className={`flex-1 px-4 py-3 rounded text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                isPromoting
+                  ? 'bg-white/5 text-white/40 cursor-not-allowed'
+                  : 'bg-white/10 hover:bg-white/20 text-white'
+              }`}
             >
-              Dismiss Review
+              {isPromoting ? 'Executing...' : 'Cancel'}
             </button>
           </div>
 
           <p className="text-xs text-white/40 text-center italic">
-            Execution Disabled in This Phase — Review Preview Only
+            {isPromoting 
+              ? 'Promotion in progress — do not close this window'
+              : 'Memory-Only Local Promotion — Deploy Remains Locked'}
           </p>
         </footer>
       </div>
