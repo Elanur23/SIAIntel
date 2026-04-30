@@ -176,6 +176,9 @@ export default function WarRoom() {
   // TASK 6B-1: Promotion Dry-Run Preview State
   const [promotionDryRunResult, setPromotionDryRunResult] = useState<LocalPromotionDryRunResult | null>(null)
 
+  // TASK 10: Promotion Finalization Summary State
+  const [promotionFinalizationSummary, setPromotionFinalizationSummary] = useState<any>(null)
+
   // PHASE 3C-3B-1: Local Remediation Controller (Scaffold Only)
   const remediationController = useLocalDraftRemediationController()
 
@@ -192,6 +195,42 @@ export default function WarRoom() {
     jp: { title: '', desc: '', ready: false },
     zh: { title: '', desc: '', ready: false },
   })
+
+  // TASK 10: Finalization Callback - Archive + Clear Session Draft
+  const finalizePromotionSession = useCallback(() => {
+    try {
+      // PHASE 1: Archive session evidence BEFORE clearing
+      const archive = remediationController.archivePromotionSession({
+        executionId: `finalize_${Date.now()}`,
+        operatorId: 'warroom-operator',
+        promotedLanguages: Object.keys(vault).filter(lang => vault[lang].ready)
+      });
+
+      // Store archive in page-level state
+      setPromotionFinalizationSummary(archive);
+
+      // PHASE 2: Clear session draft state
+      remediationController.clearLocalDraftSession();
+
+      // PHASE 3: Return success with finalization summary
+      return {
+        success: true,
+        finalizationSummary: {
+          ...archive,
+          finalizedAt: new Date().toISOString()
+        },
+        sessionCleared: true
+      };
+    } catch (error) {
+      // Archive or clear failed - return error WITHOUT clearing
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        success: false,
+        error: `Session finalization failed: ${errorMessage}`,
+        sessionCleared: false
+      };
+    }
+  }, [remediationController, vault]);
 
   // Protocol configuration
   const [protocolConfig, setProtocolConfig] = useState({

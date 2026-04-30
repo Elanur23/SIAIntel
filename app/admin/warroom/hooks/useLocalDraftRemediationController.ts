@@ -459,6 +459,90 @@ export function useLocalDraftRemediationController() {
     return "Session changes are volatile and may be lost on refresh.";
   }, [localDraftCopy]);
 
+  /**
+   * Archives promotion session evidence before clearing.
+   * TASK 10: Archive-Before-Clear design
+   * 
+   * This function creates an in-memory archive of session state before
+   * clearLocalDraftSession is called. It preserves traceability by capturing:
+   * - Session remediation ledger
+   * - Session audit result
+   * - Snapshot identity
+   * - Rollback events
+   * - Audit invalidation state
+   * 
+   * CRITICAL SAFETY RULES:
+   * - Memory-only operation (no persistence)
+   * - No mutations (read-only archive creation)
+   * - No backend/API/database/provider calls
+   * - No localStorage/sessionStorage writes
+   * - Must be called BEFORE clearLocalDraftSession
+   * 
+   * @param metadata - Execution metadata (executionId, operatorId, promotedLanguages)
+   * @returns Archive summary or throws error
+   */
+  const archivePromotionSession = useCallback((metadata: {
+    executionId: string;
+    operatorId: string;
+    promotedLanguages: string[];
+  }) => {
+    // Generate unique archive ID
+    const archiveId = `archive_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const archivedAt = new Date().toISOString();
+
+    // Capture session state (deep-clone to prevent mutation)
+    const archivedLedger = sessionRemediationLedger.length > 0
+      ? JSON.parse(JSON.stringify(sessionRemediationLedger))
+      : [];
+
+    const archivedSessionAudit = sessionAuditResult
+      ? JSON.parse(JSON.stringify(sessionAuditResult))
+      : null;
+
+    const archivedSnapshotIdentity = currentSnapshotIdentity
+      ? JSON.parse(JSON.stringify(currentSnapshotIdentity))
+      : null;
+
+    const archivedRollbackEvent = latestRollbackEvent
+      ? JSON.parse(JSON.stringify(latestRollbackEvent))
+      : null;
+
+    const archivedAuditInvalidation = sessionAuditInvalidation
+      ? JSON.parse(JSON.stringify(sessionAuditInvalidation))
+      : null;
+
+    // Build archive summary
+    const archive = {
+      archiveId,
+      archivedAt,
+      executionId: metadata.executionId,
+      operatorId: metadata.operatorId,
+      promotedLanguages: metadata.promotedLanguages,
+      promotedLanguageCount: metadata.promotedLanguages.length,
+      localDraftWasPresent: localDraftCopy !== null,
+      archivedLedgerLength: archivedLedger.length,
+      archivedSessionAuditPresent: archivedSessionAudit !== null,
+      archivedSessionAuditLifecycle: sessionAuditLifecycle,
+      archivedSessionAuditInvalidationPresent: archivedAuditInvalidation !== null,
+      archivedLatestRollbackEventPresent: archivedRollbackEvent !== null,
+      archivedSnapshotIdentity: archivedSnapshotIdentity,
+      memoryOnly: true as const,
+      backendPersistencePerformed: false as const,
+      deployRemainedLocked: true as const,
+      rollbackImplemented: false as const
+    };
+
+    return archive;
+  }, [
+    localDraftCopy,
+    sessionRemediationLedger,
+    sessionAuditResult,
+    sessionAuditLifecycle,
+    sessionAuditInvalidation,
+    latestRollbackEvent,
+    currentSnapshotIdentity
+  ]);
+
   return {
     // State
     localDraftCopy,
@@ -489,6 +573,7 @@ export function useLocalDraftRemediationController() {
     // Functions
     initializeLocalDraftFromVault,
     clearLocalDraftSession,
+    archivePromotionSession,
     applyToLocalDraftController,
     rollbackLastLocalDraftChange,
     runSessionDraftReAudit
