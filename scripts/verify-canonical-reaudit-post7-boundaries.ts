@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 
 /**
- * Verification Script: Canonical Re-Audit Post-Task 7A Boundaries
+ * Verification Script: Canonical Re-Audit Post-Task 7 Boundaries
  * 
- * Validates that Task 7A did NOT violate boundaries:
- * - page.tsx was NOT modified
+ * Validates that Task 7B wiring did NOT violate boundaries:
+ * - page.tsx renders CanonicalReAuditPanel with hook state only
  * - Hooks were NOT modified
  * - Handlers were NOT modified
  * - Adapters were NOT modified
@@ -15,7 +15,6 @@
  */
 
 import * as fs from 'fs'
-import * as path from 'path'
 import { execSync } from 'child_process'
 
 let passCount = 0
@@ -58,6 +57,125 @@ function checkFileNotModified(filePath: string, description: string): void {
     }
     pass(`${description} not modified`)
   }
+}
+
+function checkFileContains(filePath: string, description: string, predicate: (content: string) => string | null): void {
+  if (!fs.existsSync(filePath)) {
+    fail(description, `File not found: ${filePath}`)
+    return
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8')
+  const error = predicate(content)
+  if (error) {
+    fail(description, error)
+    return
+  }
+  pass(description)
+}
+
+function countMatches(content: string, pattern: RegExp): number {
+  const matches = content.match(pattern)
+  return matches ? matches.length : 0
+}
+
+function checkTask7BWiring(): void {
+  const pagePath = 'app/admin/warroom/page.tsx'
+
+  checkFileContains(pagePath, 'page.tsx imports CanonicalReAuditPanel', (content) => {
+    return content.includes('./components/CanonicalReAuditPanel') ? null : 'Missing import for CanonicalReAuditPanel'
+  })
+
+  checkFileContains(pagePath, 'page.tsx imports useCanonicalReAudit', (content) => {
+    return content.includes('./hooks/useCanonicalReAudit') ? null : 'Missing import for useCanonicalReAudit'
+  })
+
+  checkFileContains(pagePath, 'page.tsx instantiates useCanonicalReAudit exactly once', (content) => {
+    const count = countMatches(content, /useCanonicalReAudit\s*\(/g)
+    return count === 1 ? null : `Expected exactly 1 useCanonicalReAudit() call, found ${count}`
+  })
+
+  checkFileContains(pagePath, 'page.tsx computes canonicalReAuditVisible with required terms', (content) => {
+    if (!content.includes('const canonicalReAuditVisible')) {
+      return 'Missing canonicalReAuditVisible declaration'
+    }
+    const requiredTerms = ['Boolean(selectedNews)', "draftSource === 'canonical'", '!remediationController.hasSessionDraft']
+    for (const term of requiredTerms) {
+      if (!content.includes(term)) {
+        return `Missing required visibility term: ${term}`
+      }
+    }
+    return null
+  })
+
+  checkFileContains(pagePath, 'page.tsx renders CanonicalReAuditPanel exactly once', (content) => {
+    const count = countMatches(content, /<CanonicalReAuditPanel\b/g)
+    return count === 1 ? null : `Expected exactly 1 <CanonicalReAuditPanel, found ${count}`
+  })
+
+  checkFileContains(pagePath, 'page.tsx passes only allowed props to CanonicalReAuditPanel', (content) => {
+    const match = content.match(/<CanonicalReAuditPanel([\s\S]*?)\/>/m)
+    if (!match) return 'Could not locate CanonicalReAuditPanel JSX node'
+    const propsBlock = match[1]
+
+    const allowedProps = [
+      'visible=',
+      'articleId=',
+      'status=',
+      'result=',
+      'error=',
+      'isRunning=',
+      'snapshotIdentity=',
+    ]
+
+    for (const prop of allowedProps) {
+      if (!propsBlock.includes(prop)) {
+        return `Missing required prop on CanonicalReAuditPanel: ${prop}`
+      }
+    }
+
+    const forbiddenPropTokens = [
+      'run=',
+      'reset=',
+      'clearError=',
+      'onStatusChange=',
+      'onResult=',
+      'onRun=',
+      'onReset=',
+      'onAccept=',
+      'onPromote=',
+      'onDeploy=',
+      'onSave=',
+    ]
+    for (const token of forbiddenPropTokens) {
+      if (propsBlock.includes(token)) {
+        return `Forbidden prop passed to CanonicalReAuditPanel: ${token}`
+      }
+    }
+
+    const propAssignments = propsBlock
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && !l.startsWith('<') && !l.startsWith('/>'))
+
+    const unexpected = propAssignments.filter((line) => {
+      const isAllowed = allowedProps.some((p) => line.startsWith(p))
+      const isIgnored = line === '>' || line === '/>'
+      return !isAllowed && !isIgnored
+    })
+    if (unexpected.length > 0) {
+      return `Unexpected props/lines on CanonicalReAuditPanel: ${unexpected.join(' | ')}`
+    }
+    return null
+  })
+
+  checkFileContains(pagePath, 'page.tsx does not call canonicalReAudit.run/reset/clearError', (content) => {
+    const forbiddenCalls = ['canonicalReAudit.run(', 'canonicalReAudit.reset(', 'canonicalReAudit.clearError(']
+    for (const call of forbiddenCalls) {
+      if (content.includes(call)) return `Found forbidden call: ${call}`
+    }
+    return null
+  })
 }
 
 function checkComponentContent(): void {
@@ -148,10 +266,10 @@ function checkNoDBProviderModifications(): void {
 }
 
 // Main execution
-console.log('🔍 Verifying Task 7A Boundaries...\n')
+console.log('🔍 Verifying Task 7B Boundaries...\n')
 
-// Check that forbidden files were NOT modified
-checkFileNotModified('app/admin/warroom/page.tsx', 'page.tsx')
+// Check Task 7B wiring on page.tsx
+checkTask7BWiring()
 checkFileNotModified('app/admin/warroom/hooks/useCanonicalReAudit.ts', 'useCanonicalReAudit hook')
 checkFileNotModified('app/admin/warroom/handlers/canonical-reaudit-handler.ts', 'canonical-reaudit-handler')
 checkFileNotModified('lib/editorial/canonical-reaudit-adapter.ts', 'canonical-reaudit-adapter')
@@ -175,7 +293,7 @@ console.log(`❌ FAILED: ${failCount}`)
 console.log('='.repeat(60))
 
 if (failCount > 0) {
-  console.error('\n❌ VERIFICATION FAILED: Task 7A boundaries violated')
+  console.error('\n❌ VERIFICATION FAILED: Task 7B boundaries violated')
   process.exit(1)
 }
 

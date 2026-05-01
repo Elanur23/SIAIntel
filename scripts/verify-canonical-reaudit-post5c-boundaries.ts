@@ -18,6 +18,118 @@ function readIfExists(filePath: string): string {
   return fs.readFileSync(filePath, 'utf-8');
 }
 
+function countMatches(content: string, pattern: RegExp): number {
+  const matches = content.match(pattern);
+  return matches ? matches.length : 0;
+}
+
+function findMatchingParen(source: string, openParenIndex: number): number {
+  let depth = 0;
+  for (let i = openParenIndex; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === '(') depth++;
+    if (ch === ')') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function extractUseEffectCalls(source: string): string[] {
+  const calls: string[] = [];
+  let idx = 0;
+  while (idx < source.length) {
+    const start = source.indexOf('useEffect', idx);
+    if (start === -1) break;
+    const openParen = source.indexOf('(', start);
+    if (openParen === -1) break;
+    const closeParen = findMatchingParen(source, openParen);
+    if (closeParen === -1) break;
+    calls.push(source.slice(start, closeParen + 1));
+    idx = closeParen + 1;
+  }
+  return calls;
+}
+
+function extractCanonicalPanelPropsBlock(source: string): string | null {
+  const match = source.match(/<CanonicalReAuditPanel([\s\S]*?)\/>/m);
+  if (!match) return null;
+  return match[1] || '';
+}
+
+function assertReadOnlyPageWiring(pageSource: string): void {
+  // Core: still forbid direct startCanonicalReAudit usage
+  assert(!pageSource.includes('startCanonicalReAudit'), 'page.tsx does not call startCanonicalReAudit');
+
+  // If Task 7B wiring is present, enforce strict read-only constraints.
+  const referencesHook = pageSource.includes('useCanonicalReAudit');
+  if (!referencesHook) {
+    assert(true, 'page.tsx does not reference useCanonicalReAudit');
+    return;
+  }
+
+  assert(true, 'page.tsx references useCanonicalReAudit (phase-aware allowance)');
+
+  // Ensure hook is instantiated exactly once.
+  const hookCallCount = countMatches(pageSource, /useCanonicalReAudit\s*\(/g);
+  assert(hookCallCount === 1, `page.tsx instantiates useCanonicalReAudit exactly once (found ${hookCallCount})`);
+
+  // No execution or state mutation calls
+  const forbiddenCalls = [
+    'canonicalReAudit.run(', 
+    'canonicalReAudit.reset(', 
+    'canonicalReAudit.clearError(',
+  ];
+  for (const token of forbiddenCalls) {
+    assert(!pageSource.includes(token), `page.tsx does not call ${token}`);
+  }
+
+  // No auto-trigger patterns
+  const effects = extractUseEffectCalls(pageSource);
+  let hasEffectWithCanonical = false;
+  for (const effect of effects) {
+    if (effect.includes('canonicalReAudit')) {
+      hasEffectWithCanonical = true;
+      break;
+    }
+  }
+  assert(!hasEffectWithCanonical, 'page.tsx does not useEffect auto-trigger canonicalReAudit');
+
+  // No forbidden props passed to CanonicalReAuditPanel (read-only wiring only)
+  const panelProps = extractCanonicalPanelPropsBlock(pageSource);
+  assert(panelProps !== null, 'page.tsx renders CanonicalReAuditPanel');
+  const forbiddenPanelPropTokens = [
+    'run=',
+    'reset=',
+    'clearError=',
+    'onStatusChange=',
+    'onResult=',
+    'onRun=',
+    'onReset=',
+    'onAccept=',
+    'onPromote=',
+    'onDeploy=',
+    'onSave=',
+  ];
+  for (const token of forbiddenPanelPropTokens) {
+    assert(!panelProps!.includes(token), `CanonicalReAuditPanel does not receive forbidden prop ${token}`);
+  }
+
+  // No trigger UI tied to canonical re-audit
+  assert(!/onClick\s*=\s*\{[^}]*canonicalReAudit[^}]*\}/m.test(pageSource), 'page.tsx does not introduce onClick tied to canonicalReAudit');
+  assert(!/<button[^>]*canonicalReAudit[^>]*>/m.test(pageSource), 'page.tsx does not introduce button tied to canonicalReAudit');
+
+  // No deploy unlock introduced by canonical re-audit wiring
+  assert(!pageSource.includes('deployUnlockAllowed: true'), 'page.tsx does not introduce deployUnlockAllowed: true');
+
+  // Guardrails: canonical re-audit wiring must not mutate global audit or vault.
+  // page.tsx already legitimately contains setGlobalAudit/setVault for other workflows; we only
+  // enforce that canonicalReAudit itself is not coupled to these setters.
+  assert(!/setGlobalAudit\s*\(\s*canonicalReAudit/m.test(pageSource), 'page.tsx does not couple canonicalReAudit to setGlobalAudit');
+  assert(!/setVault\s*\(\s*canonicalReAudit/m.test(pageSource), 'page.tsx does not couple canonicalReAudit to setVault');
+}
+
 function walkFiles(dir: string, extensions: string[]): string[] {
   if (!fs.existsSync(dir)) return [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -43,10 +155,9 @@ const pagePath = path.join(repoRoot, 'app/admin/warroom/page.tsx');
 const componentsDir = path.join(repoRoot, 'app/admin/warroom/components');
 const handlerPath = path.join(repoRoot, 'app/admin/warroom/handlers/canonical-reaudit-handler.ts');
 
-// 1. No page.tsx canonical re-audit wiring
+// 1. Phase-aware page.tsx canonical re-audit wiring policy
 const pageSource = readIfExists(pagePath);
-assert(!pageSource.includes('useCanonicalReAudit'), 'page.tsx does not reference useCanonicalReAudit');
-assert(!pageSource.includes('startCanonicalReAudit'), 'page.tsx does not call startCanonicalReAudit');
+assertReadOnlyPageWiring(pageSource);
 
 // 2. No UI component canonical re-audit wiring
 const componentFiles = walkFiles(componentsDir, ['.ts', '.tsx']);

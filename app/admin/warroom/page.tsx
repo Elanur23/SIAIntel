@@ -38,7 +38,9 @@ import SessionStatusChips from './components/SessionStatusChips'
 import SessionAuditStatePanel from './components/SessionAuditStatePanel'
 import SessionLedgerSummary from './components/SessionLedgerSummary'
 import SessionDraftComparison from './components/SessionDraftComparison'
+import CanonicalReAuditPanel from './components/CanonicalReAuditPanel'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
+import { useCanonicalReAudit } from './hooks/useCanonicalReAudit'
 import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
 import {
   type LocalDraftApplyRequest,
@@ -190,8 +192,10 @@ export default function WarRoom() {
   const [isPromotionExecuting, setIsPromotionExecuting] = useState(false)
   const [promotionExecutionError, setPromotionExecutionError] = useState<string | null>(null)
 
-  // PHASE 3C-3B-1: Local Remediation Controller (Scaffold Only)
+  // PHASE 3C-3C-3B-1: Local Remediation Controller (Scaffold Only)
   const remediationController = useLocalDraftRemediationController()
+
+  const canonicalReAudit = useCanonicalReAudit()
 
   const [vault, setVault] = useState<
     Record<string, { title: string; desc: string; ready: boolean }>
@@ -294,6 +298,11 @@ export default function WarRoom() {
     protocolConfig.enableScarcityTone,
     remediationController.hasSessionDraft
   ])
+
+  const canonicalReAuditVisible =
+    Boolean(selectedNews) &&
+    draftSource === 'canonical' &&
+    !remediationController.hasSessionDraft
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
 
@@ -1479,6 +1488,16 @@ export default function WarRoom() {
                 onReAudit={() => remediationController.runSessionDraftReAudit(selectedNews?.id)}
                 hasSessionDraft={remediationController.hasSessionDraft}
                 sessionAuditResult={remediationController.sessionAuditResult}
+              />
+
+              <CanonicalReAuditPanel
+                visible={canonicalReAuditVisible}
+                articleId={selectedNews?.id ?? null}
+                status={canonicalReAudit.status}
+                result={canonicalReAudit.result}
+                error={canonicalReAudit.error}
+                isRunning={canonicalReAudit.isRunning}
+                snapshotIdentity={canonicalReAudit.snapshotIdentity}
               />
 
               {/* Deploy Block Reason - Display only when session draft exists */}
