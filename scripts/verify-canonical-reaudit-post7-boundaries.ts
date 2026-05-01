@@ -234,6 +234,76 @@ function checkTask7C1Implementation(): void {
   }
 }
 
+function checkTask7C2B1Implementation(): void {
+  const pagePath = 'app/admin/warroom/page.tsx'
+  const controllerPath = 'app/admin/warroom/controllers/canonical-reaudit-run-controller.ts'
+  const modalPath = 'app/admin/warroom/components/CanonicalReAuditConfirmModal.tsx'
+
+  // Check controller exists
+  if (!fs.existsSync(controllerPath)) {
+    fail('Task 7C-2B-1: Controller exists', 'Controller file not found')
+  } else {
+    pass('Task 7C-2B-1: Controller exists')
+  }
+
+  // Check controller is client-safe
+  checkFileContains(controllerPath, 'Task 7C-2B-1: Controller is client-safe', (content) => {
+    const serverPatterns = [
+      /import.*['"]fs['"]/, /import.*['"]path['"]/, /import.*['"]crypto['"]/, 
+      /import.*['"]next\/server['"]/, /import.*['"]next\/headers['"]/, 
+      /import.*['"]cookies['"]/, /import.*['"]prisma/, /import.*['"]libsql/, /import.*['"]turso/,
+      /fetch\s*\(/, /axios\./, /localStorage\./, /sessionStorage\./
+    ]
+    
+    for (const pattern of serverPatterns) {
+      if (pattern.test(content)) {
+        return `Found server pattern: ${pattern.source}`
+      }
+    }
+    return null
+  })
+
+  // Check gate evaluation exists
+  checkFileContains(controllerPath, 'Task 7C-2B-1: Gate evaluation exists', (content) => {
+    return content.includes('evaluateCanonicalReAuditRunGate') ? null : 'Gate evaluation function not found'
+  })
+
+  // Check modal execute remains disabled
+  checkFileContains(modalPath, 'Task 7C-2B-1: Modal execute remains disabled', (content) => {
+    return content.includes('disabled={true}') && content.includes('(Disabled)') ? 
+      null : 'Execute button not properly disabled'
+  })
+
+  // Check no UI path to executeConfirmedRun
+  const uiFiles = [pagePath, modalPath]
+  let foundExecutePaths: string[] = []
+
+  uiFiles.forEach(filePath => {
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf-8')
+      const codeOnly = content
+        .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
+        .replace(/\/\/.*$/gm, '')
+      
+      if (codeOnly.includes('executeConfirmedRun')) {
+        foundExecutePaths.push(filePath)
+      }
+    }
+  })
+
+  if (foundExecutePaths.length === 0) {
+    pass('Task 7C-2B-1: No UI path invokes executeConfirmedRun')
+  } else {
+    fail('Task 7C-2B-1: No UI path invokes executeConfirmedRun', 
+      `Found executeConfirmedRun in: ${foundExecutePaths.join(', ')}`)
+  }
+
+  // Check page imports gate evaluation
+  checkFileContains(pagePath, 'Task 7C-2B-1: Page imports gate evaluation', (content) => {
+    return content.includes('evaluateCanonicalReAuditRunGate') ? null : 'Gate evaluation not imported'
+  })
+}
+
 function checkComponentContent(): void {
   const componentPath = 'app/admin/warroom/components/CanonicalReAuditPanel.tsx'
   
@@ -329,6 +399,9 @@ checkTask7BWiring()
 
 // Check Task 7C-1 implementation
 checkTask7C1Implementation()
+
+// Check Task 7C-2B-1 implementation
+checkTask7C2B1Implementation()
 
 checkFileNotModified('app/admin/warroom/hooks/useCanonicalReAudit.ts', 'useCanonicalReAudit hook')
 checkFileNotModified('app/admin/warroom/handlers/canonical-reaudit-handler.ts', 'canonical-reaudit-handler')

@@ -47,6 +47,11 @@ import {
   buildCanonicalReAuditPreflight,
   type CanonicalReAuditPreflightResult
 } from '@/lib/editorial/canonical-reaudit-input-builder'
+import {
+  evaluateCanonicalReAuditRunGate,
+  type CanonicalReAuditRunGateStateFields,
+  type CanonicalReAuditRunGateResultFields
+} from './controllers/canonical-reaudit-run-controller'
 import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
 import {
   type LocalDraftApplyRequest,
@@ -355,6 +360,33 @@ export default function WarRoom() {
     remediationController.hasSessionDraft,
     canonicalReAudit.isRunning,
     lastImportInfo?.id
+  ])
+
+  // TASK 7C-2B-1: Canonical Re-Audit Gate Result Computation
+  const canonicalReAuditGateResult: CanonicalReAuditRunGateResultFields | null = useMemo(() => {
+    if (!canonicalReAuditPreflight) {
+      return null
+    }
+
+    const gateState: CanonicalReAuditRunGateStateFields = {
+      preflightCanRun: canonicalReAuditPreflight.canRun,
+      hasComputedInput: Boolean(canonicalReAuditPreflight.computedInput),
+      allAcknowledgementsChecked: false, // Modal owns acknowledgement state
+      attestationMatches: false, // Modal owns attestation state
+      isRunning: canonicalReAudit.isRunning,
+      draftSource: draftSource,
+      hasSessionDraft: remediationController.hasSessionDraft,
+      selectedArticleId: selectedNews?.id,
+      computedInputArticleId: canonicalReAuditPreflight.computedInput?.articleId
+    }
+
+    return evaluateCanonicalReAuditRunGate(gateState)
+  }, [
+    canonicalReAuditPreflight,
+    canonicalReAudit.isRunning,
+    draftSource,
+    remediationController.hasSessionDraft,
+    selectedNews?.id
   ])
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
@@ -2024,13 +2056,14 @@ export default function WarRoom() {
         promotionExecutionError={promotionExecutionError}
       />
 
-      {/* TASK 7C-1: Canonical Re-Audit Confirm Modal - UI Scaffold Only */}
+      {/* TASK 7C-2B-1: Canonical Re-Audit Confirm Modal - UI Scaffold with Gate Evaluation */}
       <CanonicalReAuditConfirmModal
         isOpen={isCanonicalReAuditConfirmOpen}
         onClose={() => setIsCanonicalReAuditConfirmOpen(false)}
         disabledReason={canonicalReAuditTriggerDisabledReason}
         articleId={selectedNews?.id ?? null}
         preflight={canonicalReAuditPreflight}
+        gateResult={canonicalReAuditGateResult}
       />
     </div>
   )

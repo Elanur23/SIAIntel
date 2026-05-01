@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 import type { CanonicalReAuditPreflightResult } from '@/lib/editorial/canonical-reaudit-input-builder'
+import type { CanonicalReAuditRunGateResultFields } from '../controllers/canonical-reaudit-run-controller'
 
 interface CanonicalReAuditConfirmModalProps {
   isOpen: boolean
@@ -20,6 +21,7 @@ interface CanonicalReAuditConfirmModalProps {
   disabledReason?: string | null
   articleId?: string | null
   preflight?: CanonicalReAuditPreflightResult | null
+  gateResult?: CanonicalReAuditRunGateResultFields | null
 }
 
 /**
@@ -42,7 +44,8 @@ export default function CanonicalReAuditConfirmModal({
   onClose,
   disabledReason,
   articleId,
-  preflight
+  preflight,
+  gateResult
 }: CanonicalReAuditConfirmModalProps) {
   // Internal acknowledgement state
   const [acknowledgements, setAcknowledgements] = useState({
@@ -53,7 +56,10 @@ export default function CanonicalReAuditConfirmModal({
     noSavePublishDeploy: false
   })
 
-  // Reset acknowledgements when modal opens
+  // Typed attestation state
+  const [typedAttestation, setTypedAttestation] = useState('')
+
+  // Reset acknowledgements and typed attestation when modal opens
   React.useEffect(() => {
     if (isOpen) {
       setAcknowledgements({
@@ -63,10 +69,14 @@ export default function CanonicalReAuditConfirmModal({
         acceptanceLaterPhase: false,
         noSavePublishDeploy: false
       })
+      setTypedAttestation('')
     }
   }, [isOpen])
 
   const allAcknowledged = Object.values(acknowledgements).every(Boolean)
+  const attestationMatches = preflight?.attestationPhrase ? 
+    typedAttestation.trim() === preflight.attestationPhrase.trim() : 
+    true // No attestation required if no phrase provided
 
   const handleAcknowledgementChange = (key: keyof typeof acknowledgements) => {
     setAcknowledgements(prev => ({
@@ -242,6 +252,54 @@ export default function CanonicalReAuditConfirmModal({
                   Required Acknowledgements
                 </div>
 
+                {/* Typed Attestation Input */}
+                {preflight?.attestationPhrase && (
+                  <div className="px-4 py-3 bg-blue-900/20 border border-blue-500/30 rounded-lg mb-4">
+                    <div className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">
+                      Type the exact phrase to confirm
+                    </div>
+                    <div className="mb-3 px-3 py-2 bg-blue-800/30 border border-blue-600/40 rounded font-mono text-sm text-blue-300">
+                      {preflight.attestationPhrase}
+                    </div>
+                    <input
+                      type="text"
+                      value={typedAttestation}
+                      onChange={(e) => setTypedAttestation(e.target.value)}
+                      placeholder="Type attestation phrase exactly..."
+                      className="w-full bg-black/65 border border-blue-500/30 rounded-md px-3 py-2 text-sm text-white/90 font-mono outline-none focus:border-blue-400/60 transition-colors placeholder:text-white/30"
+                    />
+                    {typedAttestation && !attestationMatches && (
+                      <div className="mt-2 text-xs text-red-400 flex items-center gap-2">
+                        <X size={12} />
+                        Attestation does not match
+                      </div>
+                    )}
+                    {typedAttestation && attestationMatches && (
+                      <div className="mt-2 text-xs text-green-400 flex items-center gap-2">
+                        <ShieldCheck size={12} />
+                        Attestation verified
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Gate Result Display */}
+                {gateResult && gateResult.blockReasons.length > 0 && (
+                  <div className="px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg mb-4">
+                    <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">
+                      Execution Gate Status
+                    </div>
+                    <div className="space-y-1">
+                      {gateResult.blockReasons.map((reason, idx) => (
+                        <div key={idx} className="text-sm text-red-300/90 flex items-start gap-2">
+                          <X size={12} className="mt-0.5 shrink-0" />
+                          {reason}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   <label className="flex items-start gap-3 cursor-pointer group">
                     <div className={`w-5 h-5 rounded border-2 mt-0.5 flex items-center justify-center transition-colors ${
@@ -372,13 +430,13 @@ export default function CanonicalReAuditConfirmModal({
                 Cancel
               </button>
 
-              {/* TASK 7C-1: Final execute button is DISABLED/INERT - NO canonicalReAudit.run() */}
+              {/* TASK 7C-2B-1: Final execute button reflects gate state but remains disabled/inert */}
               <button
-                disabled={true} // Always disabled in Task 7C-1
+                disabled={true} // Always disabled in Task 7C-2B-1
                 className="px-8 py-3 bg-neutral-800 text-neutral-500 border-2 border-neutral-700 cursor-not-allowed grayscale opacity-50 rounded-lg text-sm font-black uppercase tracking-wide flex items-center gap-2"
               >
                 <ShieldCheck size={16} />
-                Execute Re-Audit (Disabled)
+                {gateResult?.uiLabel || 'Execute Re-Audit'} (Disabled)
               </button>
             </div>
           </motion.div>
