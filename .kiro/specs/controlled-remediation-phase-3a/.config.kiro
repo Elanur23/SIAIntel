@@ -1,0 +1,8 @@
+{
+  "specType": "feature",
+  "workflowType": "requirements-first",
+  "featureName": "controlled-remediation-phase-3a",
+  "createdAt": "2026-04-26T00:00:00.000Z",
+  "phase": "3A",
+  "description": "Controlled Remediation Phase 3A - Apply Protocol Types. Defining the foundation for human-approved draft apply events."
+}

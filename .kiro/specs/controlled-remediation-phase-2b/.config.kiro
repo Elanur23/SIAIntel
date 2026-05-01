@@ -1,0 +1,8 @@
+{
+  "specType": "feature",
+  "workflowType": "requirements-first",
+  "featureName": "controlled-remediation-phase-2b",
+  "createdAt": "2026-04-26T00:00:00.000Z",
+  "phase": "2B",
+  "description": "Warroom Suggested Fixes Preview - Read-only UI panel displaying remediation suggestions"
+}
