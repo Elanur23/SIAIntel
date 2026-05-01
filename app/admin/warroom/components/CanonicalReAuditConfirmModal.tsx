@@ -9,12 +9,28 @@ import {
   Lock, 
   Database, 
   ShieldAlert,
-  AlertCircle
+  AlertCircle,
+  Clock
 } from 'lucide-react'
 
 import type { CanonicalReAuditPreflightResult } from '@/lib/editorial/canonical-reaudit-input-builder'
 import { CanonicalReAuditStatus, type CanonicalReAuditResult } from '@/lib/editorial/canonical-reaudit-types'
 import type { CanonicalReAuditRunGateResultFields } from '../controllers/canonical-reaudit-run-controller'
+
+// ============================================================================
+// TASK 7C-2B-3: TYPE GUARD FOR FINDINGS ENTRY
+// Safe access to unknown[] findings without casting.
+// Only exposes fields safe to display (no publishable, no gatingStatus).
+// ============================================================================
+interface CanonicalReAuditFindingEntry {
+  globalScore?: number
+  failedLanguages?: string[]
+  globalFindings?: string[]
+}
+
+function isCanonicalReAuditFindingEntry(value: unknown): value is CanonicalReAuditFindingEntry {
+  return typeof value === 'object' && value !== null
+}
 
 type CanonicalReAuditAcknowledgementState = {
   inMemoryOnly: boolean
@@ -480,6 +496,8 @@ export default function CanonicalReAuditConfirmModal({
                     <Lock size={16} className="text-amber-400" />
                     Re-Audit Result
                   </div>
+
+                  {/* Status banner — tone/icon/title/body per status */}
                   <div className={`px-4 py-3 rounded-lg border ${resultDisplay.tone}`}>
                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
                       <resultDisplay.icon size={14} />
@@ -493,12 +511,87 @@ export default function CanonicalReAuditConfirmModal({
                         Boundary: {result.blockReason.replace(/_/g, ' ')}
                       </div>
                     )}
+                    {/* TASK 7C-2B-3: Show all errors, not only errors[0] */}
                     {result?.errors && result.errors.length > 0 && (
-                      <div className="mt-2 text-xs text-white/70 font-mono">
-                        Error: {result.errors[0]}
+                      <div className="mt-2 space-y-1">
+                        {result.errors.map((err, idx) => (
+                          <div key={idx} className="text-xs text-white/70 font-mono">
+                            Error: {err}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
+
+                  {/* TASK 7C-2B-3: Audit Summary (memory-only) — PASSED and FAILED only */}
+                  {result?.summary &&
+                    result.status !== CanonicalReAuditStatus.STALE && (
+                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg">
+                      <div className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <Database size={11} className="shrink-0" />
+                        Audit Summary (memory-only)
+                      </div>
+                      <div className="text-xs font-mono text-white/70 leading-relaxed">
+                        {result.summary}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TASK 7C-2B-3: Audit Findings — FAILED_PENDING_REVIEW only */}
+                  {result?.status === CanonicalReAuditStatus.FAILED_PENDING_REVIEW &&
+                    result.findings &&
+                    result.findings.length > 0 && (() => {
+                      const entry = result.findings[0]
+                      if (!isCanonicalReAuditFindingEntry(entry)) return null
+                      const hasScore = typeof entry.globalScore === 'number'
+                      const hasFailedLangs = Array.isArray(entry.failedLanguages) && entry.failedLanguages.length > 0
+                      const hasGlobalFindings = Array.isArray(entry.globalFindings) && entry.globalFindings.length > 0
+                      if (!hasScore && !hasFailedLangs && !hasGlobalFindings) return null
+                      return (
+                        <div className="px-4 py-3 bg-red-900/15 border border-red-500/25 rounded-lg">
+                          <div className="text-xs font-bold text-red-400/80 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <ShieldAlert size={11} className="shrink-0" />
+                            Audit Findings (memory-only, review only)
+                          </div>
+                          <div className="space-y-2">
+                            {hasScore && (
+                              <div className="text-xs font-mono text-white/60">
+                                Score: {entry.globalScore}/100
+                              </div>
+                            )}
+                            {hasFailedLangs && (
+                              <div className="text-xs font-mono text-white/60">
+                                Failed languages: {(entry.failedLanguages as string[]).join(', ')}
+                              </div>
+                            )}
+                            {hasGlobalFindings && (
+                              <div className="space-y-1 pt-1">
+                                {(entry.globalFindings as string[]).map((finding, idx) => (
+                                  <div key={idx} className="flex items-start gap-2 text-xs text-red-300/70 font-mono leading-relaxed">
+                                    <span className="shrink-0 mt-0.5">•</span>
+                                    <span>{finding}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-red-500/15 text-[10px] text-red-400/50 font-bold uppercase tracking-wide">
+                            Memory-only — Deploy remains locked — Review only
+                          </div>
+                        </div>
+                      )
+                    })()
+                  }
+
+                  {/* TASK 7C-2B-3: Audited at timestamp */}
+                  {result?.auditedAt && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-white/3 border border-white/8 rounded-md">
+                      <Clock size={11} className="text-white/30 shrink-0" />
+                      <div className="text-[10px] text-white/35 font-mono">
+                        Audited at: {result.auditedAt}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
