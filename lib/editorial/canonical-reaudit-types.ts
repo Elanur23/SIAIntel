@@ -107,6 +107,62 @@ export const CANONICAL_REAUDIT_SESSION_AUDIT_INHERITANCE_ALLOWED = false;
 // ============================================================================
 
 /**
+ * Creates a pure canonical snapshot identity.
+ */
+export function createCanonicalSnapshotIdentity(
+  contentHash: string,
+  ledgerSequence: number,
+  promotionId?: string,
+  capturedAt?: string
+): CanonicalReAuditSnapshotIdentity {
+  return {
+    contentHash,
+    ledgerSequence,
+    promotionId,
+    capturedAt: capturedAt || new Date().toISOString(),
+    source: 'canonical-vault'
+  };
+}
+
+/**
+ * Verifies if two canonical snapshot identities match exactly.
+ * Fail closed if either is null or undefined.
+ */
+export function verifyCanonicalSnapshotIdentityMatch(
+  a: CanonicalReAuditSnapshotIdentity | null | undefined,
+  b: CanonicalReAuditSnapshotIdentity | null | undefined
+): boolean {
+  if (!a || !b) return false;
+
+  return (
+    a.contentHash === b.contentHash &&
+    a.ledgerSequence === b.ledgerSequence &&
+    a.capturedAt === b.capturedAt &&
+    a.source === b.source &&
+    a.promotionId === b.promotionId
+  );
+}
+
+/**
+ * Gets the canonical snapshot from a request or returns a fail-closed fallback.
+ */
+export function getCanonicalSnapshot(
+  request: CanonicalReAuditRequest | null | undefined
+): CanonicalReAuditSnapshotIdentity {
+  if (request?.canonicalSnapshot) {
+    return request.canonicalSnapshot;
+  }
+
+  return {
+    contentHash: 'MISSING_CANONICAL_SNAPSHOT',
+    ledgerSequence: -1,
+    source: 'canonical-vault',
+    promotionId: undefined,
+    capturedAt: new Date().toISOString()
+  };
+}
+
+/**
  * Creates a blocked canonical re-audit result.
  */
 export function createCanonicalReAuditBlockedResult(
