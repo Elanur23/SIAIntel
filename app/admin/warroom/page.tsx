@@ -52,6 +52,14 @@ import {
   type CanonicalReAuditRunGateStateFields,
   type CanonicalReAuditRunGateResultFields
 } from './controllers/canonical-reaudit-run-controller'
+import {
+  evaluateCanonicalReAuditAcceptanceEligibility,
+  type CanonicalReAuditAcceptanceEligibilityResult
+} from '@/lib/editorial/canonical-reaudit-acceptance-types'
+import {
+  CanonicalReAuditStatus,
+  type CanonicalReAuditSnapshotIdentity
+} from '@/lib/editorial/canonical-reaudit-types'
 import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
 import {
   type LocalDraftApplyRequest,
@@ -406,6 +414,55 @@ export default function WarRoom() {
     draftSource,
     remediationController.hasSessionDraft,
     selectedNews?.id
+  ])
+
+  // TASK 8B: Canonical Re-Audit Acceptance Eligibility Computation
+  const acceptanceEligibility: CanonicalReAuditAcceptanceEligibilityResult | null = useMemo(() => {
+    // Only compute for terminal statuses
+    if (!canonicalReAudit.result) {
+      return null
+    }
+
+    const terminalStatuses = [
+      CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE,
+      CanonicalReAuditStatus.FAILED_PENDING_REVIEW,
+      CanonicalReAuditStatus.BLOCKED,
+      CanonicalReAuditStatus.STALE
+    ]
+
+    if (!terminalStatuses.includes(canonicalReAudit.result.status)) {
+      return null
+    }
+
+    // Compute current snapshot from vault if available
+    // CRITICAL: Do NOT invent snapshot fields. If we cannot safely compute,
+    // pass null and let validator fail closed.
+    let currentSnapshot: CanonicalReAuditSnapshotIdentity | null = null
+    
+    // We cannot reliably compute currentSnapshot from page.tsx state without
+    // touching forbidden files or inventing data. Fail closed: pass null.
+    // The validator will add CURRENT_SNAPSHOT_MISSING to blockReasons.
+
+    return evaluateCanonicalReAuditAcceptanceEligibility({
+      result: canonicalReAudit.result,
+      currentSnapshot: currentSnapshot,
+      selectedArticleId: selectedNews?.id,
+      hasSessionDraft: remediationController.hasSessionDraft,
+      isAuditRunning: canonicalReAudit.isRunning,
+      operatorAcknowledged: false, // Not enabled in this phase
+      attestationMatches: false, // Not enabled in this phase
+      deployIsLocked: isDeployBlocked,
+      transformError: transformError ?? null,
+      globalAuditAuditedAt: globalAudit?.timestamp ?? null
+    })
+  }, [
+    canonicalReAudit.result,
+    canonicalReAudit.isRunning,
+    selectedNews?.id,
+    remediationController.hasSessionDraft,
+    isDeployBlocked,
+    transformError,
+    globalAudit?.timestamp
   ])
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
@@ -1671,6 +1728,7 @@ export default function WarRoom() {
                 error={canonicalReAudit.error}
                 isRunning={canonicalReAudit.isRunning}
                 snapshotIdentity={canonicalReAudit.snapshotIdentity}
+                acceptanceEligibility={acceptanceEligibility}
               />
 
               {/* TASK 7C-1: Canonical Re-Audit Trigger Button */}

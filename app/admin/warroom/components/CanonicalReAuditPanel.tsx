@@ -19,6 +19,12 @@ import type {
   CanonicalReAuditResult,
   CanonicalReAuditSnapshotIdentity
 } from '@/lib/editorial/canonical-reaudit-types'
+import type {
+  CanonicalReAuditAcceptanceEligibilityResult
+} from '@/lib/editorial/canonical-reaudit-acceptance-types'
+import {
+  CanonicalReAuditAcceptanceBlockReason
+} from '@/lib/editorial/canonical-reaudit-acceptance-types'
 
 interface CanonicalReAuditPanelProps {
   visible: boolean
@@ -28,6 +34,7 @@ interface CanonicalReAuditPanelProps {
   error: string | null
   isRunning: boolean
   snapshotIdentity: CanonicalReAuditSnapshotIdentity | null
+  acceptanceEligibility?: CanonicalReAuditAcceptanceEligibilityResult | null
 }
 
 /**
@@ -50,7 +57,8 @@ export default function CanonicalReAuditPanel({
   result,
   error,
   isRunning,
-  snapshotIdentity
+  snapshotIdentity,
+  acceptanceEligibility
 }: CanonicalReAuditPanelProps) {
   // Only show if visible and article exists
   if (!visible || !articleId) return null
@@ -217,6 +225,63 @@ export default function CanonicalReAuditPanel({
         </div>
       )}
 
+      {/* TASK 8B: Acceptance Gate Display (Read-Only Governance Scaffold) */}
+      {acceptanceEligibility && [
+        CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE,
+        CanonicalReAuditStatus.FAILED_PENDING_REVIEW,
+        CanonicalReAuditStatus.BLOCKED,
+        CanonicalReAuditStatus.STALE
+      ].includes(status) && (
+        <div className="mt-4 pt-4 border-t-2 border-white/5 space-y-3">
+          {/* Gate Header */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-900/20 border border-amber-500/30 rounded-md">
+            <Lock size={12} className="text-amber-400" />
+            <div className="flex-1">
+              <div className="text-xs font-black text-amber-400 uppercase tracking-wide">
+                Acceptance Gate
+              </div>
+              <div className="text-[9px] text-amber-400/70 font-bold uppercase tracking-tighter">
+                Locked — Task 8 execution required
+              </div>
+            </div>
+          </div>
+
+          {/* Block Reasons / Preconditions */}
+          {acceptanceEligibility.blockReasons.length > 0 ? (
+            <div className="space-y-1.5">
+              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[9px] text-white/40 font-bold uppercase tracking-tighter">
+                Acceptance Blocked
+              </div>
+              {acceptanceEligibility.blockReasons.map((reason, idx) => (
+                <div key={idx} className="px-3 py-1.5 bg-red-900/15 border border-red-500/25 rounded-md text-[9px] text-red-300/80 font-mono">
+                  {formatBlockReason(reason)}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-3 py-1.5 bg-amber-900/20 border border-amber-500/30 rounded-md text-[9px] text-amber-400/80 font-bold uppercase tracking-tighter">
+              All preconditions satisfied (acceptance not enabled in this phase)
+            </div>
+          )}
+
+          {/* Required Warning Copy */}
+          <div className="space-y-1">
+            <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[8px] text-white/30 font-bold uppercase tracking-tighter">
+              Acceptance execution is not enabled in this phase.
+            </div>
+            <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[8px] text-white/30 font-bold uppercase tracking-tighter">
+              Deploy remains locked. Global audit state is not updated.
+            </div>
+            <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[8px] text-white/30 font-bold uppercase tracking-tighter">
+              No persistence occurs. Promotion requires a separate phase.
+            </div>
+            <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[8px] text-white/30 font-bold uppercase tracking-tighter">
+              This display is informational only.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mandatory Safety Footers (Always Visible) */}
       <div className="space-y-1.5 pt-1">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-900/20 border border-yellow-500/20 rounded-md text-[10px] text-yellow-500/70 font-bold uppercase tracking-wide">
@@ -233,4 +298,32 @@ export default function CanonicalReAuditPanel({
       </div>
     </div>
   )
+}
+
+/**
+ * Format block reason for operator-safe display
+ */
+function formatBlockReason(reason: CanonicalReAuditAcceptanceBlockReason): string {
+  const reasonMap: Record<CanonicalReAuditAcceptanceBlockReason, string> = {
+    [CanonicalReAuditAcceptanceBlockReason.RESULT_MISSING]: 'No re-audit result is available.',
+    [CanonicalReAuditAcceptanceBlockReason.RESULT_NOT_PASSED_PENDING_ACCEPTANCE]: 'Only passed pending-acceptance results can reach this gate.',
+    [CanonicalReAuditAcceptanceBlockReason.RESULT_STATUS_FAILED]: 'Re-audit failed; the gate remains locked.',
+    [CanonicalReAuditAcceptanceBlockReason.RESULT_STATUS_BLOCKED]: 'Re-audit was blocked; the gate remains locked.',
+    [CanonicalReAuditAcceptanceBlockReason.RESULT_STATUS_STALE]: 'Re-audit result is stale; re-run is required.',
+    [CanonicalReAuditAcceptanceBlockReason.UNSUPPORTED_RESULT_STATUS]: 'Unsupported result status.',
+    [CanonicalReAuditAcceptanceBlockReason.RESULT_STALE]: 'Current canonical snapshot differs from audited snapshot.',
+    [CanonicalReAuditAcceptanceBlockReason.SESSION_DRAFT_EXISTS]: 'Session draft exists; the gate remains locked.',
+    [CanonicalReAuditAcceptanceBlockReason.AUDIT_RUNNING]: 'Audit is currently running.',
+    [CanonicalReAuditAcceptanceBlockReason.OPERATOR_ACKNOWLEDGEMENT_MISSING]: 'Operator acknowledgement is not enabled in this phase.',
+    [CanonicalReAuditAcceptanceBlockReason.ATTESTATION_MISMATCH]: 'Acceptance attestation is not enabled in this phase.',
+    [CanonicalReAuditAcceptanceBlockReason.CURRENT_SNAPSHOT_MISSING]: 'Current snapshot is missing; the gate remains locked.',
+    [CanonicalReAuditAcceptanceBlockReason.AUDITED_SNAPSHOT_MISSING]: 'Audited snapshot is missing.',
+    [CanonicalReAuditAcceptanceBlockReason.SNAPSHOT_MISMATCH]: 'Current canonical snapshot differs from audited snapshot.',
+    [CanonicalReAuditAcceptanceBlockReason.ARTICLE_MISMATCH]: 'Article identity cannot be verified.',
+    [CanonicalReAuditAcceptanceBlockReason.GLOBAL_AUDIT_NEWER_OR_UNKNOWN]: 'Global audit freshness cannot be safely confirmed.',
+    [CanonicalReAuditAcceptanceBlockReason.DEPLOY_NOT_LOCKED]: 'Invalid state: deploy must remain locked before acceptance.',
+    [CanonicalReAuditAcceptanceBlockReason.TRANSFORM_ERROR_PRESENT]: 'Transform error exists; the gate remains locked.',
+    [CanonicalReAuditAcceptanceBlockReason.MISSING_REQUIRED_CONTEXT]: 'Required context is missing.'
+  }
+  return reasonMap[reason] || `Block reason: ${reason}`
 }
