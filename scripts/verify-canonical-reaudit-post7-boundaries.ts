@@ -178,6 +178,62 @@ function checkTask7BWiring(): void {
   })
 }
 
+function checkTask7C1Implementation(): void {
+  const pagePath = 'app/admin/warroom/page.tsx'
+
+  // Check Task 7C-1 imports
+  checkFileContains(pagePath, 'page.tsx imports CanonicalReAuditTriggerButton', (content) => {
+    return content.includes('./components/CanonicalReAuditTriggerButton') ? null : 'Missing import for CanonicalReAuditTriggerButton'
+  })
+
+  checkFileContains(pagePath, 'page.tsx imports CanonicalReAuditConfirmModal', (content) => {
+    return content.includes('./components/CanonicalReAuditConfirmModal') ? null : 'Missing import for CanonicalReAuditConfirmModal'
+  })
+
+  // Check modal state
+  checkFileContains(pagePath, 'page.tsx has canonical re-audit modal state', (content) => {
+    return content.includes('isCanonicalReAuditConfirmOpen') && content.includes('setIsCanonicalReAuditConfirmOpen') ? 
+      null : 'Missing canonical re-audit modal state'
+  })
+
+  // Check trigger button rendering
+  checkFileContains(pagePath, 'page.tsx renders CanonicalReAuditTriggerButton', (content) => {
+    const count = countMatches(content, /<CanonicalReAuditTriggerButton\b/g)
+    return count === 1 ? null : `Expected exactly 1 <CanonicalReAuditTriggerButton, found ${count}`
+  })
+
+  // Check modal rendering
+  checkFileContains(pagePath, 'page.tsx renders CanonicalReAuditConfirmModal', (content) => {
+    const count = countMatches(content, /<CanonicalReAuditConfirmModal\b/g)
+    return count === 1 ? null : `Expected exactly 1 <CanonicalReAuditConfirmModal, found ${count}`
+  })
+
+  // Check no canonicalReAudit.run() calls in Task 7C-1
+  checkFileContains(pagePath, 'page.tsx still has no canonicalReAudit.run() calls', (content) => {
+    const forbiddenCalls = ['canonicalReAudit.run(', 'canonicalReAudit.reset(', 'canonicalReAudit.clearError(']
+    for (const call of forbiddenCalls) {
+      if (content.includes(call)) return `Found forbidden call: ${call}`
+    }
+    return null
+  })
+
+  // Check trigger button component exists
+  const triggerButtonPath = 'app/admin/warroom/components/CanonicalReAuditTriggerButton.tsx'
+  if (!fs.existsSync(triggerButtonPath)) {
+    fail('CanonicalReAuditTriggerButton component exists', 'Component file not found')
+  } else {
+    pass('CanonicalReAuditTriggerButton component exists')
+  }
+
+  // Check confirm modal component exists
+  const confirmModalPath = 'app/admin/warroom/components/CanonicalReAuditConfirmModal.tsx'
+  if (!fs.existsSync(confirmModalPath)) {
+    fail('CanonicalReAuditConfirmModal component exists', 'Component file not found')
+  } else {
+    pass('CanonicalReAuditConfirmModal component exists')
+  }
+}
+
 function checkComponentContent(): void {
   const componentPath = 'app/admin/warroom/components/CanonicalReAuditPanel.tsx'
   
@@ -266,10 +322,14 @@ function checkNoDBProviderModifications(): void {
 }
 
 // Main execution
-console.log('🔍 Verifying Task 7B Boundaries...\n')
+console.log('🔍 Verifying Task 7B + 7C-1 Boundaries...\n')
 
 // Check Task 7B wiring on page.tsx
 checkTask7BWiring()
+
+// Check Task 7C-1 implementation
+checkTask7C1Implementation()
+
 checkFileNotModified('app/admin/warroom/hooks/useCanonicalReAudit.ts', 'useCanonicalReAudit hook')
 checkFileNotModified('app/admin/warroom/handlers/canonical-reaudit-handler.ts', 'canonical-reaudit-handler')
 checkFileNotModified('lib/editorial/canonical-reaudit-adapter.ts', 'canonical-reaudit-adapter')
@@ -293,7 +353,7 @@ console.log(`❌ FAILED: ${failCount}`)
 console.log('='.repeat(60))
 
 if (failCount > 0) {
-  console.error('\n❌ VERIFICATION FAILED: Task 7B boundaries violated')
+  console.error('\n❌ VERIFICATION FAILED: Task 7B + 7C-1 boundaries violated')
   process.exit(1)
 }
 

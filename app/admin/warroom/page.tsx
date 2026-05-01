@@ -39,6 +39,8 @@ import SessionAuditStatePanel from './components/SessionAuditStatePanel'
 import SessionLedgerSummary from './components/SessionLedgerSummary'
 import SessionDraftComparison from './components/SessionDraftComparison'
 import CanonicalReAuditPanel from './components/CanonicalReAuditPanel'
+import CanonicalReAuditTriggerButton from './components/CanonicalReAuditTriggerButton'
+import CanonicalReAuditConfirmModal from './components/CanonicalReAuditConfirmModal'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
 import { useCanonicalReAudit } from './hooks/useCanonicalReAudit'
 import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
@@ -182,6 +184,9 @@ export default function WarRoom() {
   // TASK 5: Promotion Review Modal State (UI Scaffold Only)
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false)
 
+  // TASK 7C-1: Canonical Re-Audit Confirmation Modal State (UI Scaffold Only)
+  const [isCanonicalReAuditConfirmOpen, setIsCanonicalReAuditConfirmOpen] = useState(false)
+
   // TASK 6B-1: Promotion Dry-Run Preview State
   const [promotionDryRunResult, setPromotionDryRunResult] = useState<LocalPromotionDryRunResult | null>(null)
 
@@ -303,6 +308,24 @@ export default function WarRoom() {
     Boolean(selectedNews) &&
     draftSource === 'canonical' &&
     !remediationController.hasSessionDraft
+
+  // TASK 7C-1: Canonical Re-Audit Trigger Button Disabled State
+  const canonicalReAuditTriggerDisabled = 
+    !canonicalReAuditVisible ||
+    canonicalReAudit.isRunning ||
+    !selectedNews ||
+    draftSource !== 'canonical' ||
+    remediationController.hasSessionDraft
+
+  // TASK 7C-1: Canonical Re-Audit Trigger Button Disabled Reason
+  const canonicalReAuditTriggerDisabledReason = (() => {
+    if (!selectedNews) return 'No article selected'
+    if (draftSource !== 'canonical') return 'Must be viewing canonical vault'
+    if (remediationController.hasSessionDraft) return 'Session draft exists - clear session first'
+    if (canonicalReAudit.isRunning) return 'Canonical re-audit already running'
+    if (!canonicalReAuditVisible) return 'Canonical re-audit not available'
+    return null
+  })()
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
 
@@ -1500,6 +1523,15 @@ export default function WarRoom() {
                 snapshotIdentity={canonicalReAudit.snapshotIdentity}
               />
 
+              {/* TASK 7C-1: Canonical Re-Audit Trigger Button */}
+              <CanonicalReAuditTriggerButton
+                visible={canonicalReAuditVisible}
+                disabled={canonicalReAuditTriggerDisabled}
+                isRunning={canonicalReAudit.isRunning}
+                disabledReason={canonicalReAuditTriggerDisabledReason}
+                onOpenConfirmModal={() => setIsCanonicalReAuditConfirmOpen(true)}
+              />
+
               {/* Deploy Block Reason - Display only when session draft exists */}
               {remediationController.deployBlockReason && (
                 <div className="px-3 py-2 bg-red-900/20 border border-red-500/30 rounded-md text-xs text-red-300/90 leading-relaxed">
@@ -1960,6 +1992,14 @@ export default function WarRoom() {
         onPromote={handleExecuteRealLocalPromotion}
         isPromoting={isPromotionExecuting}
         promotionExecutionError={promotionExecutionError}
+      />
+
+      {/* TASK 7C-1: Canonical Re-Audit Confirm Modal - UI Scaffold Only */}
+      <CanonicalReAuditConfirmModal
+        isOpen={isCanonicalReAuditConfirmOpen}
+        onClose={() => setIsCanonicalReAuditConfirmOpen(false)}
+        disabledReason={canonicalReAuditTriggerDisabledReason}
+        articleId={selectedNews?.id ?? null}
       />
     </div>
   )
