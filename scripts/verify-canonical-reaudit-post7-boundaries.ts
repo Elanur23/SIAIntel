@@ -118,7 +118,20 @@ function checkTask7BWiring(): void {
     if (!match) return 'Could not locate CanonicalReAuditPanel JSX node'
     const propsBlock = match[1]
 
+    // PHASE-AWARE: Task 8B adds acceptanceEligibility prop for inert display only
     const allowedProps = [
+      'visible=',
+      'articleId=',
+      'status=',
+      'result=',
+      'error=',
+      'isRunning=',
+      'snapshotIdentity=',
+      'acceptanceEligibility=', // Task 8B: Read-only acceptance gate display
+    ]
+
+    // Check required props (acceptanceEligibility is optional)
+    const requiredProps = [
       'visible=',
       'articleId=',
       'status=',
@@ -128,7 +141,7 @@ function checkTask7BWiring(): void {
       'snapshotIdentity=',
     ]
 
-    for (const prop of allowedProps) {
+    for (const prop of requiredProps) {
       if (!propsBlock.includes(prop)) {
         return `Missing required prop on CanonicalReAuditPanel: ${prop}`
       }

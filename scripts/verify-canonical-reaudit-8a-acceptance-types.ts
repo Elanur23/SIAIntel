@@ -376,10 +376,87 @@ function checkTask8AValidator(): void {
 }
 
 function checkTask8ANoBoundaryViolations(): void {
-  // Check UI files not modified
+  // PHASE-AWARE: Task 8B later adds read-only UI integration
+  // Task 8A verifier focuses on acceptance types file safety only
+  // Task 8B modifications to page.tsx and CanonicalReAuditPanel are allowed
+  // if they only add read-only acceptanceEligibility display
+  
+  // Check page.tsx Task 8B additions are safe (acceptanceEligibility computation)
+  const pagePath = 'app/admin/warroom/page.tsx'
+  if (fs.existsSync(pagePath)) {
+    checkFileContains(pagePath, 'Task 8A: page.tsx acceptanceEligibility computation is safe (if added by Task 8B)', (content) => {
+      // Find the acceptanceEligibility useMemo block
+      const acceptanceEligibilityStart = content.indexOf('const acceptanceEligibility')
+      if (acceptanceEligibilityStart === -1) {
+        // Task 8B not implemented yet - pass
+        return null
+      }
+      
+      // Extract the useMemo block (find matching closing brace)
+      const useMemoStart = content.indexOf('useMemo(', acceptanceEligibilityStart)
+      if (useMemoStart === -1) return null
+      
+      // Find the end of the useMemo (look for the dependency array closing)
+      const depsArrayMatch = content.substring(useMemoStart).match(/\], \[[\s\S]*?\]\)/)
+      if (!depsArrayMatch) return null
+      
+      const useMemoEnd = useMemoStart + content.substring(useMemoStart).indexOf(depsArrayMatch[0]) + depsArrayMatch[0].length
+      const useMemoBlock = content.substring(acceptanceEligibilityStart, useMemoEnd)
+      
+      // Check for forbidden patterns in the acceptanceEligibility block only
+      const forbiddenPatterns = [
+        { pattern: 'setGlobalAudit(', desc: 'setGlobalAudit call' },
+        { pattern: 'setVault(', desc: 'setVault call' },
+        { pattern: 'setIsDeployBlocked(false)', desc: 'deploy unlock' },
+        { pattern: 'fetch(', desc: 'fetch call' },
+        { pattern: 'axios', desc: 'axios call' },
+        { pattern: 'localStorage', desc: 'localStorage access' },
+        { pattern: 'sessionStorage', desc: 'sessionStorage access' }
+      ]
+      
+      for (const { pattern, desc } of forbiddenPatterns) {
+        if (useMemoBlock.includes(pattern)) {
+          return `Found forbidden ${desc} in acceptanceEligibility computation`
+        }
+      }
+      
+      // Verify it calls evaluateCanonicalReAuditAcceptanceEligibility
+      if (!useMemoBlock.includes('evaluateCanonicalReAuditAcceptanceEligibility')) {
+        return 'acceptanceEligibility does not call evaluateCanonicalReAuditAcceptanceEligibility'
+      }
+      
+      return null
+    })
+  }
+  
+  // Check CanonicalReAuditPanel safety (if modified by Task 8B)
+  const panelPath = 'app/admin/warroom/components/CanonicalReAuditPanel.tsx'
+  if (fs.existsSync(panelPath)) {
+    checkFileContains(panelPath, 'Task 8A: CanonicalReAuditPanel has no forbidden mutations (if modified by Task 8B)', (content) => {
+      const forbiddenPatterns = [
+        'setGlobalAudit(',
+        'setVault(',
+        'setIsDeployBlocked(false)',
+        'onAccept',
+        'onPromote',
+        'onDeploy',
+        'fetch(',
+        'axios',
+        'localStorage',
+        'sessionStorage'
+      ]
+      
+      for (const pattern of forbiddenPatterns) {
+        if (content.includes(pattern)) {
+          return `Found forbidden pattern in CanonicalReAuditPanel: ${pattern}`
+        }
+      }
+      return null
+    })
+  }
+  
+  // Check other UI files not modified (Task 8B should not touch these)
   const uiFiles = [
-    { path: 'app/admin/warroom/page.tsx', description: 'page.tsx' },
-    { path: 'app/admin/warroom/components/CanonicalReAuditPanel.tsx', description: 'CanonicalReAuditPanel' },
     { path: 'app/admin/warroom/components/CanonicalReAuditTriggerButton.tsx', description: 'CanonicalReAuditTriggerButton' },
     { path: 'app/admin/warroom/components/CanonicalReAuditConfirmModal.tsx', description: 'CanonicalReAuditConfirmModal' },
     { path: 'app/admin/warroom/hooks/useCanonicalReAudit.ts', description: 'useCanonicalReAudit hook' },
