@@ -116,13 +116,13 @@ function checkModalSafety() {
     return
   }
 
-  // Check execute button is disabled
-  if (!content.includes('disabled={true}') && !content.includes('Execute Re-Audit (Disabled)')) {
-    addResult('Modal Execute Button Disabled', 'FAIL', 
-      ['Execute button must be disabled/inert in Task 7C-2A'])
+  // Check execute button is gated (Task 7C-2B-2 update)
+  if (content.includes('disabled={!canExecute || isRunning}') || content.includes('gateResult?.canExecute')) {
+    addResult('Modal Execute Button Gated', 'PASS', 
+      ['Execute button is properly gated by controller'])
   } else {
-    addResult('Modal Execute Button Disabled', 'PASS', 
-      ['Execute button is properly disabled'])
+    addResult('Modal Execute Button Gated', 'FAIL', 
+      ['Execute button must be gated by controller in Task 7C-2B-2'])
   }
 
   // Check for preflight prop acceptance
@@ -189,14 +189,33 @@ function checkPageIntegration() {
       ['Preflight passed to modal'])
   }
 
-  // Check no canonicalReAudit.run() calls in Task 7C-2A context
+  // Check controlled canonicalReAudit.run() calls (Task 7C-2B-2 update)
   const runCallMatches = content.match(/canonicalReAudit\.run\(/g)
-  if (runCallMatches && runCallMatches.length > 0) {
-    addResult('Page No Audit Execution', 'FAIL', 
-      ['Page must not call canonicalReAudit.run() in Task 7C-2A'])
-  } else {
-    addResult('Page No Audit Execution', 'PASS', 
+  const runCallCount = runCallMatches ? runCallMatches.length : 0
+  
+  if (runCallCount === 0) {
+    addResult('Page Controlled Audit Execution', 'PASS', 
       ['No audit execution calls detected'])
+  } else if (runCallCount === 1) {
+    // Single call - verify it's in the approved handler
+    const handlerStart = content.indexOf('handleConfirmedCanonicalReAuditRun')
+    if (handlerStart !== -1) {
+      const handlerEnd = content.indexOf('})', handlerStart)
+      const handlerCode = content.substring(handlerStart, handlerEnd)
+      if (handlerCode.includes('canonicalReAudit.run(')) {
+        addResult('Page Controlled Audit Execution', 'PASS', 
+          ['Controlled audit execution in approved handler'])
+      } else {
+        addResult('Page Controlled Audit Execution', 'FAIL', 
+          ['canonicalReAudit.run() found outside approved handler'])
+      }
+    } else {
+      addResult('Page Controlled Audit Execution', 'FAIL', 
+        ['canonicalReAudit.run() found but no approved handler'])
+    }
+  } else {
+    addResult('Page Controlled Audit Execution', 'FAIL', 
+      [`Found ${runCallCount} canonicalReAudit.run() calls - expected 0 or 1 in approved handler`])
   }
 }
 

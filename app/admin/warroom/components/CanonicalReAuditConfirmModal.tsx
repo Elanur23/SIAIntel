@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, 
@@ -13,15 +13,33 @@ import {
 } from 'lucide-react'
 
 import type { CanonicalReAuditPreflightResult } from '@/lib/editorial/canonical-reaudit-input-builder'
+import { CanonicalReAuditStatus, type CanonicalReAuditResult } from '@/lib/editorial/canonical-reaudit-types'
 import type { CanonicalReAuditRunGateResultFields } from '../controllers/canonical-reaudit-run-controller'
+
+type CanonicalReAuditAcknowledgementState = {
+  inMemoryOnly: boolean
+  deployLocked: boolean
+  globalAuditNotUpdated: boolean
+  acceptanceLaterPhase: boolean
+  noSavePublishDeploy: boolean
+}
 
 interface CanonicalReAuditConfirmModalProps {
   isOpen: boolean
   onClose: () => void
+  onConfirmedRun: () => void | Promise<void>
   disabledReason?: string | null
   articleId?: string | null
   preflight?: CanonicalReAuditPreflightResult | null
   gateResult?: CanonicalReAuditRunGateResultFields | null
+  acknowledgements: CanonicalReAuditAcknowledgementState
+  onAcknowledgementToggle: (key: keyof CanonicalReAuditAcknowledgementState) => void
+  typedAttestation: string
+  onTypedAttestationChange: (value: string) => void
+  isRunning: boolean
+  status: CanonicalReAuditStatus
+  result: CanonicalReAuditResult | null
+  runError?: string | null
 }
 
 /**
@@ -42,47 +60,93 @@ interface CanonicalReAuditConfirmModalProps {
 export default function CanonicalReAuditConfirmModal({
   isOpen,
   onClose,
+  onConfirmedRun,
   disabledReason,
   articleId,
   preflight,
-  gateResult
+  gateResult,
+  acknowledgements,
+  onAcknowledgementToggle,
+  typedAttestation,
+  onTypedAttestationChange,
+  isRunning,
+  status,
+  result,
+  runError
 }: CanonicalReAuditConfirmModalProps) {
-  // Internal acknowledgement state
-  const [acknowledgements, setAcknowledgements] = useState({
-    inMemoryOnly: false,
-    deployLocked: false,
-    globalAuditNotUpdated: false,
-    acceptanceLaterPhase: false,
-    noSavePublishDeploy: false
-  })
-
-  // Typed attestation state
-  const [typedAttestation, setTypedAttestation] = useState('')
-
-  // Reset acknowledgements and typed attestation when modal opens
-  React.useEffect(() => {
-    if (isOpen) {
-      setAcknowledgements({
-        inMemoryOnly: false,
-        deployLocked: false,
-        globalAuditNotUpdated: false,
-        acceptanceLaterPhase: false,
-        noSavePublishDeploy: false
-      })
-      setTypedAttestation('')
-    }
-  }, [isOpen])
-
   const allAcknowledged = Object.values(acknowledgements).every(Boolean)
   const attestationMatches = preflight?.attestationPhrase ? 
-    typedAttestation.trim() === preflight.attestationPhrase.trim() : 
+    typedAttestation === preflight.attestationPhrase : 
     true // No attestation required if no phrase provided
 
+  const hasTerminalResult = Boolean(result) && !isRunning
+  const canClose = !isRunning && (hasTerminalResult || !result)
+  const canExecute = Boolean(gateResult?.canExecute) && !hasTerminalResult
+  const executeLabel = gateResult?.uiLabel || (isRunning ? 'Running Re-Audit…' : 'Complete Confirmations')
+
+  const handleClose = () => {
+    if (!canClose) {
+      return
+    }
+    onClose()
+  }
+
+  const handleExecute = () => {
+    if (!canExecute || isRunning) {
+      return
+    }
+    onConfirmedRun()
+  }
+
+  const resultDisplay = (() => {
+    if (!result) return null
+
+    switch (result.status) {
+      case CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE:
+        return {
+          icon: Lock,
+          title: 'Re-audit checks passed',
+          body:
+            "This result exists only in this session's memory. Deploy remains locked. Global audit has not been updated. Acceptance review is required in a later phase before any promotion, persistence, or deploy action.",
+          tone: 'bg-amber-900/20 border-amber-500/30 text-amber-100'
+        }
+      case CanonicalReAuditStatus.FAILED_PENDING_REVIEW:
+        return {
+          icon: ShieldAlert,
+          title: 'Re-audit checks failed',
+          body:
+            'No state has changed. This result is memory-only. Deploy remains locked. Global audit has not been updated. Review the findings before retry.',
+          tone: 'bg-red-900/20 border-red-500/30 text-red-100'
+        }
+      case CanonicalReAuditStatus.BLOCKED:
+        return {
+          icon: ShieldAlert,
+          title: 'Re-audit blocked',
+          body:
+            'Execution was halted by a boundary guard. No state changed. This result is memory-only. Deploy remains locked. Global audit has not been updated.',
+          tone: 'bg-red-900/30 border-red-500/40 text-red-100'
+        }
+      case CanonicalReAuditStatus.STALE:
+        return {
+          icon: AlertTriangle,
+          title: 'Result stale — discarded',
+          body:
+            'The canonical snapshot or vault state changed during execution or preflight. The output is unreliable. No state changed. This result is memory-only. Deploy remains locked. Global audit has not been updated. Refresh and re-run.',
+          tone: 'bg-yellow-900/30 border-yellow-500/40 text-yellow-100'
+        }
+      default:
+        return {
+          icon: AlertCircle,
+          title: 'Re-audit error',
+          body:
+            'An unexpected error occurred. This result is memory-only. Deploy remains locked. Global audit has not been updated.',
+          tone: 'bg-neutral-900/40 border-white/10 text-white/80'
+        }
+    }
+  })()
+
   const handleAcknowledgementChange = (key: keyof typeof acknowledgements) => {
-    setAcknowledgements(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }))
+    onAcknowledgementToggle(key)
   }
 
   return (
@@ -95,7 +159,7 @@ export default function CanonicalReAuditConfirmModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={canClose ? handleClose : undefined}
           />
 
           {/* Modal */}
@@ -113,12 +177,14 @@ export default function CanonicalReAuditConfirmModal({
                   Canonical Re-Audit Confirmation
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 text-white/60 hover:text-white/90 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X size={20} />
-              </button>
+              {canClose && (
+                <button
+                  onClick={handleClose}
+                  className="p-2 text-white/60 hover:text-white/90 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              )}
             </div>
 
             {/* Content */}
@@ -264,7 +330,7 @@ export default function CanonicalReAuditConfirmModal({
                     <input
                       type="text"
                       value={typedAttestation}
-                      onChange={(e) => setTypedAttestation(e.target.value)}
+                      onChange={(e) => onTypedAttestationChange(e.target.value)}
                       placeholder="Type attestation phrase exactly..."
                       className="w-full bg-black/65 border border-blue-500/30 rounded-md px-3 py-2 text-sm text-white/90 font-mono outline-none focus:border-blue-400/60 transition-colors placeholder:text-white/30"
                     />
@@ -408,6 +474,34 @@ export default function CanonicalReAuditConfirmModal({
                 </div>
               </div>
 
+              {hasTerminalResult && resultDisplay && (
+                <div className="space-y-4">
+                  <div className="text-sm font-black text-white/80 uppercase tracking-wide flex items-center gap-2">
+                    <Lock size={16} className="text-amber-400" />
+                    Re-Audit Result
+                  </div>
+                  <div className={`px-4 py-3 rounded-lg border ${resultDisplay.tone}`}>
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                      <resultDisplay.icon size={14} />
+                      {resultDisplay.title}
+                    </div>
+                    <div className="mt-2 text-sm leading-relaxed">
+                      {resultDisplay.body}
+                    </div>
+                    {result?.blockReason && (
+                      <div className="mt-2 text-xs text-white/70 font-mono">
+                        Boundary: {result.blockReason.replace(/_/g, ' ')}
+                      </div>
+                    )}
+                    {result?.errors && result.errors.length > 0 && (
+                      <div className="mt-2 text-xs text-white/70 font-mono">
+                        Error: {result.errors[0]}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Disabled Reason */}
               {disabledReason && (
                 <div className="px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg">
@@ -419,24 +513,45 @@ export default function CanonicalReAuditConfirmModal({
                   </div>
                 </div>
               )}
+
+              {runError && (
+                <div className="px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg">
+                  <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">
+                    Execution Error
+                  </div>
+                  <div className="text-sm text-red-300/90 font-mono leading-relaxed">
+                    {runError}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Footer */}
             <div className="flex items-center justify-between p-6 border-t border-white/10 bg-gradient-to-r from-white/5 to-white/2">
               <button
-                onClick={onClose}
-                className="px-6 py-3 text-sm font-bold text-white/70 hover:text-white/90 hover:bg-white/10 rounded-lg transition-colors uppercase tracking-wide"
+                onClick={handleClose}
+                disabled={!canClose}
+                className={`px-6 py-3 text-sm font-bold rounded-lg transition-colors uppercase tracking-wide ${
+                  canClose
+                    ? 'text-white/80 hover:text-white/95 hover:bg-white/10'
+                    : 'text-white/30 cursor-not-allowed'
+                }`}
               >
-                Cancel
+                Close Review
               </button>
 
-              {/* TASK 7C-2B-1: Final execute button reflects gate state but remains disabled/inert */}
+              {/* TASK 7C-2B-2: Final execute button gated by confirmation and controller state */}
               <button
-                disabled={true} // Always disabled in Task 7C-2B-1
-                className="px-8 py-3 bg-neutral-800 text-neutral-500 border-2 border-neutral-700 cursor-not-allowed grayscale opacity-50 rounded-lg text-sm font-black uppercase tracking-wide flex items-center gap-2"
+                onClick={handleExecute}
+                disabled={!canExecute || isRunning}
+                className={`px-8 py-3 border-2 rounded-lg text-sm font-black uppercase tracking-wide flex items-center gap-2 transition-all ${
+                  !canExecute || isRunning
+                    ? 'bg-neutral-800 text-neutral-500 border-neutral-700 cursor-not-allowed grayscale opacity-50'
+                    : 'bg-gradient-to-r from-blue-700/80 to-blue-500/70 border-blue-400/60 text-blue-100 hover:from-blue-600/90 hover:to-blue-400/80 hover:border-blue-200/80 shadow-[0_8px_18px_rgba(59,130,246,0.22)] ring-2 ring-blue-300/20'
+                }`}
               >
                 <ShieldCheck size={16} />
-                {gateResult?.uiLabel || 'Execute Re-Audit'} (Disabled)
+                {executeLabel}
               </button>
             </div>
           </motion.div>

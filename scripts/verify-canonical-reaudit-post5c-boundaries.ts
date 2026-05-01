@@ -75,9 +75,32 @@ function assertReadOnlyPageWiring(pageSource: string): void {
   const hookCallCount = countMatches(pageSource, /useCanonicalReAudit\s*\(/g);
   assert(hookCallCount === 1, `page.tsx instantiates useCanonicalReAudit exactly once (found ${hookCallCount})`);
 
-  // No execution or state mutation calls
-  const forbiddenCalls = [
-    'canonicalReAudit.run(', 
+  // No execution or state mutation calls (UPDATED for Task 7C-2B-2)
+  // Task 7C-2B-2: Allow controlled canonicalReAudit.run() in handleConfirmedCanonicalReAuditRun only
+  const runCallCount = countMatches(pageSource, /canonicalReAudit\.run\s*\(/g);
+  
+  if (runCallCount === 0) {
+    // No calls - this is acceptable for earlier phases
+    assert(true, 'page.tsx does not call canonicalReAudit.run()');
+  } else if (runCallCount === 1) {
+    // Single call - verify it's in the approved handler
+    const handlerStart = pageSource.indexOf('handleConfirmedCanonicalReAuditRun');
+    if (handlerStart !== -1) {
+      const handlerEnd = pageSource.indexOf('})', handlerStart);
+      const handlerCode = pageSource.substring(handlerStart, handlerEnd);
+      if (handlerCode.includes('canonicalReAudit.run(')) {
+        assert(true, 'page.tsx has controlled canonicalReAudit.run() in approved handler only');
+      } else {
+        assert(false, 'page.tsx calls canonicalReAudit.run() outside approved handler');
+      }
+    } else {
+      assert(false, 'page.tsx calls canonicalReAudit.run() but handleConfirmedCanonicalReAuditRun handler not found');
+    }
+  } else {
+    assert(false, `page.tsx has ${runCallCount} canonicalReAudit.run() calls - expected 0 or 1 in approved handler`);
+  }
+
+  const forbiddenCalls = [ 
     'canonicalReAudit.reset(', 
     'canonicalReAudit.clearError(',
   ];

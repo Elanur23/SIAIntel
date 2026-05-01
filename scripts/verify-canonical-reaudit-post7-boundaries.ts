@@ -169,11 +169,45 @@ function checkTask7BWiring(): void {
     return null
   })
 
-  checkFileContains(pagePath, 'page.tsx does not call canonicalReAudit.run/reset/clearError', (content) => {
-    const forbiddenCalls = ['canonicalReAudit.run(', 'canonicalReAudit.reset(', 'canonicalReAudit.clearError(']
+  checkFileContains(pagePath, 'page.tsx has controlled canonicalReAudit.run() path only (Task 7C-2B-2)', (content) => {
+    // Task 7C-2B-2: Allow controlled execution path through handleConfirmedCanonicalReAuditRun
+    const runCallCount = countMatches(content, /canonicalReAudit\.run\s*\(/g)
+    
+    if (runCallCount === 0) {
+      return 'No canonicalReAudit.run() calls found - expected controlled path in handleConfirmedCanonicalReAuditRun'
+    }
+    
+    if (runCallCount > 1) {
+      return `Found ${runCallCount} canonicalReAudit.run() calls - expected exactly 1 in controlled handler`
+    }
+    
+    // Verify the single call is in the approved handler
+    const handlerStart = content.indexOf('handleConfirmedCanonicalReAuditRun')
+    const handlerEnd = content.indexOf('})', handlerStart)
+    
+    if (handlerStart === -1) {
+      return 'handleConfirmedCanonicalReAuditRun handler not found'
+    }
+    
+    const handlerCode = content.substring(handlerStart, handlerEnd)
+    if (!handlerCode.includes('canonicalReAudit.run(')) {
+      return 'canonicalReAudit.run() call not found in approved handler'
+    }
+    
+    // Check for forbidden calls outside handler
+    const beforeHandler = content.substring(0, handlerStart)
+    const afterHandler = content.substring(handlerEnd)
+    
+    if (beforeHandler.includes('canonicalReAudit.run(') || afterHandler.includes('canonicalReAudit.run(')) {
+      return 'canonicalReAudit.run() found outside approved handler'
+    }
+    
+    // Check for other forbidden calls
+    const forbiddenCalls = ['canonicalReAudit.reset(', 'canonicalReAudit.clearError(']
     for (const call of forbiddenCalls) {
       if (content.includes(call)) return `Found forbidden call: ${call}`
     }
+    
     return null
   })
 }
@@ -208,12 +242,40 @@ function checkTask7C1Implementation(): void {
     return count === 1 ? null : `Expected exactly 1 <CanonicalReAuditConfirmModal, found ${count}`
   })
 
-  // Check no canonicalReAudit.run() calls in Task 7C-1
-  checkFileContains(pagePath, 'page.tsx still has no canonicalReAudit.run() calls', (content) => {
-    const forbiddenCalls = ['canonicalReAudit.run(', 'canonicalReAudit.reset(', 'canonicalReAudit.clearError(']
-    for (const call of forbiddenCalls) {
-      if (content.includes(call)) return `Found forbidden call: ${call}`
+  // Check no canonicalReAudit.run() calls in Task 7C-1 (UPDATED for 7C-2B-2)
+  checkFileContains(pagePath, 'page.tsx has controlled canonicalReAudit.run() path only', (content) => {
+    // Task 7C-2B-2: Allow controlled execution path through handleConfirmedCanonicalReAuditRun
+    const runCallCount = countMatches(content, /canonicalReAudit\.run\s*\(/g)
+    
+    if (runCallCount === 0) {
+      return 'No canonicalReAudit.run() calls found - expected controlled path in handleConfirmedCanonicalReAuditRun'
     }
+    
+    if (runCallCount > 1) {
+      return `Found ${runCallCount} canonicalReAudit.run() calls - expected exactly 1 in controlled handler`
+    }
+    
+    // Verify the single call is in the approved handler
+    const handlerStart = content.indexOf('handleConfirmedCanonicalReAuditRun')
+    const handlerEnd = content.indexOf('})', handlerStart)
+    
+    if (handlerStart === -1) {
+      return 'handleConfirmedCanonicalReAuditRun handler not found'
+    }
+    
+    const handlerCode = content.substring(handlerStart, handlerEnd)
+    if (!handlerCode.includes('canonicalReAudit.run(')) {
+      return 'canonicalReAudit.run() call not found in approved handler'
+    }
+    
+    // Check for forbidden calls outside handler
+    const beforeHandler = content.substring(0, handlerStart)
+    const afterHandler = content.substring(handlerEnd)
+    
+    if (beforeHandler.includes('canonicalReAudit.run(') || afterHandler.includes('canonicalReAudit.run(')) {
+      return 'canonicalReAudit.run() found outside approved handler'
+    }
+    
     return null
   })
 
@@ -234,73 +296,103 @@ function checkTask7C1Implementation(): void {
   }
 }
 
-function checkTask7C2B1Implementation(): void {
+function checkTask7C2B2Implementation(): void {
   const pagePath = 'app/admin/warroom/page.tsx'
-  const controllerPath = 'app/admin/warroom/controllers/canonical-reaudit-run-controller.ts'
   const modalPath = 'app/admin/warroom/components/CanonicalReAuditConfirmModal.tsx'
 
-  // Check controller exists
-  if (!fs.existsSync(controllerPath)) {
-    fail('Task 7C-2B-1: Controller exists', 'Controller file not found')
-  } else {
-    pass('Task 7C-2B-1: Controller exists')
-  }
+  // Check Task 7C-2B-2: Controlled execution path exists
+  checkFileContains(pagePath, 'Task 7C-2B-2: Controlled execution handler exists', (content) => {
+    return content.includes('handleConfirmedCanonicalReAuditRun') && 
+           content.includes('const handleConfirmedCanonicalReAuditRun = useCallback') ?
+      null : 'handleConfirmedCanonicalReAuditRun handler not found'
+  })
 
-  // Check controller is client-safe
-  checkFileContains(controllerPath, 'Task 7C-2B-1: Controller is client-safe', (content) => {
-    const serverPatterns = [
-      /import.*['"]fs['"]/, /import.*['"]path['"]/, /import.*['"]crypto['"]/, 
-      /import.*['"]next\/server['"]/, /import.*['"]next\/headers['"]/, 
-      /import.*['"]cookies['"]/, /import.*['"]prisma/, /import.*['"]libsql/, /import.*['"]turso/,
-      /fetch\s*\(/, /axios\./, /localStorage\./, /sessionStorage\./
+  // Check modal acknowledgement state management
+  checkFileContains(pagePath, 'Task 7C-2B-2: Modal acknowledgement state exists', (content) => {
+    return content.includes('canonicalReAuditAcknowledgements') && 
+           content.includes('handleCanonicalReAuditAcknowledgementToggle') ?
+      null : 'Modal acknowledgement state management not found'
+  })
+
+  // Check modal typed attestation state
+  checkFileContains(pagePath, 'Task 7C-2B-2: Modal typed attestation state exists', (content) => {
+    return content.includes('canonicalReAuditTypedAttestation') && 
+           content.includes('setCanonicalReAuditTypedAttestation') ?
+      null : 'Modal typed attestation state not found'
+  })
+
+  // Check modal close handler with state reset
+  checkFileContains(pagePath, 'Task 7C-2B-2: Modal close handler resets state', (content) => {
+    return content.includes('handleCanonicalReAuditModalClose') && 
+           content.includes('setCanonicalReAuditAcknowledgements') &&
+           content.includes('inMemoryOnly: false') ?
+      null : 'Modal close handler does not properly reset state'
+  })
+
+  // Check modal execute button is no longer disabled={true}
+  checkFileContains(modalPath, 'Task 7C-2B-2: Modal execute button is gated (not disabled={true})', (content) => {
+    if (content.includes('disabled={true}')) {
+      return 'Execute button still has disabled={true} - should be gated by canExecute'
+    }
+    if (!content.includes('disabled={!canExecute || isRunning}')) {
+      return 'Execute button not properly gated by canExecute'
+    }
+    return null
+  })
+
+  // Check modal receives all required props
+  checkFileContains(pagePath, 'Task 7C-2B-2: Modal receives all required props', (content) => {
+    const requiredProps = [
+      'onConfirmedRun={handleConfirmedCanonicalReAuditRun}',
+      'acknowledgements={canonicalReAuditAcknowledgements}',
+      'onAcknowledgementToggle={handleCanonicalReAuditAcknowledgementToggle}',
+      'typedAttestation={canonicalReAuditTypedAttestation}',
+      'onTypedAttestationChange={setCanonicalReAuditTypedAttestation}',
+      'isRunning={canonicalReAudit.isRunning}',
+      'status={canonicalReAudit.status}',
+      'result={canonicalReAudit.result}',
+      'runError={canonicalReAudit.error}'
     ]
     
-    for (const pattern of serverPatterns) {
-      if (pattern.test(content)) {
-        return `Found server pattern: ${pattern.source}`
+    for (const prop of requiredProps) {
+      if (!content.includes(prop)) {
+        return `Missing required modal prop: ${prop}`
       }
     }
     return null
   })
 
-  // Check gate evaluation exists
-  checkFileContains(controllerPath, 'Task 7C-2B-1: Gate evaluation exists', (content) => {
-    return content.includes('evaluateCanonicalReAuditRunGate') ? null : 'Gate evaluation function not found'
-  })
-
-  // Check modal execute remains disabled
-  checkFileContains(modalPath, 'Task 7C-2B-1: Modal execute remains disabled', (content) => {
-    return content.includes('disabled={true}') && content.includes('(Disabled)') ? 
-      null : 'Execute button not properly disabled'
-  })
-
-  // Check no UI path to executeConfirmedRun
-  const uiFiles = [pagePath, modalPath]
-  let foundExecutePaths: string[] = []
-
-  uiFiles.forEach(filePath => {
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf-8')
-      const codeOnly = content
-        .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
-        .replace(/\/\/.*$/gm, '')
-      
-      if (codeOnly.includes('executeConfirmedRun')) {
-        foundExecutePaths.push(filePath)
+  // Check no forbidden behaviors in handler
+  checkFileContains(pagePath, 'Task 7C-2B-2: Handler has no forbidden behaviors', (content) => {
+    const handlerStart = content.indexOf('handleConfirmedCanonicalReAuditRun')
+    const handlerEnd = content.indexOf('})', handlerStart) + 2
+    
+    if (handlerStart === -1) {
+      return 'Handler not found'
+    }
+    
+    const handlerCode = content.substring(handlerStart, handlerEnd)
+    
+    const forbiddenPatterns = [
+      'setGlobalAudit(',
+      'setVault(',
+      'fetch(',
+      'axios',
+      'localStorage',
+      'sessionStorage',
+      'deployUnlockAllowed: true',
+      'save(',
+      'publish(',
+      'promote(',
+      'rollback('
+    ]
+    
+    for (const pattern of forbiddenPatterns) {
+      if (handlerCode.includes(pattern)) {
+        return `Found forbidden pattern in handler: ${pattern}`
       }
     }
-  })
-
-  if (foundExecutePaths.length === 0) {
-    pass('Task 7C-2B-1: No UI path invokes executeConfirmedRun')
-  } else {
-    fail('Task 7C-2B-1: No UI path invokes executeConfirmedRun', 
-      `Found executeConfirmedRun in: ${foundExecutePaths.join(', ')}`)
-  }
-
-  // Check page imports gate evaluation
-  checkFileContains(pagePath, 'Task 7C-2B-1: Page imports gate evaluation', (content) => {
-    return content.includes('evaluateCanonicalReAuditRunGate') ? null : 'Gate evaluation not imported'
+    return null
   })
 }
 
@@ -392,7 +484,7 @@ function checkNoDBProviderModifications(): void {
 }
 
 // Main execution
-console.log('🔍 Verifying Task 7B + 7C-1 Boundaries...\n')
+console.log('🔍 Verifying Task 7B + 7C-1 + 7C-2B-2 Boundaries...\n')
 
 // Check Task 7B wiring on page.tsx
 checkTask7BWiring()
@@ -400,8 +492,8 @@ checkTask7BWiring()
 // Check Task 7C-1 implementation
 checkTask7C1Implementation()
 
-// Check Task 7C-2B-1 implementation
-checkTask7C2B1Implementation()
+// Check Task 7C-2B-2 implementation (replaces 7C-2B-1 checks)
+checkTask7C2B2Implementation()
 
 checkFileNotModified('app/admin/warroom/hooks/useCanonicalReAudit.ts', 'useCanonicalReAudit hook')
 checkFileNotModified('app/admin/warroom/handlers/canonical-reaudit-handler.ts', 'canonical-reaudit-handler')
@@ -426,7 +518,7 @@ console.log(`❌ FAILED: ${failCount}`)
 console.log('='.repeat(60))
 
 if (failCount > 0) {
-  console.error('\n❌ VERIFICATION FAILED: Task 7B + 7C-1 boundaries violated')
+  console.error('\n❌ VERIFICATION FAILED: Task 7B + 7C-1 + 7C-2B-2 boundaries violated')
   process.exit(1)
 }
 

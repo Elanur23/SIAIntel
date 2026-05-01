@@ -142,11 +142,11 @@ class Task7C1BoundaryVerifier {
       this.addResult(missingAcknowledgements.length === 0, '✅ All required acknowledgement copy present',
         missingAcknowledgements.length > 0 ? [`Missing acknowledgements: ${missingAcknowledgements.join(', ')}`] : undefined)
 
-      // 5. Final execute button is disabled or inert
-      const hasDisabledExecuteButton = content.includes('disabled={true}') || 
-                                      content.includes('Execute Re-Audit (Disabled)')
-      this.addResult(hasDisabledExecuteButton, '✅ Final execute button is disabled/inert',
-        hasDisabledExecuteButton ? undefined : ['Execute button not properly disabled'])
+      // 5. Final execute button is gated (Task 7C-2B-2 update)
+      const hasGatedExecuteButton = content.includes('disabled={!canExecute || isRunning}') ||
+                                   content.includes('gateResult?.canExecute')
+      this.addResult(hasGatedExecuteButton, '✅ Final execute button is gated by controller',
+        hasGatedExecuteButton ? undefined : ['Execute button not properly gated'])
 
       // 6. No canonicalReAudit.run() call
       // Remove all comments (both /* */ and //) and JSDoc to avoid false positives
@@ -235,17 +235,32 @@ class Task7C1BoundaryVerifier {
       this.addResult(rendersTriggerButton, '✅ Page renders trigger button with correct props',
         rendersTriggerButton ? undefined : ['Trigger button not rendered or props incorrect'])
 
-      // 4. Renders modal once
+      // 4. Renders modal once (Task 7C-2B-2 update)
       const rendersModal = content.includes('<CanonicalReAuditConfirmModal') &&
-                          content.includes('onClose={() => setIsCanonicalReAuditConfirmOpen(false)}')
+                          (content.includes('onClose={handleCanonicalReAuditModalClose}') ||
+                           content.includes('onClose={() => setIsCanonicalReAuditConfirmOpen(false)}'))
       
       this.addResult(rendersModal, '✅ Page renders confirm modal with correct props',
         rendersModal ? undefined : ['Confirm modal not rendered or props incorrect'])
 
-      // 5. No canonicalReAudit.run() call in page
-      const hasNoRunCall = !content.includes('canonicalReAudit.run(')
-      this.addResult(hasNoRunCall, '✅ No canonicalReAudit.run() call in page',
-        hasNoRunCall ? undefined : ['Found canonicalReAudit.run() call in page'])
+      // 5. Controlled canonicalReAudit.run() call in page (Task 7C-2B-2 update)
+      const runCallCount = (content.match(/canonicalReAudit\.run\s*\(/g) || []).length
+      let runCallValid = false
+      
+      if (runCallCount === 0) {
+        runCallValid = true // No calls is acceptable for earlier phases
+      } else if (runCallCount === 1) {
+        // Single call - verify it's in the approved handler
+        const handlerStart = content.indexOf('handleConfirmedCanonicalReAuditRun')
+        if (handlerStart !== -1) {
+          const handlerEnd = content.indexOf('})', handlerStart)
+          const handlerCode = content.substring(handlerStart, handlerEnd)
+          runCallValid = handlerCode.includes('canonicalReAudit.run(')
+        }
+      }
+      
+      this.addResult(runCallValid, '✅ Controlled canonicalReAudit.run() call in page',
+        runCallValid ? undefined : [`Found ${runCallCount} canonicalReAudit.run() calls - expected 0 or 1 in approved handler`])
 
       // 6. Disabled state computation exists
       const hasDisabledLogic = content.includes('canonicalReAuditTriggerDisabled') &&

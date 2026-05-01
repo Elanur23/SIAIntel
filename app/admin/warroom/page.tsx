@@ -196,6 +196,18 @@ export default function WarRoom() {
   // TASK 7C-1: Canonical Re-Audit Confirmation Modal State (UI Scaffold Only)
   const [isCanonicalReAuditConfirmOpen, setIsCanonicalReAuditConfirmOpen] = useState(false)
 
+  // TASK 7C-2B-2: Canonical Re-Audit Modal Acknowledgement State
+  const [canonicalReAuditAcknowledgements, setCanonicalReAuditAcknowledgements] = useState({
+    inMemoryOnly: false,
+    deployLocked: false,
+    globalAuditNotUpdated: false,
+    acceptanceLaterPhase: false,
+    noSavePublishDeploy: false
+  })
+
+  // TASK 7C-2B-2: Canonical Re-Audit Modal Typed Attestation State
+  const [canonicalReAuditTypedAttestation, setCanonicalReAuditTypedAttestation] = useState('')
+
   // TASK 6B-1: Promotion Dry-Run Preview State
   const [promotionDryRunResult, setPromotionDryRunResult] = useState<LocalPromotionDryRunResult | null>(null)
 
@@ -368,11 +380,16 @@ export default function WarRoom() {
       return null
     }
 
+    const allAcknowledged = Object.values(canonicalReAuditAcknowledgements).every(Boolean)
+    const attestationMatches = canonicalReAuditPreflight.attestationPhrase ? 
+      canonicalReAuditTypedAttestation === canonicalReAuditPreflight.attestationPhrase : 
+      true // No attestation required if no phrase provided
+
     const gateState: CanonicalReAuditRunGateStateFields = {
       preflightCanRun: canonicalReAuditPreflight.canRun,
       hasComputedInput: Boolean(canonicalReAuditPreflight.computedInput),
-      allAcknowledgementsChecked: false, // Modal owns acknowledgement state
-      attestationMatches: false, // Modal owns attestation state
+      allAcknowledgementsChecked: allAcknowledged,
+      attestationMatches: attestationMatches,
       isRunning: canonicalReAudit.isRunning,
       draftSource: draftSource,
       hasSessionDraft: remediationController.hasSessionDraft,
@@ -383,6 +400,8 @@ export default function WarRoom() {
     return evaluateCanonicalReAuditRunGate(gateState)
   }, [
     canonicalReAuditPreflight,
+    canonicalReAuditAcknowledgements,
+    canonicalReAuditTypedAttestation,
     canonicalReAudit.isRunning,
     draftSource,
     remediationController.hasSessionDraft,
@@ -980,6 +999,75 @@ export default function WarRoom() {
     lastImportInfo,
     finalizePromotionSession
   ])
+
+  // TASK 7C-2B-2: Canonical Re-Audit Confirmed Run Handler
+  const handleConfirmedCanonicalReAuditRun = useCallback(() => {
+    try {
+      // PHASE 1: Re-check gate state immediately before run
+      if (!canonicalReAuditGateResult?.canExecute) {
+        const blockReasons = canonicalReAuditGateResult?.blockReasons || ['Gate evaluation failed']
+        throw new Error(`Canonical re-audit blocked: ${blockReasons.join(', ')}`)
+      }
+
+      // PHASE 2: Validate preflight and computed input
+      if (!canonicalReAuditPreflight?.canRun || !canonicalReAuditPreflight.computedInput) {
+        throw new Error('Canonical re-audit blocked: Preflight validation failed or computed input missing')
+      }
+
+      // PHASE 3: Validate selected article
+      if (!selectedNews?.id) {
+        throw new Error('Canonical re-audit blocked: No article selected')
+      }
+
+      // PHASE 4: Call canonicalReAudit.run through the approved path
+      const runInput = {
+        articleId: selectedNews.id,
+        operatorId: 'warroom-operator',
+        canonicalSnapshot: canonicalReAuditPreflight.computedInput.canonicalSnapshot,
+        vault: canonicalReAuditPreflight.computedInput.vault,
+        promotionId: canonicalReAuditPreflight.computedInput.promotionId,
+        promotionArchiveId: canonicalReAuditPreflight.computedInput.promotionArchiveId,
+        requestedAt: new Date().toISOString()
+      }
+
+      // PHASE 5: Execute canonical re-audit run
+      const result = canonicalReAudit.run(runInput)
+
+      // PHASE 6: Handle result (result is already stored in canonicalReAudit hook state)
+      // No additional handling needed - the modal will display the result from canonicalReAudit.result
+
+    } catch (error) {
+      // Handle errors safely - they will be reflected in canonicalReAudit.error
+      console.error('[WARROOM] Canonical re-audit execution failed:', error)
+    }
+  }, [
+    canonicalReAuditGateResult,
+    canonicalReAuditPreflight,
+    selectedNews,
+    canonicalReAudit
+  ])
+
+  // TASK 7C-2B-2: Modal Acknowledgement Toggle Handler
+  const handleCanonicalReAuditAcknowledgementToggle = useCallback((key: keyof typeof canonicalReAuditAcknowledgements) => {
+    setCanonicalReAuditAcknowledgements(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }))
+  }, [])
+
+  // TASK 7C-2B-2: Modal Close Handler with State Reset
+  const handleCanonicalReAuditModalClose = useCallback(() => {
+    // Reset modal-local state on close
+    setCanonicalReAuditAcknowledgements({
+      inMemoryOnly: false,
+      deployLocked: false,
+      globalAuditNotUpdated: false,
+      acceptanceLaterPhase: false,
+      noSavePublishDeploy: false
+    })
+    setCanonicalReAuditTypedAttestation('')
+    setIsCanonicalReAuditConfirmOpen(false)
+  }, [])
 
   // PHASE 3C-3B-2: Guarded Dry-Run Handler Only
   const handleRequestLocalDraftApply = (request: LocalDraftApplyRequest): LocalDraftApplyRequestResult => {
@@ -2056,14 +2144,23 @@ export default function WarRoom() {
         promotionExecutionError={promotionExecutionError}
       />
 
-      {/* TASK 7C-2B-1: Canonical Re-Audit Confirm Modal - UI Scaffold with Gate Evaluation */}
+      {/* TASK 7C-2B-2: Canonical Re-Audit Confirm Modal - Fully Wired with Execute Path */}
       <CanonicalReAuditConfirmModal
         isOpen={isCanonicalReAuditConfirmOpen}
-        onClose={() => setIsCanonicalReAuditConfirmOpen(false)}
+        onClose={handleCanonicalReAuditModalClose}
+        onConfirmedRun={handleConfirmedCanonicalReAuditRun}
         disabledReason={canonicalReAuditTriggerDisabledReason}
         articleId={selectedNews?.id ?? null}
         preflight={canonicalReAuditPreflight}
         gateResult={canonicalReAuditGateResult}
+        acknowledgements={canonicalReAuditAcknowledgements}
+        onAcknowledgementToggle={handleCanonicalReAuditAcknowledgementToggle}
+        typedAttestation={canonicalReAuditTypedAttestation}
+        onTypedAttestationChange={setCanonicalReAuditTypedAttestation}
+        isRunning={canonicalReAudit.isRunning}
+        status={canonicalReAudit.status}
+        result={canonicalReAudit.result}
+        runError={canonicalReAudit.error}
       />
     </div>
   )
