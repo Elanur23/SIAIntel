@@ -1,12 +1,47 @@
 import {
+  CanonicalReAuditBlockReason,
+  CanonicalReAuditStatus,
+  createCanonicalReAuditBlockedResult,
+} from "lib/editorial/canonical-reaudit-types";
+import type {
   CanonicalReAuditRequest,
   CanonicalReAuditResult,
-  CanonicalReAuditBlockedReason,
-  createCanonicalReAuditBlockedResult,
+  CanonicalReAuditSnapshotIdentity,
 } from "lib/editorial/canonical-reaudit-types";
 
 // Internal lock to prevent concurrent execution
 let isLocked = false;
+
+const createFallbackSnapshot = (): CanonicalReAuditSnapshotIdentity => ({
+  contentHash: "UNAVAILABLE",
+  ledgerSequence: -1,
+  capturedAt: new Date().toISOString(),
+  source: "canonical-vault",
+});
+
+const getSnapshot = (request?: CanonicalReAuditRequest | null): CanonicalReAuditSnapshotIdentity =>
+  request?.canonicalSnapshot ?? createFallbackSnapshot();
+
+const getAuditor = (request?: CanonicalReAuditRequest | null): string => {
+  if (request && typeof request.operatorId === "string" && request.operatorId.trim().length > 0) {
+    return request.operatorId;
+  }
+  return "UNKNOWN";
+};
+
+const createBlockedResult = (
+  request: CanonicalReAuditRequest | null | undefined,
+  reason: CanonicalReAuditBlockReason,
+  message: string
+): CanonicalReAuditResult => {
+  const errors = message ? [message] : undefined;
+  const blocked = createCanonicalReAuditBlockedResult(getSnapshot(request), reason, getAuditor(request), errors);
+  return {
+    ...blocked,
+    status: CanonicalReAuditStatus.BLOCKED,
+    blockReason: reason,
+  };
+};
 
 /**
  * Fail-closed canonical re-audit handler scaffold.
@@ -14,117 +49,69 @@ let isLocked = false;
  */
 export function startCanonicalReAudit(request: CanonicalReAuditRequest): CanonicalReAuditResult {
   if (isLocked) {
-    return createCanonicalReAuditBlockedResult({
-      reason: CanonicalReAuditBlockedReason.CONCURRENT_EXECUTION,
-      message: "Canonical re-audit is already running (scaffold lock).",
-      deployUnlockAllowed: false,
-      globalAuditOverwriteAllowed: false,
-      backendPersistenceAllowed: false,
-      sessionAuditInheritanceAllowed: false,
-      memoryOnly: true,
-    });
+    return createBlockedResult(
+      request,
+      CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
+      "Canonical re-audit is already running (scaffold lock)."
+    );
   }
   isLocked = true;
   try {
     // Minimal input validation (fail-closed)
     if (!request) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.INVALID_REQUEST,
-        message: "Request object is missing.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(request, CanonicalReAuditBlockReason.UNKNOWN, "Request object is missing.");
     }
     if (request.manualTrigger !== true) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.INVALID_TRIGGER,
-        message: "Manual trigger is required.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(request, CanonicalReAuditBlockReason.UNKNOWN, "Manual trigger is required.");
     }
     if (request.memoryOnly !== true) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.MEMORY_ONLY_REQUIRED,
-        message: "Handler only supports memory-only execution.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
+        "Handler only supports memory-only execution."
+      );
     }
     if (request.deployUnlockAllowed !== false) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.DEPLOY_UNLOCK_FORBIDDEN,
-        message: "Deploy unlock is forbidden in scaffold.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN,
+        "Deploy unlock is forbidden in scaffold."
+      );
     }
     if (request.backendPersistenceAllowed !== false) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.BACKEND_PERSISTENCE_FORBIDDEN,
-        message: "Backend persistence is forbidden in scaffold.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
+        "Backend persistence is forbidden in scaffold."
+      );
     }
     if (request.sessionAuditInheritanceAllowed !== false) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
-        message: "Session audit inheritance is forbidden in scaffold.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
+        "Session audit inheritance is forbidden in scaffold."
+      );
     }
     if (!request.canonicalSnapshot) {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.MISSING_CANONICAL_SNAPSHOT,
-        message: "Canonical snapshot is required.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.SNAPSHOT_MISSING,
+        "Canonical snapshot is required."
+      );
     }
     if (request.canonicalSnapshot.source !== "canonical-vault") {
-      return createCanonicalReAuditBlockedResult({
-        reason: CanonicalReAuditBlockedReason.INVALID_SNAPSHOT_SOURCE,
-        message: "Canonical snapshot source must be 'canonical-vault'.",
-        deployUnlockAllowed: false,
-        globalAuditOverwriteAllowed: false,
-        backendPersistenceAllowed: false,
-        sessionAuditInheritanceAllowed: false,
-        memoryOnly: true,
-      });
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
+        "Canonical snapshot source must be 'canonical-vault'."
+      );
     }
     // Always fail-closed: scaffold does not run real audit
-    return createCanonicalReAuditBlockedResult({
-      reason: CanonicalReAuditBlockedReason.AUDIT_RUNNER_UNAVAILABLE,
-      message: "Canonical re-audit execution is scaffolded and not yet implemented.",
-      deployUnlockAllowed: false,
-      globalAuditOverwriteAllowed: false,
-      backendPersistenceAllowed: false,
-      sessionAuditInheritanceAllowed: false,
-      memoryOnly: true,
-    });
+    return createBlockedResult(
+      request,
+      CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
+      "Canonical re-audit execution is scaffolded and not yet implemented."
+    );
   } finally {
     isLocked = false;
   }
