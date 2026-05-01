@@ -43,6 +43,10 @@ import CanonicalReAuditTriggerButton from './components/CanonicalReAuditTriggerB
 import CanonicalReAuditConfirmModal from './components/CanonicalReAuditConfirmModal'
 import { useLocalDraftRemediationController } from './hooks/useLocalDraftRemediationController'
 import { useCanonicalReAudit } from './hooks/useCanonicalReAudit'
+import {
+  buildCanonicalReAuditPreflight,
+  type CanonicalReAuditPreflightResult
+} from '@/lib/editorial/canonical-reaudit-input-builder'
 import { RemediationCategory, type RemediationSuggestion } from '@/lib/editorial/remediation-types'
 import {
   type LocalDraftApplyRequest,
@@ -326,6 +330,32 @@ export default function WarRoom() {
     if (!canonicalReAuditVisible) return 'Canonical re-audit not available'
     return null
   })()
+
+  // TASK 7C-2A: Canonical Re-Audit Preflight Computation
+  const canonicalReAuditPreflight: CanonicalReAuditPreflightResult | null = useMemo(() => {
+    if (!selectedNews || draftSource !== 'canonical') {
+      return null
+    }
+
+    return buildCanonicalReAuditPreflight({
+      articleId: selectedNews.id,
+      operatorId: 'warroom-operator', // Fallback operator ID
+      vault: vault,
+      draftSource: draftSource,
+      hasSessionDraft: remediationController.hasSessionDraft,
+      isRunning: canonicalReAudit.isRunning,
+      promotionId: lastImportInfo?.id,
+      promotionArchiveId: undefined,
+      requestedAt: new Date().toISOString()
+    })
+  }, [
+    selectedNews,
+    draftSource,
+    vault,
+    remediationController.hasSessionDraft,
+    canonicalReAudit.isRunning,
+    lastImportInfo?.id
+  ])
 
   const activeDraft = vault[activeLang] || { title: '', desc: '', ready: false }
 
@@ -2000,6 +2030,7 @@ export default function WarRoom() {
         onClose={() => setIsCanonicalReAuditConfirmOpen(false)}
         disabledReason={canonicalReAuditTriggerDisabledReason}
         articleId={selectedNews?.id ?? null}
+        preflight={canonicalReAuditPreflight}
       />
     </div>
   )

@@ -12,11 +12,14 @@ import {
   AlertCircle
 } from 'lucide-react'
 
+import type { CanonicalReAuditPreflightResult } from '@/lib/editorial/canonical-reaudit-input-builder'
+
 interface CanonicalReAuditConfirmModalProps {
   isOpen: boolean
   onClose: () => void
   disabledReason?: string | null
   articleId?: string | null
+  preflight?: CanonicalReAuditPreflightResult | null
 }
 
 /**
@@ -38,7 +41,8 @@ export default function CanonicalReAuditConfirmModal({
   isOpen,
   onClose,
   disabledReason,
-  articleId
+  articleId,
+  preflight
 }: CanonicalReAuditConfirmModalProps) {
   // Internal acknowledgement state
   const [acknowledgements, setAcknowledgements] = useState({
@@ -118,6 +122,64 @@ export default function CanonicalReAuditConfirmModal({
                   <div className="text-sm font-mono text-white/90">
                     {articleId}
                   </div>
+                </div>
+              )}
+
+              {/* Preflight Status */}
+              {preflight && (
+                <div className="space-y-4">
+                  <div className="text-sm font-black text-white/80 uppercase tracking-wide flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-blue-400" />
+                    Preflight Validation
+                  </div>
+
+                  {preflight.canRun ? (
+                    <div className="px-4 py-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <div className="text-xs font-bold text-green-400 uppercase tracking-wider mb-2">
+                        Preflight PASSED
+                      </div>
+                      {preflight.inputPreview && (
+                        <div className="space-y-2 text-sm text-green-200/90">
+                          <div>Article: ***{preflight.inputPreview.articleIdSuffix}</div>
+                          <div>Operator: {preflight.inputPreview.operatorId}</div>
+                          <div>Languages: {preflight.inputPreview.languageCount}</div>
+                          <div>Snapshot: {preflight.inputPreview.snapshotShort}***</div>
+                          {preflight.inputPreview.promotionIdPresent && (
+                            <div>Promotion: Present</div>
+                          )}
+                        </div>
+                      )}
+                      {preflight.attestationPhrase && (
+                        <div className="mt-3 px-3 py-2 bg-green-800/30 border border-green-600/40 rounded font-mono text-sm text-green-300">
+                          Attestation: {preflight.attestationPhrase}
+                        </div>
+                      )}
+                      {preflight.warnings.length > 0 && (
+                        <div className="mt-3 space-y-1">
+                          {preflight.warnings.map((warning, idx) => (
+                            <div key={idx} className="text-xs text-yellow-300/80 flex items-start gap-2">
+                              <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+                              {warning}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-3 bg-red-900/30 border border-red-500/40 rounded-lg">
+                      <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">
+                        Preflight BLOCKED
+                      </div>
+                      <div className="space-y-1">
+                        {preflight.blockReasons.map((reason, idx) => (
+                          <div key={idx} className="text-sm text-red-300/90 flex items-start gap-2">
+                            <X size={12} className="mt-0.5 shrink-0" />
+                            {reason.replace(/_/g, ' ')}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
