@@ -1,19 +1,22 @@
 /**
  * Canonical Re-Audit Handler
  *
- * Task 5B: Bridge-Only Preflight Layer
+ * Task 5C: Handler Layer Implementation
  *
  * This handler provides:
  * 1. A pure vault snapshot computation helper (computeCanonicalVaultSnapshot)
  * 2. A session/local-draft contamination detector (hasSessionContamination)
  * 3. A bridge preflight builder (buildCanonicalReAuditAdapterPreflight)
- * 4. The existing fail-closed scaffold entry point (startCanonicalReAudit)
- *    — updated to accept optional vault and run preflight before returning
- *      the AUDIT_RUNNER_UNAVAILABLE sentinel.
+ * 4. A result mapper (mapAdapterResultToHandlerResult) that transforms adapter
+ *    results to handler results with full safety invariants
+ * 5. The fail-closed entry point (startCanonicalReAudit) that integrates
+ *    adapter execution after successful preflight
  *
- * CRITICAL SAFETY BOUNDARIES (Task 5B):
- * - Does NOT call runInMemoryCanonicalReAudit
- * - Does NOT execute any real audit runner
+ * CRITICAL SAFETY BOUNDARIES (Task 5C):
+ * - Calls runInMemoryCanonicalReAudit only after successful preflight
+ * - Wraps adapter execution in try-catch for fail-closed error handling
+ * - Maps adapter results to handler results with safety invariants
+ * - Rejects unsafe adapter flags (deployUnlockAllowed, sessionAuditInheritanceAllowed)
  * - Does NOT mutate vault, canonical article state, or session draft state
  * - Does NOT overwrite globalAudit
  * - Does NOT inherit session audit into canonical audit
@@ -24,7 +27,7 @@
  * - Does NOT accept audit result into canonical/global state
  * - Fail-closed for all ambiguous or invalid states
  *
- * @version 5B.0.0
+ * @version 5C.0.0
  */
 
 import {
@@ -37,12 +40,15 @@ import type {
   CanonicalReAuditRequest,
   CanonicalReAuditResult,
   CanonicalReAuditSnapshotIdentity,
+  PendingCanonicalReAuditResult,
 } from "lib/editorial/canonical-reaudit-types";
 
-// Type-only imports from adapter — no runtime import of runInMemoryCanonicalReAudit
-import type {
-  CanonicalVaultInput,
-  RunInMemoryCanonicalReAuditRequest,
+// Runtime imports from adapter (Task 5C: Adapter Integration)
+import {
+  runInMemoryCanonicalReAudit,
+  type CanonicalVaultInput,
+  type RunInMemoryCanonicalReAuditRequest,
+  type CanonicalReAuditAdapterResult,
 } from "lib/editorial/canonical-reaudit-adapter";
 
 // ============================================================================
@@ -478,28 +484,156 @@ const createBlockedResult = (
 };
 
 // ============================================================================
+// RESULT MAPPER: mapAdapterResultToHandlerResult
+// ============================================================================
+
+/**
+ * Maps adapter result to handler result with full safety invariants.
+ *
+ * Task 5C: Result Mapper Function
+ *
+ * This function transforms a CanonicalReAuditAdapterResult (from Task 5A)
+ * into a CanonicalReAuditResult (handler layer type) with:
+ * - All safety invariants injected
+ * - Status enum conversion
+ * - Derived field computation
+ * - Field renaming
+ * - Promotion ID extraction
+ * - Unsafe flag detection and rejection
+ *
+ * SAFETY RULES:
+ * - Pure function — no mutation, no I/O
+ * - Injects all safety invariants regardless of adapter output
+ * - Computes derived fields from status
+ * - Preserves adapter findings and summary
+ * - Wraps blockMessage in errors array
+ * - Rejects unsafe adapter flags (deployUnlockAllowed, sessionAuditInheritanceAllowed)
+ *
+ * @param adapterResult - Result from runInMemoryCanonicalReAudit
+ * @param request - Original canonical re-audit request
+ * @returns Handler result with full safety invariants
+ */
+function mapAdapterResultToHandlerResult(
+  adapterResult: CanonicalReAuditAdapterResult,
+  request: CanonicalReAuditRequest
+): CanonicalReAuditResult {
+  // ── Task 2.1: Unsafe Flag Detection - deployUnlockAllowed ──────────────
+  // Defense-in-depth: adapter should never return unsafe flags, but fail-closed
+  // design requires defensive checks at every boundary
+  if (adapterResult.deployUnlockAllowed !== false) {
+    return createBlockedResult(
+      request,
+      CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN,
+      'Adapter result contains unsafe deployUnlockAllowed flag'
+    );
+  }
+
+  // ── Task 2.2: Unsafe Flag Detection - sessionAuditInheritanceAllowed ───
+  if (adapterResult.sessionAuditInheritanceAllowed !== false) {
+    return createBlockedResult(
+      request,
+      CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
+      'Adapter result contains unsafe sessionAuditInheritanceAllowed flag'
+    );
+  }
+  // Map adapter status to handler status enum
+  let status: CanonicalReAuditStatus;
+  switch (adapterResult.status) {
+    case 'PASSED_PENDING_ACCEPTANCE':
+      status = CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE;
+      break;
+    case 'FAILED_PENDING_REVIEW':
+      status = CanonicalReAuditStatus.FAILED_PENDING_REVIEW;
+      break;
+    case 'BLOCKED':
+      status = CanonicalReAuditStatus.BLOCKED;
+      break;
+    case 'STALE':
+      status = CanonicalReAuditStatus.STALE;
+      break;
+    default:
+      // Fail-closed: unknown status
+      status = CanonicalReAuditStatus.BLOCKED;
+  }
+
+  // Compute derived fields from status
+  const success = status === CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE;
+  const passed = status === CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE;
+  const readyForAcceptance = status === CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE;
+
+  // Extract promotionId from request or snapshot
+  const promotionId = request.promotionId || adapterResult.snapshotIdentity.promotionId;
+
+  // Wrap blockMessage in errors array if present
+  const errors = adapterResult.blockMessage ? [adapterResult.blockMessage] : undefined;
+
+  // Build base result with all safety invariants
+  const baseResult: PendingCanonicalReAuditResult = {
+    status,
+    success,
+    passed,
+    readyForAcceptance,
+    // Safety invariants (always enforced)
+    deployRemainsLocked: true,
+    globalAuditOverwriteAllowed: false,
+    backendPersistenceAllowed: false,
+    memoryOnly: true,
+    sessionAuditInherited: false,
+    // Field renaming
+    auditedSnapshot: adapterResult.snapshotIdentity,
+    summary: adapterResult.auditSummary,
+    // Direct copies
+    findings: adapterResult.findings,
+    auditedAt: adapterResult.auditedAt,
+    auditor: adapterResult.auditor,
+    promotionId,
+    blockReason: adapterResult.blockReason,
+    errors,
+  };
+
+  // Return typed result based on status
+  if (status === CanonicalReAuditStatus.BLOCKED) {
+    return {
+      ...baseResult,
+      status: CanonicalReAuditStatus.BLOCKED,
+      blockReason: adapterResult.blockReason || CanonicalReAuditBlockReason.UNKNOWN,
+    };
+  }
+
+  if (status === CanonicalReAuditStatus.STALE) {
+    return {
+      ...baseResult,
+      status: CanonicalReAuditStatus.STALE,
+    };
+  }
+
+  // PASSED_PENDING_ACCEPTANCE or FAILED_PENDING_REVIEW
+  return {
+    ...baseResult,
+    status,
+  };
+}
+
+// ============================================================================
 // ENTRY POINT: startCanonicalReAudit
 // ============================================================================
 
 /**
  * Fail-closed canonical re-audit handler.
  *
- * Task 5B update: accepts an optional vault parameter and runs the bridge
- * preflight before returning the AUDIT_RUNNER_UNAVAILABLE scaffold sentinel.
+ * Task 5C update: Integrates adapter execution after successful preflight.
+ * Replaces the AUDIT_RUNNER_UNAVAILABLE scaffold sentinel with real adapter
+ * execution wrapped in try-catch for fail-closed error handling.
  *
- * If vault is provided and preflight fails, returns a BLOCKED or STALE result
- * using the preflight's blockReason. If preflight succeeds, the handler still
- * returns AUDIT_RUNNER_UNAVAILABLE — real adapter execution is deferred to
- * Task 5C.
+ * If vault is provided and preflight succeeds, calls runInMemoryCanonicalReAudit
+ * and maps the result to handler result format with full safety invariants.
  *
- * If vault is omitted, the handler behaves identically to the Task 5A scaffold
- * (all existing guards fire, then AUDIT_RUNNER_UNAVAILABLE is returned).
+ * If vault is omitted or preflight fails, returns appropriate BLOCKED/STALE result.
  *
  * CALL-SITE RISK: Zero. No .ts/.tsx file in the project currently imports or
  * calls startCanonicalReAudit. The optional vault parameter is backward-
  * compatible — existing callers (none) would not break.
  *
- * Does NOT call runInMemoryCanonicalReAudit.
  * Does NOT mutate globalAudit.
  * Does NOT unlock deploy.
  */
@@ -576,31 +710,51 @@ export function startCanonicalReAudit(
     }
 
     // ── Task 5B: Bridge preflight (runs only when vault is provided) ─────────
+    // ── Task 5C: Adapter execution after successful preflight ────────────────
 
-    if (vault !== undefined) {
-      const preflight = buildCanonicalReAuditAdapterPreflight(request, vault);
-
-      if (!preflight.ok) {
-        // Map preflight failure to the appropriate BLOCKED/STALE result
-        return createBlockedResult(
-          request,
-          preflight.blockReason,
-          `Preflight blocked: ${preflight.message}`
-        );
-      }
-
-      // Preflight succeeded — adapterRequest is ready for Task 5C.
-      // Task 5B does NOT call runInMemoryCanonicalReAudit here.
-      // Fall through to the scaffold sentinel below.
+    if (vault === undefined) {
+      // Vault not provided — backward compatibility path
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
+        "Canonical vault is required for re-audit execution."
+      );
     }
 
-    // ── Scaffold sentinel (preserved from Task 5A) ───────────────────────────
-    // Real adapter execution is deferred to Task 5C.
-    return createBlockedResult(
-      request,
-      CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
-      "Canonical re-audit execution is scaffolded and not yet implemented."
-    );
+    // Run preflight validation
+    const preflight = buildCanonicalReAuditAdapterPreflight(request, vault);
+
+    if (!preflight.ok) {
+      // Preflight failed — return BLOCKED/STALE result
+      return createBlockedResult(
+        request,
+        preflight.blockReason,
+        `Preflight blocked: ${preflight.message}`
+      );
+    }
+
+    // ── Task 3.1: Adapter execution after successful preflight ───────────────
+    // ── Task 3.2: Try-catch wrapper for fail-closed error handling ───────────
+
+    try {
+      // Call adapter with validated request
+      const adapterResult = runInMemoryCanonicalReAudit(preflight.adapterRequest);
+
+      // ── Task 3.3: Wire result mapping and safety guards ──────────────────
+      // Map adapter result to handler result with safety invariants
+      const handlerResult = mapAdapterResultToHandlerResult(adapterResult, request);
+
+      return handlerResult;
+
+    } catch (error) {
+      // Adapter threw exception — fail-closed with BLOCKED result
+      return createBlockedResult(
+        request,
+        CanonicalReAuditBlockReason.AUDIT_RUNNER_FAILED,
+        `Adapter execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+
   } finally {
     isLocked = false;
   }

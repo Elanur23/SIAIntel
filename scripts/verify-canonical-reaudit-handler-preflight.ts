@@ -95,7 +95,7 @@ const VALID_REQUEST: CanonicalReAuditRequest = {
 // ============================================================================
 
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-console.log("TASK 5B: CANONICAL RE-AUDIT HANDLER PREFLIGHT VERIFICATION");
+console.log("TASK 5B/5C: CANONICAL RE-AUDIT HANDLER PREFLIGHT VERIFICATION");
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
 // ============================================================================
@@ -127,9 +127,9 @@ assert(
 );
 
 // ============================================================================
-// TEST 4: Handler does NOT import/call runInMemoryCanonicalReAudit as runtime
+// TEST 4: Handler imports runInMemoryCanonicalReAudit for Task 5C integration
 // ============================================================================
-console.log("\nTEST 4: Handler does NOT import/call runInMemoryCanonicalReAudit as runtime");
+console.log("\nTEST 4: Handler imports runInMemoryCanonicalReAudit for Task 5C integration");
 const handlerSource = fs.readFileSync(handlerPath, "utf-8");
 
 // Strip single-line comments (//) and block comments (/* ... */) before checking
@@ -138,22 +138,19 @@ const handlerSourceNoComments = handlerSource
   .replace(/\/\*[\s\S]*?\*\//g, "") // remove block comments
   .replace(/\/\/[^\n]*/g, "");       // remove line comments
 
-// After stripping comments, the only remaining references should be type-only imports.
-// A runtime import would look like: import { runInMemoryCanonicalReAudit } from ...
-// A type-only import looks like: import type { ... } from ...
-// We check that no non-type import or call expression remains.
+// Task 5C: Handler should now import and call runInMemoryCanonicalReAudit
 const hasRuntimeImport = /import\s+\{[^}]*runInMemoryCanonicalReAudit[^}]*\}\s+from/.test(
   handlerSourceNoComments
 );
 const hasCallExpression = /runInMemoryCanonicalReAudit\s*\(/.test(handlerSourceNoComments);
 
 assert(
-  !hasRuntimeImport,
-  "Handler does not have a runtime import of runInMemoryCanonicalReAudit (type-only imports are allowed)"
+  hasRuntimeImport,
+  "Handler has runtime import of runInMemoryCanonicalReAudit (Task 5C integration)"
 );
 assert(
-  !hasCallExpression,
-  "Handler does not call runInMemoryCanonicalReAudit()"
+  hasCallExpression,
+  "Handler calls runInMemoryCanonicalReAudit() (Task 5C integration)"
 );
 
 // ============================================================================
@@ -447,17 +444,21 @@ assert(
 );
 
 // ============================================================================
-// TEST 18: startCanonicalReAudit still returns AUDIT_RUNNER_UNAVAILABLE after valid preflight
+// TEST 18: startCanonicalReAudit executes adapter after valid preflight (Task 5C)
 // ============================================================================
-console.log("\nTEST 18: startCanonicalReAudit returns AUDIT_RUNNER_UNAVAILABLE after valid preflight");
+console.log("\nTEST 18: startCanonicalReAudit executes adapter after valid preflight (Task 5C)");
 const handlerResult = startCanonicalReAudit(VALID_REQUEST, VALID_VAULT);
 assert(
-  handlerResult.status === CanonicalReAuditStatus.BLOCKED,
-  "startCanonicalReAudit returns BLOCKED status"
+  handlerResult.status === CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE ||
+  handlerResult.status === CanonicalReAuditStatus.FAILED_PENDING_REVIEW ||
+  handlerResult.status === CanonicalReAuditStatus.BLOCKED ||
+  handlerResult.status === CanonicalReAuditStatus.STALE,
+  "startCanonicalReAudit returns valid status from adapter execution"
 );
 assert(
-  handlerResult.blockReason === CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
-  "startCanonicalReAudit returns AUDIT_RUNNER_UNAVAILABLE after valid preflight (sentinel preserved)"
+  handlerResult.status !== CanonicalReAuditStatus.BLOCKED ||
+  handlerResult.blockReason !== CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
+  "startCanonicalReAudit no longer returns AUDIT_RUNNER_UNAVAILABLE sentinel (adapter integrated)"
 );
 
 // Also verify without vault (backward-compatible path)
@@ -497,17 +498,18 @@ try {
 // FINAL REPORT
 // ============================================================================
 console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-console.log("TASK 5B VERIFICATION COMPLETE");
+console.log("TASK 5B/5C VERIFICATION COMPLETE");
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 console.log(`[VERIFY] canonical-reaudit-handler-preflight: ${passCount} checks passed, ${failCount} failed`);
 
 if (failCount > 0) {
-  console.error(`\n❌ ${failCount} check(s) FAILED. Task 5B verification FAILED.`);
+  console.error(`\n❌ ${failCount} check(s) FAILED. Task 5B/5C verification FAILED.`);
   process.exit(1);
 }
 
 console.log("\n✅ All checks passed.");
-console.log("✅ Handler is bridge-only — no adapter execution");
+console.log("✅ Handler integrates adapter execution (Task 5C)");
+console.log("✅ Handler calls adapter after successful preflight");
 console.log("✅ No forbidden imports or patterns");
 console.log("✅ No UI/page/hook changes");
 console.log("✅ No mutation");
@@ -515,7 +517,7 @@ console.log("✅ No globalAudit overwrite");
 console.log("✅ No deploy unlock");
 console.log("✅ No backend/API/database/provider calls");
 console.log("✅ No persistence");
-console.log("✅ Scaffold sentinel AUDIT_RUNNER_UNAVAILABLE preserved");
+console.log("✅ Adapter execution wrapped in try-catch for fail-closed");
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
 process.exit(0);

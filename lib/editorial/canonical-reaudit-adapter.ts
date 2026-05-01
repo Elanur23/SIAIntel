@@ -257,13 +257,16 @@ export function runInMemoryCanonicalReAudit(
   }
   
   // Snapshot verification: expected vs current
+  // Note: Only compare stable identity fields (contentHash, ledgerSequence)
+  // capturedAt is volatile and set at call time, so it will always differ
+  // between the request snapshot and the current snapshot computed in preflight
   if (request.expectedSnapshot) {
-    const snapshotMatch = verifyCanonicalSnapshotIdentityMatch(
-      request.expectedSnapshot,
-      request.currentSnapshot
-    );
+    const contentHashMatch = 
+      request.expectedSnapshot.contentHash === request.currentSnapshot.contentHash;
+    const ledgerSequenceMatch = 
+      request.expectedSnapshot.ledgerSequence === request.currentSnapshot.ledgerSequence;
     
-    if (!snapshotMatch) {
+    if (!contentHashMatch || !ledgerSequenceMatch) {
       // Return stale result using the types module function
       const staleResult = createStaleCanonicalReAuditResult(
         request.currentSnapshot,
