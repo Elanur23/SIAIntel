@@ -3,12 +3,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { startCanonicalReAudit } from '../handlers/canonical-reaudit-handler';
 import type { CanonicalVaultInput } from '@/lib/editorial/canonical-reaudit-adapter';
+import {
+  CanonicalReAuditStatus,
+  CanonicalReAuditBlockReason
+} from '@/lib/editorial/canonical-reaudit-types';
 import type {
   CanonicalReAuditRequest,
   CanonicalReAuditResult,
-  CanonicalReAuditSnapshotIdentity,
-  CanonicalReAuditStatus,
-  CanonicalReAuditBlockReason
+  CanonicalReAuditSnapshotIdentity
 } from '@/lib/editorial/canonical-reaudit-types';
 
 type RunCanonicalReAuditInput = {
@@ -23,7 +25,6 @@ type RunCanonicalReAuditInput = {
 
 const STATUS_NOT_RUN = 'NOT_RUN' as CanonicalReAuditStatus;
 const STATUS_RUNNING = 'RUNNING' as CanonicalReAuditStatus;
-const STATUS_BLOCKED = 'BLOCKED' as CanonicalReAuditStatus;
 
 const REASON_UNKNOWN = 'UNKNOWN' as CanonicalReAuditBlockReason;
 const REASON_AUDIT_UNAVAILABLE = 'AUDIT_RUNNER_UNAVAILABLE' as CanonicalReAuditBlockReason;
@@ -56,7 +57,7 @@ const createSafeBlockedResult = (input: {
   const errors = input.message ? [input.message] : undefined;
 
   return {
-    status: STATUS_BLOCKED,
+    status: CanonicalReAuditStatus.BLOCKED,
     success: false,
     passed: false,
     readyForAcceptance: false,
@@ -112,7 +113,7 @@ export function useCanonicalReAudit() {
         reason: REASON_AUDIT_UNAVAILABLE,
         message: 'Canonical re-audit is already running.'
       });
-      setStatus(STATUS_BLOCKED);
+      setStatus(CanonicalReAuditStatus.BLOCKED);
       setError(blocked.errors?.[0] ?? 'Canonical re-audit is already running.');
       setResult(blocked);
       setSnapshotIdentity(blocked.auditedSnapshot);
@@ -165,7 +166,7 @@ export function useCanonicalReAudit() {
         reason: REASON_AUDIT_FAILED,
         message
       });
-      setStatus(STATUS_BLOCKED);
+      setStatus(CanonicalReAuditStatus.BLOCKED);
       setError(message);
       setResult(blocked);
       setSnapshotIdentity(blocked.auditedSnapshot);
