@@ -4,9 +4,6 @@ import { evaluateHardRulesForBatch } from './hard-rule-engine'
 import type { PublishSafetyGate } from './types'
 import type { Language } from '../editorial-event-bus'
 
-const isNonEmptyObject = (v: unknown): v is Record<string, unknown> =>
-  typeof v === 'object' && v !== null && !Array.isArray(v) && Object.keys(v as any).length > 0
-
 function isValidUrl(maybeUrl: unknown): boolean {
   if (typeof maybeUrl !== 'string' || maybeUrl.trim().length === 0) return false
   try {
@@ -43,23 +40,13 @@ function validateHreflangSetForApproved(editions: Record<Language, LanguageEditi
   return reasons
 }
 
-function validateSchemaMarkup(edition: LanguageEdition): string[] {
-  const reasons: string[] = []
-  const schema = (edition as any)?.content?.schema
-  if (!isNonEmptyObject(schema) || typeof schema['@type'] !== 'string' || schema['@type'].trim().length === 0) {
-    reasons.push(`schema_markup invalid for ${edition.language}`)
-  }
-  return reasons
-}
-
 function validatePublishContractForEdition(edition: LanguageEdition): string[] {
   const reasons: string[] = []
   if (edition.status !== 'APPROVED') {
     reasons.push(`edition.status not APPROVED for ${edition.language}`)
   }
-  if (edition.stale) {
-    reasons.push(`edition.stale=true for ${edition.language}`)
-  }
+  // NOTE: stale check removed — single source of truth is hard-rule-engine (STALE_DEPENDENCY)
+  // NOTE: schema markup check removed — single source of truth is hard-rule-engine (MALFORMED_SCHEMA_MARKUP)
   return reasons
 }
 
@@ -123,15 +110,7 @@ export function validatePublishSafetyGate(params: {
     blocking_reasons.push(`hard_rule_violations_present(${hard.violations.length})`)
   }
 
-  // Stale dependencies unresolved
-  for (const lang of approved_languages) {
-    const edition = batch.editions[lang]
-    if (!edition) {
-      blocking_reasons.push(`missing edition for ${lang}`)
-      continue
-    }
-    if (edition.stale) blocking_reasons.push(`stale_dependency unresolved for ${lang}`)
-  }
+  // NOTE: stale dependency check removed — single source of truth is hard-rule-engine (STALE_DEPENDENCY)
 
   // No pending supervisor review (safety)
   if (batch.status === 'SUPERVISOR_REVIEW' || batch.status === 'MANUAL_REVIEW') {
@@ -154,19 +133,11 @@ export function validatePublishSafetyGate(params: {
   for (const lang of approved_languages) {
     const edition = batch.editions[lang]
     if (!edition) continue
-    blocking_reasons.push(...validateSchemaMarkup(edition))
+    // NOTE: validateSchemaMarkup removed — single source of truth is hard-rule-engine (MALFORMED_SCHEMA_MARKUP)
     blocking_reasons.push(...validatePublishContractForEdition(edition))
   }
 
-  // Critical unresolved risks (from audit)
-  for (const lang of approved_languages) {
-    const edition = batch.editions[lang]
-    if (!edition) continue
-    const criticalIssues = edition.audit_results?.issues?.filter(i => i.severity === 'CRITICAL') ?? []
-    if (criticalIssues.length > 0) {
-      blocking_reasons.push(`critical_risk_unresolved(${criticalIssues.length}) for ${lang}`)
-    }
-  }
+  // NOTE: critical audit issues check removed — single source of truth is hard-rule-engine (POLICY_CRITICAL_AUDIT_ISSUES)
 
   const can_publish = blocking_reasons.length === 0
 

@@ -1,0 +1,47 @@
+{
+  "specName": "task-8c-3a-runtime-validator-design",
+  "specType": "feature",
+  "workflowType": "design-first",
+  "title": "Task 8C-3A-1: Pure Runtime Validator Design Lock",
+  "description": "Design-only specification for the first pure runtime validator in the canonical re-audit subsystem. Defines validator contract, error model, safety invariants, and verification plan without implementing runtime code.",
+  "createdAt": "2026-05-02T00:00:00Z",
+  "phase": "design-lock",
+  "status": "design-complete",
+  "nextPhase": "design-review",
+  "nextTask": "8C-3A-2",
+  "files": {
+    "requirements": ".kiro/specs/task-8c-3a-runtime-validator-design/requirements.md",
+    "design": ".kiro/specs/task-8c-3a-runtime-validator-design/design.md",
+    "tasks": ".kiro/specs/task-8c-3a-runtime-validator-design/tasks.md"
+  },
+  "constraints": {
+    "noImplementation": true,
+    "noRuntimeBehavior": true,
+    "noLibChanges": true,
+    "noAppChanges": true,
+    "noComponentChanges": true,
+    "noHandlerChanges": true,
+    "noAdapterChanges": true,
+    "noUIIntegration": true,
+    "noMutationAllowed": true,
+    "noPersistenceAllowed": true,
+    "noDeployUnlock": true
+  },
+  "designLock": {
+    "validatorContract": "locked",
+    "errorModel": "locked",
+    "warningModel": "locked",
+    "safetyInvariants": "locked",
+    "purityContract": "locked",
+    "boundaryInvariants": "locked",
+    "verificationPlan": "locked"
+  },
+  "readiness": {
+    "internalTestArticle": "pending-implementation",
+    "livePublicArticle": "pending-compliance-and-protocol"
+  },
+  "sequencing": {
+    "jurisdictionalCompliance": "separate-phase",
+    "pandaSiaProtocol": "separate-phase"
+  }
+}

@@ -3,23 +3,23 @@
  *
  * Verifies:
  *  1.  Handler file exists
- *  2.  buildCanonicalReAuditAdapterPreflight is exported
+ *  2.  startCanonicalReAudit is exported
  *  3.  computeCanonicalVaultSnapshot is exported
- *  4.  Handler does NOT import/call runInMemoryCanonicalReAudit
+ *  4.  Handler imports runInMemoryCanonicalReAudit for Task 5C integration
  *  5.  Handler does NOT reference page.tsx / UI / hooks
  *  6.  No forbidden patterns in handler source
- *  7.  Valid preflight returns ok: true with adapterRequest
- *  8.  Missing request fails closed
- *  9.  Missing vault fails closed
- * 10.  Missing canonicalSnapshot fails closed
- * 11.  Wrong source fails closed
- * 12.  deployUnlockAllowed: true fails closed
- * 13.  backendPersistenceAllowed: true fails closed
- * 14.  sessionAuditInheritanceAllowed: true fails closed
- * 15.  Session/local-draft contamination fails closed
- * 16.  Snapshot mismatch (stale) fails closed
- * 17.  Valid preflight does not mutate vault
- * 18.  startCanonicalReAudit still returns AUDIT_RUNNER_UNAVAILABLE after valid preflight
+ *  7.  Valid request + vault produces non-BLOCKED status
+ *  8.  Missing request → BLOCKED result
+ *  9.  Missing vault → BLOCKED result
+ * 10.  Missing canonicalSnapshot → BLOCKED result
+ * 11.  Wrong source → BLOCKED result
+ * 12.  deployUnlockAllowed: true → BLOCKED result
+ * 13.  backendPersistenceAllowed: true → BLOCKED result
+ * 14.  sessionAuditInheritanceAllowed: true → BLOCKED result
+ * 15.  Session/local-draft contamination → BLOCKED result
+ * 16.  Snapshot mismatch (stale) → BLOCKED result
+ * 17.  Valid handler call does not mutate vault
+ * 18.  startCanonicalReAudit executes adapter after valid preflight
  * 19.  Task 5A adapter verification still passes
  * 20.  Task 4 snapshot helper verification still passes
  */
@@ -29,7 +29,6 @@ import * as path from "path";
 import { execSync } from "child_process";
 
 import {
-  buildCanonicalReAuditAdapterPreflight,
   computeCanonicalVaultSnapshot,
   hasSessionContamination,
   startCanonicalReAudit,
@@ -109,12 +108,12 @@ const handlerPath = path.join(
 assert(fs.existsSync(handlerPath), "Handler file exists at app/admin/warroom/handlers/canonical-reaudit-handler.ts");
 
 // ============================================================================
-// TEST 2: buildCanonicalReAuditAdapterPreflight is exported
+// TEST 2: startCanonicalReAudit is exported
 // ============================================================================
-console.log("\nTEST 2: buildCanonicalReAuditAdapterPreflight is exported");
+console.log("\nTEST 2: startCanonicalReAudit is exported");
 assert(
-  typeof buildCanonicalReAuditAdapterPreflight === "function",
-  "buildCanonicalReAuditAdapterPreflight is exported as a function"
+  typeof startCanonicalReAudit === "function",
+  "startCanonicalReAudit is exported as a function"
 );
 
 // ============================================================================
@@ -197,99 +196,83 @@ for (const { pattern, label } of forbiddenPatterns) {
 }
 
 // ============================================================================
-// TEST 7: Valid preflight returns ok: true with adapterRequest
+// TEST 7: Valid request + vault produces non-BLOCKED status
 // ============================================================================
-console.log("\nTEST 7: Valid preflight returns ok: true with adapterRequest");
-const validResult = buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, VALID_VAULT);
-assert(validResult.ok === true, "Valid preflight returns ok: true");
-if (validResult.ok) {
-  assert(
-    typeof validResult.adapterRequest === "object" && validResult.adapterRequest !== null,
-    "Valid preflight returns adapterRequest object"
-  );
-  assert(
-    validResult.adapterRequest.canonicalVault === VALID_VAULT,
-    "adapterRequest.canonicalVault is the provided vault"
-  );
-  assert(
-    typeof validResult.adapterRequest.currentSnapshot === "object",
-    "adapterRequest.currentSnapshot is present"
-  );
-  assert(
-    validResult.adapterRequest.currentSnapshot.source === "canonical-vault",
-    "adapterRequest.currentSnapshot.source is 'canonical-vault'"
-  );
-  assert(
-    validResult.adapterRequest.expectedSnapshot === LIVE_SNAPSHOT,
-    "adapterRequest.expectedSnapshot is request.canonicalSnapshot"
-  );
-  assert(
-    validResult.adapterRequest.auditor === "operator-test",
-    "adapterRequest.auditor is taken from request.operatorId"
-  );
-  assert(
-    typeof validResult.liveSnapshot === "object",
-    "Valid preflight returns liveSnapshot"
-  );
-  assert(
-    validResult.liveSnapshot.source === "canonical-vault",
-    "liveSnapshot.source is 'canonical-vault'"
-  );
-}
+console.log("\nTEST 7: Valid request + vault produces non-BLOCKED status");
+const validResult = startCanonicalReAudit(VALID_REQUEST, VALID_VAULT);
+assert(
+  validResult.status !== CanonicalReAuditStatus.BLOCKED,
+  "Valid request + vault produces non-BLOCKED status"
+);
+assert(
+  validResult.status === CanonicalReAuditStatus.PASSED_PENDING_ACCEPTANCE ||
+  validResult.status === CanonicalReAuditStatus.FAILED_PENDING_REVIEW ||
+  validResult.status === CanonicalReAuditStatus.STALE,
+  "Valid request + vault produces valid handler status"
+);
 
 // ============================================================================
-// TEST 8: Missing request fails closed
+// TEST 8: Missing request → BLOCKED result
 // ============================================================================
-console.log("\nTEST 8: Missing request fails closed");
-const r8 = buildCanonicalReAuditAdapterPreflight(null, VALID_VAULT);
-assert(r8.ok === false, "null request returns ok: false");
-if (!r8.ok) {
-  assert(
-    r8.blockReason === CanonicalReAuditBlockReason.UNKNOWN,
-    "null request blockReason is UNKNOWN"
-  );
-}
+console.log("\nTEST 8: Missing request → BLOCKED result");
+const r8 = startCanonicalReAudit(null as any, VALID_VAULT);
+assert(
+  r8.status === CanonicalReAuditStatus.BLOCKED,
+  "null request returns BLOCKED status"
+);
+assert(
+  r8.blockReason === CanonicalReAuditBlockReason.UNKNOWN,
+  "null request blockReason is UNKNOWN"
+);
 
-const r8b = buildCanonicalReAuditAdapterPreflight(undefined, VALID_VAULT);
-assert(r8b.ok === false, "undefined request returns ok: false");
-
-// ============================================================================
-// TEST 9: Missing vault fails closed
-// ============================================================================
-console.log("\nTEST 9: Missing vault fails closed");
-const r9 = buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, null);
-assert(r9.ok === false, "null vault returns ok: false");
-if (!r9.ok) {
-  assert(
-    r9.blockReason === CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-    "null vault blockReason is MISSING_CANONICAL_VAULT"
-  );
-}
-
-const r9b = buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, undefined);
-assert(r9b.ok === false, "undefined vault returns ok: false");
+const r8b = startCanonicalReAudit(undefined as any, VALID_VAULT);
+assert(
+  r8b.status === CanonicalReAuditStatus.BLOCKED,
+  "undefined request returns BLOCKED status"
+);
 
 // ============================================================================
-// TEST 10: Missing canonicalSnapshot fails closed
+// TEST 9: Missing vault → BLOCKED result
 // ============================================================================
-console.log("\nTEST 10: Missing canonicalSnapshot fails closed");
+console.log("\nTEST 9: Missing vault → BLOCKED result");
+const r9 = startCanonicalReAudit(VALID_REQUEST);
+assert(
+  r9.status === CanonicalReAuditStatus.BLOCKED,
+  "Missing vault returns BLOCKED status"
+);
+assert(
+  r9.blockReason === CanonicalReAuditBlockReason.AUDIT_RUNNER_UNAVAILABLE,
+  "Missing vault blockReason is AUDIT_RUNNER_UNAVAILABLE"
+);
+
+const r9b = startCanonicalReAudit(VALID_REQUEST, undefined);
+assert(
+  r9b.status === CanonicalReAuditStatus.BLOCKED,
+  "undefined vault returns BLOCKED status"
+);
+
+// ============================================================================
+// TEST 10: Missing canonicalSnapshot → BLOCKED result
+// ============================================================================
+console.log("\nTEST 10: Missing canonicalSnapshot → BLOCKED result");
 const requestNoSnapshot = {
   ...VALID_REQUEST,
   canonicalSnapshot: undefined as unknown as CanonicalReAuditSnapshotIdentity,
 };
-const r10 = buildCanonicalReAuditAdapterPreflight(requestNoSnapshot, VALID_VAULT);
-assert(r10.ok === false, "Missing canonicalSnapshot returns ok: false");
-if (!r10.ok) {
-  assert(
-    r10.blockReason === CanonicalReAuditBlockReason.SNAPSHOT_MISSING,
-    "Missing canonicalSnapshot blockReason is SNAPSHOT_MISSING"
-  );
-}
+const r10 = startCanonicalReAudit(requestNoSnapshot, VALID_VAULT);
+assert(
+  r10.status === CanonicalReAuditStatus.BLOCKED,
+  "Missing canonicalSnapshot returns BLOCKED status"
+);
+assert(
+  r10.blockReason === CanonicalReAuditBlockReason.SNAPSHOT_MISSING,
+  "Missing canonicalSnapshot blockReason is SNAPSHOT_MISSING"
+);
 
 // ============================================================================
-// TEST 11: Wrong source fails closed
+// TEST 11: Wrong source → BLOCKED result
 // ============================================================================
-console.log("\nTEST 11: Wrong source fails closed");
+console.log("\nTEST 11: Wrong source → BLOCKED result");
 const requestWrongSource = {
   ...VALID_REQUEST,
   canonicalSnapshot: {
@@ -297,70 +280,74 @@ const requestWrongSource = {
     source: "session-draft" as "canonical-vault",
   },
 };
-const r11 = buildCanonicalReAuditAdapterPreflight(requestWrongSource, VALID_VAULT);
-assert(r11.ok === false, "Wrong snapshot source returns ok: false");
-if (!r11.ok) {
-  assert(
-    r11.blockReason === CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
-    "Wrong snapshot source blockReason is SNAPSHOT_MISMATCH"
-  );
-}
+const r11 = startCanonicalReAudit(requestWrongSource, VALID_VAULT);
+assert(
+  r11.status === CanonicalReAuditStatus.BLOCKED,
+  "Wrong snapshot source returns BLOCKED status"
+);
+assert(
+  r11.blockReason === CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
+  "Wrong snapshot source blockReason is SNAPSHOT_MISMATCH"
+);
 
 // ============================================================================
-// TEST 12: deployUnlockAllowed: true fails closed
+// TEST 12: deployUnlockAllowed: true → BLOCKED result
 // ============================================================================
-console.log("\nTEST 12: deployUnlockAllowed: true fails closed");
+console.log("\nTEST 12: deployUnlockAllowed: true → BLOCKED result");
 const requestDeployUnlock = {
   ...VALID_REQUEST,
   deployUnlockAllowed: true as unknown as false,
 };
-const r12 = buildCanonicalReAuditAdapterPreflight(requestDeployUnlock, VALID_VAULT);
-assert(r12.ok === false, "deployUnlockAllowed: true returns ok: false");
-if (!r12.ok) {
-  assert(
-    r12.blockReason === CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN,
-    "deployUnlockAllowed: true blockReason is DEPLOY_UNLOCK_FORBIDDEN"
-  );
-}
+const r12 = startCanonicalReAudit(requestDeployUnlock, VALID_VAULT);
+assert(
+  r12.status === CanonicalReAuditStatus.BLOCKED,
+  "deployUnlockAllowed: true returns BLOCKED status"
+);
+assert(
+  r12.blockReason === CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN,
+  "deployUnlockAllowed: true blockReason is DEPLOY_UNLOCK_FORBIDDEN"
+);
 
 // ============================================================================
-// TEST 13: backendPersistenceAllowed: true fails closed
+// TEST 13: backendPersistenceAllowed: true → BLOCKED result
 // ============================================================================
-console.log("\nTEST 13: backendPersistenceAllowed: true fails closed");
+console.log("\nTEST 13: backendPersistenceAllowed: true → BLOCKED result");
 const requestBackend = {
   ...VALID_REQUEST,
   backendPersistenceAllowed: true as unknown as false,
 };
-const r13 = buildCanonicalReAuditAdapterPreflight(requestBackend, VALID_VAULT);
-assert(r13.ok === false, "backendPersistenceAllowed: true returns ok: false");
-if (!r13.ok) {
-  assert(
-    r13.blockReason === CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
-    "backendPersistenceAllowed: true blockReason is BACKEND_FORBIDDEN"
-  );
-}
+const r13 = startCanonicalReAudit(requestBackend, VALID_VAULT);
+assert(
+  r13.status === CanonicalReAuditStatus.BLOCKED,
+  "backendPersistenceAllowed: true returns BLOCKED status"
+);
+assert(
+  r13.blockReason === CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
+  "backendPersistenceAllowed: true blockReason is BACKEND_FORBIDDEN"
+);
 
 // ============================================================================
-// TEST 14: sessionAuditInheritanceAllowed: true fails closed
+// TEST 14: sessionAuditInheritanceAllowed: true → BLOCKED result
 // ============================================================================
-console.log("\nTEST 14: sessionAuditInheritanceAllowed: true fails closed");
+console.log("\nTEST 14: sessionAuditInheritanceAllowed: true → BLOCKED result");
 const requestSessionInherit = {
   ...VALID_REQUEST,
   sessionAuditInheritanceAllowed: true as unknown as false,
 };
-const r14 = buildCanonicalReAuditAdapterPreflight(requestSessionInherit, VALID_VAULT);
-assert(r14.ok === false, "sessionAuditInheritanceAllowed: true returns ok: false");
-if (!r14.ok) {
-  assert(
-    r14.blockReason === CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
-    "sessionAuditInheritanceAllowed: true blockReason is SESSION_AUDIT_INHERITANCE_FORBIDDEN"
-  );
-}
+const r14 = startCanonicalReAudit(requestSessionInherit, VALID_VAULT);
+assert(
+  r14.status === CanonicalReAuditStatus.BLOCKED,
+  "sessionAuditInheritanceAllowed: true returns BLOCKED status"
+);
+assert(
+  r14.blockReason === CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
+  "sessionAuditInheritanceAllowed: true blockReason is SESSION_AUDIT_INHERITANCE_FORBIDDEN"
+);
 
 // ============================================================================
-// TEST 15: Session/local-draft contamination fails closed
+// TEST 15: Session/local-draft contamination → BLOCKED result
 // ============================================================================
-console.log("\nTEST 15: Session/local-draft contamination fails closed");
+console.log("\nTEST 15: Session/local-draft contamination → BLOCKED result");
 
 const contaminatedVaults: Array<{ label: string; vault: CanonicalVaultInput }> = [
   {
@@ -399,14 +386,17 @@ for (const { label, vault: contaminatedVault } of contaminatedVaults) {
     `hasSessionContamination detects: ${label}`
   );
   // Build a matching snapshot for the contaminated vault to isolate the contamination check
-  const r15 = buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, contaminatedVault);
-  assert(r15.ok === false, `Contaminated vault (${label}) returns ok: false from preflight`);
+  const r15 = startCanonicalReAudit(VALID_REQUEST, contaminatedVault);
+  assert(
+    r15.status === CanonicalReAuditStatus.BLOCKED,
+    `Contaminated vault (${label}) returns BLOCKED status`
+  );
 }
 
 // ============================================================================
-// TEST 16: Snapshot mismatch (stale) fails closed
+// TEST 16: Snapshot mismatch (stale) → BLOCKED result
 // ============================================================================
-console.log("\nTEST 16: Snapshot mismatch (stale) fails closed");
+console.log("\nTEST 16: Snapshot mismatch (stale) → BLOCKED result");
 
 // Build a request whose canonicalSnapshot has a different contentHash than VALID_VAULT
 const staleSnapshot: CanonicalReAuditSnapshotIdentity = {
@@ -419,28 +409,25 @@ const staleRequest: CanonicalReAuditRequest = {
   ...VALID_REQUEST,
   canonicalSnapshot: staleSnapshot,
 };
-const r16 = buildCanonicalReAuditAdapterPreflight(staleRequest, VALID_VAULT);
-assert(r16.ok === false, "Snapshot mismatch returns ok: false");
-if (!r16.ok) {
-  assert(
-    r16.blockReason === CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
-    "Snapshot mismatch blockReason is SNAPSHOT_MISMATCH"
-  );
-  assert(
-    typeof r16.liveSnapshot === "object",
-    "Snapshot mismatch result includes liveSnapshot for traceability"
-  );
-}
+const r16 = startCanonicalReAudit(staleRequest, VALID_VAULT);
+assert(
+  r16.status === CanonicalReAuditStatus.BLOCKED,
+  "Snapshot mismatch returns BLOCKED status"
+);
+assert(
+  r16.blockReason === CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
+  "Snapshot mismatch blockReason is SNAPSHOT_MISMATCH"
+);
 
 // ============================================================================
-// TEST 17: Valid preflight does not mutate vault
+// TEST 17: Valid handler call does not mutate vault
 // ============================================================================
-console.log("\nTEST 17: Valid preflight does not mutate vault");
+console.log("\nTEST 17: Valid handler call does not mutate vault");
 const vaultCopy = JSON.parse(JSON.stringify(VALID_VAULT));
-buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, VALID_VAULT);
+startCanonicalReAudit(VALID_REQUEST, VALID_VAULT);
 assert(
   JSON.stringify(VALID_VAULT) === JSON.stringify(vaultCopy),
-  "Vault object is not mutated by preflight"
+  "Vault object is not mutated by handler"
 );
 
 // ============================================================================

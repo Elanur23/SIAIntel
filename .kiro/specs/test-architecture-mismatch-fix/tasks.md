@@ -1,0 +1,110 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Direct Preflight Call Detection
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate tests currently call `buildCanonicalReAuditAdapterPreflight()` directly
+  - **Scoped PBT Approach**: For deterministic bugs, scope the property to the concrete failing case(s) to ensure reproducibility
+  - Search `scripts/verify-canonical-reaudit-handler-preflight.ts` for direct calls to `buildCanonicalReAuditAdapterPreflight()`
+  - Search `scripts/verify-canonical-reaudit-handler-execution.ts` for direct calls to `buildCanonicalReAuditAdapterPreflight()`
+  - Document each occurrence with line number and test case description
+  - Run both verification scripts to confirm they pass with current architecture (demonstrates bug exists but tests work)
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found: Tests 7-17 in preflight script call internal function directly
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Test Coverage Completeness
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code: all verification checks pass with current test architecture
+  - Document current test coverage: staleness detection, safety invariants, immutability, result mapping, unsafe flag detection
+  - Write property-based tests capturing observed test coverage patterns from Preservation Requirements
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline test coverage to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10_
+
+- [x] 3. Refactor verification scripts to use handler entry point
+
+  - [x] 3.1 Refactor Tests 7-17 in verify-canonical-reaudit-handler-preflight.ts
+    - Replace all direct calls to `buildCanonicalReAuditAdapterPreflight()` with `startCanonicalReAudit()`
+    - Update Test 7: Valid preflight → Valid handler execution
+      - Change: `buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, VALID_VAULT)` → `startCanonicalReAudit(VALID_REQUEST, VALID_VAULT)`
+      - Update assertion: Verify `status !== BLOCKED` instead of `ok === true`
+    - Update Test 8: Missing request → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(null, VALID_VAULT)` → `startCanonicalReAudit(null as any, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === UNKNOWN`
+    - Update Test 9: Missing vault → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, null)` → `startCanonicalReAudit(VALID_REQUEST)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === AUDIT_RUNNER_UNAVAILABLE`
+    - Update Test 10: Missing snapshot → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(requestNoSnapshot, VALID_VAULT)` → `startCanonicalReAudit(requestNoSnapshot, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === SNAPSHOT_MISSING`
+    - Update Test 11: Wrong source → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(requestWrongSource, VALID_VAULT)` → `startCanonicalReAudit(requestWrongSource, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === SNAPSHOT_MISMATCH`
+    - Update Test 12: deployUnlockAllowed: true → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(requestDeployUnlock, VALID_VAULT)` → `startCanonicalReAudit(requestDeployUnlock, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === DEPLOY_UNLOCK_FORBIDDEN`
+    - Update Test 13: backendPersistenceAllowed: true → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(requestBackend, VALID_VAULT)` → `startCanonicalReAudit(requestBackend, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === BACKEND_FORBIDDEN`
+    - Update Test 14: sessionAuditInheritanceAllowed: true → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(requestSessionInherit, VALID_VAULT)` → `startCanonicalReAudit(requestSessionInherit, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === SESSION_AUDIT_INHERITANCE_FORBIDDEN`
+    - Update Test 15: Contamination detection → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, contaminatedVault)` → `startCanonicalReAudit(VALID_REQUEST, contaminatedVault)`
+      - Update assertion: Verify `status === BLOCKED`
+    - Update Test 16: Snapshot mismatch (stale) → BLOCKED result
+      - Change: `buildCanonicalReAuditAdapterPreflight(staleRequest, VALID_VAULT)` → `startCanonicalReAudit(staleRequest, VALID_VAULT)`
+      - Update assertion: Verify `status === BLOCKED` and `blockReason === SNAPSHOT_MISMATCH`
+    - Update Test 17: Immutability verification
+      - Change: `buildCanonicalReAuditAdapterPreflight(VALID_REQUEST, VALID_VAULT)` → `startCanonicalReAudit(VALID_REQUEST, VALID_VAULT)`
+      - Keep assertion: Verify vault object unchanged
+    - _Bug_Condition: isBugCondition(testCase) where testCase.callsFunction == 'buildCanonicalReAuditAdapterPreflight'_
+    - _Expected_Behavior: All tests call startCanonicalReAudit() and verify handler results_
+    - _Preservation: All test coverage preserved (staleness, safety, immutability, result mapping)_
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
+
+  - [x] 3.2 Review verify-canonical-reaudit-handler-execution.ts for direct preflight calls
+    - Search for any remaining direct calls to `buildCanonicalReAuditAdapterPreflight()`
+    - Verify all test cases use `startCanonicalReAudit()` as entry point
+    - If direct calls found, refactor to use handler entry point
+    - Update assertions to verify handler results instead of preflight results
+    - _Bug_Condition: isBugCondition(testCase) where testCase.callsFunction == 'buildCanonicalReAuditAdapterPreflight'_
+    - _Expected_Behavior: All tests call startCanonicalReAudit() and verify handler results_
+    - _Preservation: All test coverage preserved_
+    - _Requirements: 1.2, 2.1, 2.2, 2.3, 2.4_
+
+  - [x] 3.3 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Single Entry Point Enforcement
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - Search both verification scripts for `buildCanonicalReAuditAdapterPreflight(`
+    - **EXPECTED OUTCOME**: Test PASSES (confirms no direct preflight calls remain)
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
+
+  - [x] 3.4 Verify preservation tests still pass
+    - **Property 2: Preservation** - Test Coverage Completeness
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - Run `npx tsx scripts/verify-canonical-reaudit-handler-preflight.ts`
+    - Run `npx tsx scripts/verify-canonical-reaudit-handler-execution.ts`
+    - Verify all checks pass with same pass/fail counts as before refactoring
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix (no regressions)
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Run `npx tsx scripts/verify-canonical-reaudit-handler-preflight.ts` and verify all checks pass
+  - Run `npx tsx scripts/verify-canonical-reaudit-handler-execution.ts` and verify all checks pass
+  - Verify Task 5A adapter verification still passes: `npx tsx scripts/verify-canonical-reaudit-adapter.ts`
+  - Verify Task 4 snapshot helper verification still passes: `npx tsx scripts/verify-canonical-reaudit-snapshot-helpers.ts`
+  - Verify no direct calls to `buildCanonicalReAuditAdapterPreflight()` remain in test files
+  - Verify pass/fail counts match original test suite
+  - Ensure all tests pass, ask the user if questions arise.

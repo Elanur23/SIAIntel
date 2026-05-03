@@ -1,7 +1,7 @@
 /**
  * Canonical Re-Audit Handler
  *
- * Task 5C: Handler Layer Implementation
+ * Task 5D: Validator Integration
  *
  * This handler provides:
  * 1. A pure vault snapshot computation helper (computeCanonicalVaultSnapshot)
@@ -10,10 +10,24 @@
  * 4. A result mapper (mapAdapterResultToHandlerResult) that transforms adapter
  *    results to handler results with full safety invariants
  * 5. The fail-closed entry point (startCanonicalReAudit) that integrates
- *    adapter execution after successful preflight
+ *    validator → preflight → adapter execution in strict order
  *
- * CRITICAL SAFETY BOUNDARIES (Task 5C):
- * - Calls runInMemoryCanonicalReAudit only after successful preflight
+ * EXECUTION ORDER (Task 5D):
+ * 1. Validator: validateCanonicalReAuditRegistrationPreviewAssessment(request)
+ *    - If FAIL → return BLOCKED immediately
+ * 2. Request-level guards (manualTrigger, memoryOnly, etc.)
+ * 3. Preflight: buildCanonicalReAuditAdapterPreflight(request, vault)
+ *    - Staleness check only
+ *    - If FAIL → return BLOCKED/STALE
+ * 4. Adapter: runInMemoryCanonicalReAudit(adapterRequest)
+ *    - Calls runGlobalGovernanceAudit for content validation
+ *    - Returns audit result
+ *
+ * CRITICAL SAFETY BOUNDARIES (Task 5D):
+ * - Validator runs BEFORE adapter (no validation inside adapter)
+ * - Validator is NOT replaced by audit logic
+ * - No duplicate validation logic
+ * - Calls runInMemoryCanonicalReAudit only after successful validator + preflight
  * - Wraps adapter execution in try-catch for fail-closed error handling
  * - Maps adapter results to handler results with safety invariants
  * - Rejects unsafe adapter flags (deployUnlockAllowed, sessionAuditInheritanceAllowed)
@@ -27,7 +41,7 @@
  * - Does NOT accept audit result into canonical/global state
  * - Fail-closed for all ambiguous or invalid states
  *
- * @version 5C.0.0
+ * @version 5D.0.0
  */
 
 import {
@@ -51,6 +65,23 @@ import {
   type CanonicalReAuditAdapterResult,
 } from "lib/editorial/canonical-reaudit-adapter";
 
+// Validator import (Task 5D: Validator Integration)
+import { validateCanonicalReAuditRequest } from "lib/editorial/canonical-reaudit-request-validator";
+
+function mapValidationErrorsToBlockReason(
+  errors: readonly { readonly fieldPath: readonly string[]; readonly message: string }[]
+): CanonicalReAuditBlockReason {
+  for (const err of errors) {
+    const path = err.fieldPath.join('.');
+    if (path === 'canonicalSnapshot') return CanonicalReAuditBlockReason.SNAPSHOT_MISSING;
+    if (path === 'canonicalSnapshot.source') return CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH;
+    if (path === 'deployUnlockAllowed') return CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN;
+    if (path === 'backendPersistenceAllowed') return CanonicalReAuditBlockReason.BACKEND_FORBIDDEN;
+    if (path === 'sessionAuditInheritanceAllowed') return CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN;
+  }
+  return CanonicalReAuditBlockReason.UNKNOWN;
+}
+
 // ============================================================================
 // PREFLIGHT RESULT TYPE
 // ============================================================================
@@ -73,6 +104,23 @@ export type CanonicalReAuditAdapterPreflightResult =
       message: string;
       liveSnapshot?: CanonicalReAuditSnapshotIdentity;
     };
+
+// ============================================================================
+// VALIDATOR INPUT BUILDER
+// ============================================================================
+
+/**
+ * Validates the canonical re-audit request directly.
+ * 
+ * Pure function that passes the request to the validator.
+ * The validator checks all required fields and flags.
+ * 
+ * @param request - Unknown request input
+ * @returns Validation result
+ */
+export function validateCanonicalReAuditRequestInput(request: unknown) {
+  return validateCanonicalReAuditRequest(request);
+}
 
 // ============================================================================
 // SESSION / LOCAL-DRAFT CONTAMINATION MARKERS
@@ -226,184 +274,29 @@ export function hasSessionContamination(
  *
  * On failure, returns ok: false with a blockReason and message.
  *
- * FAIL-CLOSED CHECKS (16 total):
- *  1. Missing request → UNKNOWN
- *  2. Missing vault → MISSING_CANONICAL_VAULT
- *  3. Missing request.canonicalSnapshot → SNAPSHOT_MISSING
- *  4. canonicalSnapshot.source !== "canonical-vault" → SNAPSHOT_MISMATCH
- *  5. manualTrigger !== true → UNKNOWN
- *  6. memoryOnly !== true → BACKEND_FORBIDDEN
- *  7. deployUnlockAllowed !== false → DEPLOY_UNLOCK_FORBIDDEN
- *  8. backendPersistenceAllowed !== false → BACKEND_FORBIDDEN
- *  9. sessionAuditInheritanceAllowed !== false → SESSION_AUDIT_INHERITANCE_FORBIDDEN
- * 10. Session/local-draft contamination detected → MISSING_CANONICAL_VAULT
- * 11. vault.vault missing or not an object → MISSING_CANONICAL_VAULT
- * 12. vault.vault is empty → MISSING_CANONICAL_VAULT
- * 13. Any vault node missing title (string) → MISSING_CANONICAL_VAULT
- * 14. Any vault node missing desc (string) → MISSING_CANONICAL_VAULT
- * 15. Any vault node missing ready (boolean) → MISSING_CANONICAL_VAULT
- * 16. liveSnapshot contentHash does not match request.canonicalSnapshot → SNAPSHOT_MISMATCH (STALE)
+ * FAIL-CLOSED CHECKS:
+ * 1. Vault contamination detection (session/local-draft markers)
+ * 2. Staleness detection (contentHash mismatch)
  *
  * @param request - Canonical re-audit request (from types contract)
  * @param vault   - Canonical vault input (actual vault content)
  * @returns CanonicalReAuditAdapterPreflightResult
  */
 export function buildCanonicalReAuditAdapterPreflight(
-  request: CanonicalReAuditRequest | null | undefined,
-  vault: CanonicalVaultInput | null | undefined
+  request: CanonicalReAuditRequest,
+  vault: CanonicalVaultInput
 ): CanonicalReAuditAdapterPreflightResult {
-  // CHECK 1: Missing request
-  if (!request) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.UNKNOWN,
-      message: "Preflight failed: request is missing.",
-    };
-  }
-
-  // CHECK 2: Missing vault
-  if (!vault) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-      message: "Preflight failed: canonical vault is missing.",
-    };
-  }
-
-  // CHECK 3: Missing canonicalSnapshot
-  if (!request.canonicalSnapshot) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.SNAPSHOT_MISSING,
-      message: "Preflight failed: request.canonicalSnapshot is missing.",
-    };
-  }
-
-  // CHECK 4: canonicalSnapshot.source must be "canonical-vault"
-  if (request.canonicalSnapshot.source !== "canonical-vault") {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
-      message: `Preflight failed: canonicalSnapshot.source must be "canonical-vault", got "${request.canonicalSnapshot.source}".`,
-    };
-  }
-
-  // CHECK 5: manualTrigger must be true
-  if (request.manualTrigger !== true) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.UNKNOWN,
-      message: "Preflight failed: manualTrigger must be true.",
-    };
-  }
-
-  // CHECK 6: memoryOnly must be true
-  if (request.memoryOnly !== true) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
-      message: "Preflight failed: memoryOnly must be true.",
-    };
-  }
-
-  // CHECK 7: deployUnlockAllowed must be false
-  if (request.deployUnlockAllowed !== false) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN,
-      message: "Preflight failed: deployUnlockAllowed must be false.",
-    };
-  }
-
-  // CHECK 8: backendPersistenceAllowed must be false
-  if (request.backendPersistenceAllowed !== false) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
-      message: "Preflight failed: backendPersistenceAllowed must be false.",
-    };
-  }
-
-  // CHECK 9: sessionAuditInheritanceAllowed must be false
-  if (request.sessionAuditInheritanceAllowed !== false) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
-      message: "Preflight failed: sessionAuditInheritanceAllowed must be false.",
-    };
-  }
-
-  // CHECK 10: Session/local-draft contamination
+  // CHECK: Session/local-draft contamination detection
   if (hasSessionContamination(vault)) {
     return {
       ok: false,
-      blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-      message:
-        "Preflight failed: vault contains session or local-draft contamination markers.",
+      blockReason: CanonicalReAuditBlockReason.UNKNOWN,
+      message: "Preflight failed: vault contains session or local-draft contamination markers.",
     };
   }
 
-  // CHECK 11: vault.vault must be a non-null object
-  if (!vault.vault || typeof vault.vault !== "object") {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-      message: "Preflight failed: vault.vault is missing or not an object.",
-    };
-  }
-
-  // CHECK 12: vault.vault must not be empty
-  const langKeys = Object.keys(vault.vault);
-  if (langKeys.length === 0) {
-    return {
-      ok: false,
-      blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-      message: "Preflight failed: vault.vault is empty (no language nodes).",
-    };
-  }
-
-  // CHECKS 13–15: Each vault node must have title (string), desc (string), ready (boolean)
-  for (const lang of langKeys) {
-    const node = vault.vault[lang];
-    if (!node || typeof node !== "object") {
-      return {
-        ok: false,
-        blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-        message: `Preflight failed: vault node for language "${lang}" is missing or not an object.`,
-      };
-    }
-    if (typeof node.title !== "string") {
-      return {
-        ok: false,
-        blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-        message: `Preflight failed: vault node for language "${lang}" has missing or non-string title.`,
-      };
-    }
-    if (typeof node.desc !== "string") {
-      return {
-        ok: false,
-        blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-        message: `Preflight failed: vault node for language "${lang}" has missing or non-string desc.`,
-      };
-    }
-    if (typeof node.ready !== "boolean") {
-      return {
-        ok: false,
-        blockReason: CanonicalReAuditBlockReason.MISSING_CANONICAL_VAULT,
-        message: `Preflight failed: vault node for language "${lang}" has missing or non-boolean ready flag.`,
-      };
-    }
-  }
-
-  // Compute live snapshot from vault content
+  // CHECK: Staleness detection — compare live vault hash with request snapshot
   const liveSnapshot = computeCanonicalVaultSnapshot(vault);
-
-  // CHECK 16: liveSnapshot must match request.canonicalSnapshot (staleness check)
-  // Note: capturedAt is volatile (set at call time), so we compare only
-  // contentHash and ledgerSequence — the stable identity fields.
-  // verifyCanonicalSnapshotIdentityMatch also checks capturedAt and promotionId,
-  // which would always differ for a freshly computed snapshot. We therefore
-  // perform a targeted content-identity comparison here.
   const requestHash = request.canonicalSnapshot.contentHash;
   const liveHash = liveSnapshot.contentHash;
 
@@ -621,14 +514,18 @@ function mapAdapterResultToHandlerResult(
 /**
  * Fail-closed canonical re-audit handler.
  *
- * Task 5C update: Integrates adapter execution after successful preflight.
- * Replaces the AUDIT_RUNNER_UNAVAILABLE scaffold sentinel with real adapter
- * execution wrapped in try-catch for fail-closed error handling.
+ * Task 5D update: Integrates validator execution BEFORE preflight and adapter.
+ * Execution order is now:
+ * 1. Validator (validateCanonicalReAuditRegistrationPreviewAssessment)
+ * 2. Request-level guards
+ * 3. Preflight (staleness check)
+ * 4. Adapter (runInMemoryCanonicalReAudit → runGlobalGovernanceAudit)
  *
- * If vault is provided and preflight succeeds, calls runInMemoryCanonicalReAudit
+ * If validator fails, returns BLOCKED immediately without proceeding to preflight or adapter.
+ * If vault is provided and all checks succeed, calls runInMemoryCanonicalReAudit
  * and maps the result to handler result format with full safety invariants.
  *
- * If vault is omitted or preflight fails, returns appropriate BLOCKED/STALE result.
+ * If vault is omitted or any check fails, returns appropriate BLOCKED/STALE result.
  *
  * CALL-SITE RISK: Zero. No .ts/.tsx file in the project currently imports or
  * calls startCanonicalReAudit. The optional vault parameter is backward-
@@ -650,66 +547,21 @@ export function startCanonicalReAudit(
   }
   isLocked = true;
   try {
-    // ── Existing request-level guards (unchanged from Task 5A) ──────────────
-
-    if (!request) {
+    // ── STEP 1: VALIDATOR (Task 5D: Validator Integration) ──────────────────
+    // Validate request structure and safety constraints BEFORE any execution
+    const validationResult = validateCanonicalReAuditRequest(request);
+    
+    if (!validationResult.valid) {
+      // Validator failed - return BLOCKED with validation errors
+      const validationErrors = validationResult.errors.map(err => err.message).join('; ');
       return createBlockedResult(
         request,
-        CanonicalReAuditBlockReason.UNKNOWN,
-        "Request object is missing."
-      );
-    }
-    if (request.manualTrigger !== true) {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.UNKNOWN,
-        "Manual trigger is required."
-      );
-    }
-    if (request.memoryOnly !== true) {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
-        "Handler only supports memory-only execution."
-      );
-    }
-    if (request.deployUnlockAllowed !== false) {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.DEPLOY_UNLOCK_FORBIDDEN,
-        "Deploy unlock is forbidden in scaffold."
-      );
-    }
-    if (request.backendPersistenceAllowed !== false) {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.BACKEND_FORBIDDEN,
-        "Backend persistence is forbidden in scaffold."
-      );
-    }
-    if (request.sessionAuditInheritanceAllowed !== false) {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.SESSION_AUDIT_INHERITANCE_FORBIDDEN,
-        "Session audit inheritance is forbidden in scaffold."
-      );
-    }
-    if (!request.canonicalSnapshot) {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.SNAPSHOT_MISSING,
-        "Canonical snapshot is required."
-      );
-    }
-    if (request.canonicalSnapshot.source !== "canonical-vault") {
-      return createBlockedResult(
-        request,
-        CanonicalReAuditBlockReason.SNAPSHOT_MISMATCH,
-        "Canonical snapshot source must be 'canonical-vault'."
+        mapValidationErrorsToBlockReason(validationResult.errors),
+        `Validator failed: ${validationErrors}`
       );
     }
 
-    // ── Task 5B: Bridge preflight (runs only when vault is provided) ─────────
+    // ── STEP 2: Bridge preflight (runs only when vault is provided) ─────────
     // ── Task 5C: Adapter execution after successful preflight ────────────────
 
     if (vault === undefined) {
@@ -733,7 +585,7 @@ export function startCanonicalReAudit(
       );
     }
 
-    // ── Task 3.1: Adapter execution after successful preflight ───────────────
+    // ── STEP 4: Adapter execution after successful preflight ─────────────────
     // ── Task 3.2: Try-catch wrapper for fail-closed error handling ───────────
 
     try {

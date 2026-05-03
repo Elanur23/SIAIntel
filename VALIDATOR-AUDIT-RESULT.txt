@@ -1,0 +1,138 @@
+================================================================================
+VALIDATOR INTEGRATION AUDIT - FINAL RESULT
+================================================================================
+
+Date: 2026-05-03
+Status: ✅ PASS
+Severity: CRITICAL AUDIT
+
+================================================================================
+AUDIT CHECKLIST
+================================================================================
+
+✅ CHECK 1: validateCanonicalReAuditRequest is used (NOT old validator)
+   Status: PASS
+   Evidence: Import verified (line 69), old validator NOT imported
+
+✅ CHECK 2: Called inside startCanonicalReAudit
+   Status: PASS
+   Evidence: Line 558 - const validationResult = validateCanonicalReAuditRequest(request);
+
+✅ CHECK 3: Called BEFORE preflight
+   Status: PASS
+   Evidence: STEP 1 (validator) at line 558, STEP 3 (preflight) at line 630
+
+✅ CHECK 4: FAIL → BLOCKED
+   Status: PASS
+   Evidence: Lines 561-567 return BLOCKED with validation errors
+
+✅ CHECK 5: PASS → Continues
+   Status: PASS
+   Evidence: No early exit on validation success, continues to STEP 2
+
+✅ CHECK 6: No duplicate validation in preflight
+   Status: PASS
+   Evidence: Preflight only checks vault contamination and staleness
+   NOT in preflight: articleId, operatorId, requestedAt, flags
+
+✅ CHECK 7: No validation in adapter
+   Status: PASS
+   Evidence: Adapter only checks null/undefined (defensive)
+   NOT in adapter: request structure validation
+
+================================================================================
+FAIL CONDITIONS AUDIT
+================================================================================
+
+✅ FAIL IF: Wrong validator still exists
+   Status: PASS - Old validator NOT found in handler
+
+✅ FAIL IF: Validator called after preflight
+   Status: PASS - Validator runs BEFORE preflight
+
+✅ FAIL IF: Validation duplicated
+   Status: PASS - No overlap between validator and preflight checks
+
+✅ FAIL IF: Flow incorrect
+   Status: PASS - Correct order: Validator → Guards → Preflight → Adapter
+
+================================================================================
+EXECUTION ORDER VERIFICATION
+================================================================================
+
+STEP 1: Validator (line 558)
+  ├─ validateCanonicalReAuditRequest(request)
+  ├─ If FAIL → return BLOCKED (lines 561-567)
+  └─ If PASS → continue to STEP 2
+
+STEP 2: Request-level guards (line 577)
+  ├─ Check manualTrigger, memoryOnly, flags
+  ├─ If FAIL → return BLOCKED
+  └─ If PASS → continue to STEP 3
+
+STEP 3: Preflight (line 630)
+  ├─ buildCanonicalReAuditAdapterPreflight(request, vault)
+  ├─ If FAIL → return BLOCKED/STALE
+  └─ If PASS → continue to STEP 4
+
+STEP 4: Adapter (line 650+)
+  ├─ runInMemoryCanonicalReAudit(adapterRequest)
+  └─ Return audit result
+
+================================================================================
+VALIDATOR CHECKS (NOT in preflight or adapter)
+================================================================================
+
+✅ Validator checks:
+   - Request shape (plain object)
+   - Required string fields: articleId, operatorId, requestedAt
+   - Snapshot structure: contentHash, ledgerSequence, source, capturedAt
+   - Boolean flags: manualTrigger, memoryOnly, deployUnlockAllowed, etc.
+   - Optional fields: promotionArchiveId, promotionId
+
+✅ Preflight checks (NOT duplicated):
+   - Session/local-draft contamination detection
+   - Staleness detection (contentHash mismatch)
+
+✅ Adapter checks (NOT duplicated):
+   - Null/undefined checks (defensive only)
+   - Vault structure validation (not request validation)
+
+================================================================================
+SAFETY PROPERTIES
+================================================================================
+
+✅ Fail-closed architecture preserved
+✅ Defense-in-depth maintained (validator + guards + preflight)
+✅ No validation duplication
+✅ Each layer has distinct responsibility
+✅ Memory-only operation preserved
+✅ Deploy remains locked
+✅ No compilation errors
+✅ Type-safe
+
+================================================================================
+AUDIT RESULT
+================================================================================
+
+OVERALL STATUS: ✅ PASS
+
+All 7 checks passed
+All 4 fail conditions passed
+Execution order correct
+No issues found
+
+VALIDATOR INTEGRATION: ✅ CORRECT
+
+The handler correctly:
+1. Uses validateCanonicalReAuditRequest (NOT old validator)
+2. Calls validator inside startCanonicalReAudit
+3. Calls validator BEFORE preflight
+4. Returns BLOCKED on validation failure
+5. Continues on validation success
+6. Avoids duplicate validation in preflight
+7. Avoids validation in adapter
+
+READY FOR TESTING: YES
+
+================================================================================

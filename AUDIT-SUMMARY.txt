@@ -1,0 +1,194 @@
+================================================================================
+TEST VALIDITY AUDIT - EXECUTIVE SUMMARY
+================================================================================
+
+AUDIT RESULT: ❌ FAIL
+
+MISMATCH DETECTED: Tests expect old validation location (preflight)
+                   Implementation moved checks to validator
+                   Tests call wrong function in wrong order
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+1. TESTS EXPECT OLD VALIDATION LOCATION
+   Tests expect: buildCanonicalReAuditAdapterPreflight() validates everything
+   Implementation: validator validates, preflight detects staleness only
+   Result: ❌ FAIL - Architectural mismatch
+
+2. TESTS CALL WRONG FUNCTION IN WRONG ORDER
+   Tests call: buildCanonicalReAuditAdapterPreflight() directly
+   Should call: startCanonicalReAudit() (which calls validator first)
+   Result: ❌ FAIL - Tests bypass validator
+
+3. FAILING TESTS ARE DISMISSED WITHOUT INVESTIGATION
+   Previous report: "validator is working correctly"
+   Reality: Tests don't test the validator
+   Result: ❌ FAIL - False positive report
+
+4. PASS RESULTS ARE FALSELY REPORTED
+   Previous report: "56 checks passed"
+   Reality: Tests don't verify validator behavior
+   Result: ❌ FAIL - Passing tests don't confirm integration
+
+5. FAIL CASES ARE INCORRECTLY INTERPRETED
+   Previous report: "outdated test expectations"
+   Reality: Architectural mismatch (tests call wrong function)
+   Result: ❌ FAIL - Root cause not identified
+
+================================================================================
+ARCHITECTURAL MISMATCH
+================================================================================
+
+CURRENT IMPLEMENTATION:
+  startCanonicalReAudit()
+    → validator (checks contamination, flags, structure)
+    → preflight (checks staleness only)
+    → adapter (runs audit)
+    → mapper (injects safety invariants)
+
+TEST EXPECTATIONS:
+  buildCanonicalReAuditAdapterPreflight()
+    → checks contamination
+    → checks flags
+    → checks structure
+    → checks staleness
+    → returns ok: true/false
+
+MISMATCH:
+  Tests call preflight directly, bypassing validator
+  Tests expect preflight to do what validator now does
+  Tests don't verify validator behavior
+
+================================================================================
+FAILING TESTS ANALYSIS
+================================================================================
+
+TEST 12: deployUnlockAllowed: true fails closed
+  Expected: preflight returns ok: false
+  Actual: preflight returns ok: true
+  Reason: Validator (not preflight) validates request flags
+  Status: ❌ FAIL - Test calls wrong function
+
+TEST 13: backendPersistenceAllowed: true fails closed
+  Expected: preflight returns ok: false
+  Actual: preflight returns ok: true
+  Reason: Validator (not preflight) validates request flags
+  Status: ❌ FAIL - Test calls wrong function
+
+TEST 14: sessionAuditInheritanceAllowed: true fails closed
+  Expected: preflight returns ok: false
+  Actual: preflight returns ok: true
+  Reason: Validator (not preflight) validates request flags
+  Status: ❌ FAIL - Test calls wrong function
+
+TEST 15: Session/local-draft contamination fails closed
+  Expected: preflight returns ok: false
+  Actual: preflight returns ok: true
+  Reason: Validator (not preflight) detects contamination
+  Status: ❌ FAIL - Test calls wrong function
+
+TEST 11: Wrong source fails closed
+  Expected: preflight returns ok: false
+  Actual: preflight returns ok: true
+  Reason: Validator (not preflight) validates snapshot source
+  Status: ❌ FAIL - Test calls wrong function
+
+================================================================================
+PREVIOUS REPORT CLAIMS - AUDIT RESULTS
+================================================================================
+
+CLAIM: "Validator integration is working correctly"
+  Audit Result: ⚠️ UNVERIFIED
+  Reason: Tests don't test the validator
+  Verdict: FALSE ASSUMPTION
+
+CLAIM: "Invalid input is always BLOCKED"
+  Audit Result: ❌ UNVERIFIED
+  Reason: Tests don't test the validator
+  Verdict: FALSE ASSUMPTION
+
+CLAIM: "Valid input always continues"
+  Audit Result: ⚠️ PARTIALLY VERIFIED
+  Reason: Tests only verify preflight, not validator
+  Verdict: INCOMPLETE
+
+CLAIM: "Test failures are due to outdated expectations"
+  Audit Result: ❌ INCOMPLETE DIAGNOSIS
+  Reason: Root cause is architectural mismatch
+  Verdict: FALSE ASSUMPTION
+
+CLAIM: "56 checks passed"
+  Audit Result: ❌ FALSE
+  Reason: Tests don't verify validator behavior
+  Verdict: FALSE POSITIVE
+
+================================================================================
+AUDIT CHECKLIST
+================================================================================
+
+✅ Tests match current architecture
+  Result: ❌ FAIL
+
+✅ No outdated expectations
+  Result: ❌ FAIL
+
+✅ Failing tests are NOT ignored or bypassed
+  Result: ❌ FAIL
+
+✅ PASS results are not falsely reported
+  Result: ❌ FAIL
+
+✅ FAIL cases are correctly interpreted
+  Result: ❌ FAIL
+
+================================================================================
+CRITICAL ISSUES
+================================================================================
+
+1. Tests Bypass Validator
+   Severity: 🔴 CRITICAL
+   Impact: Validator behavior is not tested
+
+2. Tests Test Wrong Function
+   Severity: 🔴 CRITICAL
+   Impact: Tests don't verify actual behavior
+
+3. False Positive Report
+   Severity: 🔴 CRITICAL
+   Impact: Incorrect assessment of system state
+
+4. Mismatch Between Test Logic and Implementation
+   Severity: 🔴 CRITICAL
+   Impact: Tests and implementation are fundamentally misaligned
+
+================================================================================
+REQUIRED ACTIONS
+================================================================================
+
+1. Rewrite tests to call startCanonicalReAudit() instead of preflight
+2. Add validator-specific tests
+3. Verify validator behavior independently
+4. Re-run test suite with corrected tests
+5. Confirm validator integration is working
+
+================================================================================
+CONCLUSION
+================================================================================
+
+VALIDATOR INTEGRATION STATUS: UNVERIFIED
+
+The validator integration may be working correctly, but we cannot confirm
+this from the current test suite because the tests don't actually test the
+validator.
+
+The test suite contains CRITICAL ARCHITECTURAL MISMATCHES that invalidate
+the test results.
+
+The previous report's claim that "validator integration is working correctly"
+is UNVERIFIED and based on tests that don't actually test the validator.
+
+AUDIT RESULT: ❌ FAIL - CRITICAL MISMATCH DETECTED
+
+================================================================================

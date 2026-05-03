@@ -731,11 +731,13 @@ export function getCurrentISOTimestamp(): string {
 
 /**
  * Generate slug from headline
+ * CRITICAL: No length limit to prevent URL mismatch between generation and lookup
  */
-export function generateSlugFromHeadline(headline: string): string {
-  return headline
+export function generateSlugFromHeadline(title: string): string {
+  return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .substring(0, 100)
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
 }

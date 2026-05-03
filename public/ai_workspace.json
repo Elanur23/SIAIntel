@@ -6,11 +6,21 @@
   "articles": [
     {
       "id": "SIA_20260315_CBSB_001",
-      "status": "deployed",
+      "status": "sealed",
       "source": "manual",
       "created_at": "2026-03-15T14:30:00Z",
-      "updated_at": "2026-03-25T00:00:00Z",
-      "languages": ["en", "tr", "de", "fr", "es", "ru", "ar", "jp", "zh"],
+      "updated_at": "2026-05-03T13:05:26.537Z",
+      "languages": [
+        "en",
+        "tr",
+        "de",
+        "fr",
+        "es",
+        "ru",
+        "ar",
+        "jp",
+        "zh"
+      ],
       "audit_score": 9.9,
       "verification": {
         "sources": [

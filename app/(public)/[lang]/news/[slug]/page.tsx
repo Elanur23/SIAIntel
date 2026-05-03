@@ -3,7 +3,7 @@
  * FEATURES: DEBRIEFING SYSTEM | REPORT EXPORT | SOCIAL SHARE SUITE | E-E-A-T | 9-LANG SEO | DISCOVER OPTIMIZED
  */
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/db/prisma'
 import Link from 'next/link'
 import {
@@ -420,11 +420,25 @@ function mapWarRoomArticle(
   }
 }
 
+function normalizeSlug(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/-+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+}
+
 async function resolveFromNormalizedModel(
   slugParam: string,
   routeLang: PublicRouteLocale
 ): Promise<ResolvedDetailArticle | null> {
+  const normalizedSlug = normalizeSlug(slugParam)
   const { idCandidates, slugCandidates } = parseRouteSlugParam(slugParam)
+
+  console.log({
+    incoming: slugParam,
+    normalized: normalizedSlug,
+  })
 
   if (idCandidates.length > 0) {
     const byId = await prisma.article.findFirst({
@@ -445,10 +459,12 @@ async function resolveFromNormalizedModel(
   const preferredLang = toSupportedArticleLang(routeLang)
 
   for (const slug of slugCandidates) {
+    const normalizedCandidate = normalizeSlug(slug)
+    
     const preferredTranslation = await prisma.articleTranslation.findUnique({
       where: {
         slug_lang: {
-          slug,
+          slug: normalizedCandidate,
           lang: preferredLang,
         },
       },
@@ -473,7 +489,7 @@ async function resolveFromNormalizedModel(
       const englishTranslation = await prisma.articleTranslation.findUnique({
         where: {
           slug_lang: {
-            slug,
+            slug: normalizedCandidate,
             lang: 'en',
           },
         },
@@ -529,9 +545,24 @@ async function resolveDetailArticle(
   routeLang: PublicRouteLocale
 ): Promise<ResolvedDetailArticle | null> {
   const normalized = await resolveFromNormalizedModel(slugParam, routeLang)
-  if (normalized) return normalized
+  if (normalized) {
+    const canonicalSlug = normalized.canonicalSlug
+    if (normalizeSlug(slugParam) !== canonicalSlug) {
+      redirect(`/${routeLang}/news/${canonicalSlug}`)
+    }
+    return normalized
+  }
 
-  return resolveFromWarRoomModel(slugParam, routeLang)
+  const warroom = await resolveFromWarRoomModel(slugParam, routeLang)
+  if (warroom) {
+    const canonicalSlug = warroom.canonicalSlug
+    if (normalizeSlug(slugParam) !== canonicalSlug) {
+      redirect(`/${routeLang}/news/${canonicalSlug}`)
+    }
+    return warroom
+  }
+
+  return null
 }
 
 async function getRelatedNodes(
@@ -676,7 +707,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const canonicalRouteLocale = detailArticle.canonicalRouteLocale
   const canonicalSlug =
     detailArticle.getSlugForLocale(canonicalRouteLocale) || detailArticle.canonicalSlug
-  const articleUrl = `${baseUrl}/${canonicalRouteLocale}/news/${canonicalSlug}`
+  const canonicalUrl = `${baseUrl}/${canonicalRouteLocale}/news/${canonicalSlug}`
   const imageUrl = detailArticle.imageUrl || `${baseUrl}/og-image.png`
 
   const languageAlternates = PUBLIC_ROUTE_LOCALES.reduce(
@@ -696,15 +727,15 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     {} as Record<string, string>
   )
 
-  languageAlternates[HREFLANG_BY_ROUTE_LOCALE[canonicalRouteLocale]] = articleUrl
-  const xDefaultUrl = languageAlternates.en || articleUrl
+  languageAlternates[HREFLANG_BY_ROUTE_LOCALE[canonicalRouteLocale]] = canonicalUrl
+  const xDefaultUrl = languageAlternates.en || canonicalUrl
 
   return {
     title: `${title} | SIA Intelligence`,
     description,
     metadataBase: new URL(baseUrl),
     alternates: {
-      canonical: articleUrl,
+      canonical: canonicalUrl,
       languages: {
         'x-default': xDefaultUrl,
         ...languageAlternates,
@@ -723,7 +754,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     },
     openGraph: {
       type: 'article',
-      url: articleUrl,
+      url: canonicalUrl,
       title,
       description,
       siteName: 'SIA Intelligence',
@@ -804,7 +835,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const canonicalRouteLocale = detailArticle.canonicalRouteLocale
   const canonicalSlug =
     detailArticle.getSlugForLocale(canonicalRouteLocale) || detailArticle.canonicalSlug
-  const articleUrl = `${baseUrl}/${canonicalRouteLocale}/news/${canonicalSlug}`
+  const canonicalUrl = `${baseUrl}/${canonicalRouteLocale}/news/${canonicalSlug}`
   const visibleSummary = buildVisibleSummaryWithIntroFallback({
     summary: content.summary || '',
     content: content.body || '',
@@ -817,7 +848,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   })
   const datasetSurface = buildDatasetForVisibleSignals({
     routeLang,
-    articleUrl,
+    articleUrl: canonicalUrl,
     title: content.title,
     summary: visibleSummary,
     selector: '#article-visible-signal-dataset',
@@ -845,6 +876,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     '@type': ['NewsArticle', 'AnalysisNewsArticle'],
     headline: content.title || 'SIA Intelligence Report',
     description: content.summary || 'Intelligence analysis from SIA',
+    url: canonicalUrl,
     image: {
       '@type': 'ImageObject',
       url: content.image || `${baseUrl}/og-image.png`,
@@ -866,8 +898,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': articleUrl,
+      '@id': canonicalUrl,
     },
+    inLanguage: canonicalRouteLocale,
     isAccessibleForFree: true,
     articleSection: content.category || 'MARKET',
     ...(speakable ? { speakable } : {}),
@@ -885,7 +918,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         name: content.category || 'MARKET',
         item: `${baseUrl}/${routeLang}/${getCategoryPageSlug(content.category)}`,
       },
-      { '@type': 'ListItem', position: 3, name: content.title || 'Intelligence Report', item: articleUrl },
+      { '@type': 'ListItem', position: 3, name: content.title || 'Intelligence Report', item: canonicalUrl },
     ],
   }
 
@@ -1081,7 +1114,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   author={content.author}
                   lang={routeLang}
                 />
-                <SocialShareSuite url={articleUrl} title={content.title} lang={routeLang} />
+                <SocialShareSuite url={canonicalUrl} title={content.title} lang={routeLang} />
               </div>
 
               {/* 🎙️ LIVE AI DEBRIEFING SYSTEM */}

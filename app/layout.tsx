@@ -37,6 +37,9 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.svg', type: 'image/svg+xml' }],
   },
   manifest: '/manifest.json',
+  verification: {
+    google: 'XXXX',
+  },
 }
 
 export const viewport: Viewport = {
@@ -54,6 +57,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <meta name="google-site-verification" content="XXXX" />
+      </head>
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} ${spaceMono.variable} font-sans antialiased bg-[#020203] text-white`}
       >
