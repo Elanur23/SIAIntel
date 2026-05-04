@@ -37,13 +37,16 @@ export async function generateMetadata(
   const dict = getDictionary(dictLocale)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://siaintel.com'
 
+  const parentMetadata = await parent
+
   return {
     title: {
       template: `%s | SIA Intel`,
-      default: `${dict.home.hero.title} | SIA Intelligence Protocol`,
+      default: 'SIA Intelligence',
     },
     description: dict.home.hero.subtitle,
     metadataBase: new URL(siteUrl),
+    ...(parentMetadata.verification && { verification: parentMetadata.verification }),
     alternates: {
       canonical: `/${routeLang}`,
       languages: buildLanguageAlternates(),
